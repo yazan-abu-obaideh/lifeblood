@@ -5,12 +5,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
-@Entity(name = "hospital")
-public class HospitalEntity {
+@Entity(name = "doctor")
+public class DoctorEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private String hospitalName;
-    private float xCoordinate;
-    private float yCoordinate;
+    private String fullName;
+    private String registrationNumber;
 }

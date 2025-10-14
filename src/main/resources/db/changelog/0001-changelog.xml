@@ -6,7 +6,7 @@
                         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
     <changeSet id="0001" author="Yazan">
-        <createTable tableName="volunteer_entity">
+        <createTable tableName="volunteer">
             <column name="id" type="identity">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -16,6 +16,7 @@
             <column name="last_updated_date" type="datetime2">
                 <constraints nullable="false"/>
             </column>
+            <column name="last_donation_date" type="datetime2"/>
             <column name="uuid" type="char(36)">
                 <constraints nullable="false"/>
             </column>
@@ -25,7 +26,38 @@
             <column name="verified_phone_number" type="bool">
                 <constraints nullable="false"/>
             </column>
+            <column name="verified_donor" type="bool">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
+
+        <createTable tableName="doctor">
+            <column name="id" type="identity">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="full_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="registration_number" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="hospital">
+            <column name="id" type="identity">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="hospital_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="x_coordinate" type="float">
+                <constraints nullable="false"/>
+            </column>
+            <column name="y_coordinate" type="float">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
     </changeSet>
 
 </databaseChangeLog>

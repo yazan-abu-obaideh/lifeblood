@@ -24,7 +24,7 @@ public class VolunteerController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public VolunteerEntity createVolunteer(@RequestBody @Valid VolunteerRegistrationRequest volunteerRequest) {
+    public VolunteerEntity registerVolunteer(@RequestBody @Valid VolunteerRegistrationRequest volunteerRequest) {
         VolunteerEntity entity = mapper.toEntity(volunteerRequest);
         entity.setUuid(UUID.randomUUID().toString());
         return volunteerJpaRepository.save(entity);

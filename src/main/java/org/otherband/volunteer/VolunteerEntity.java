@@ -9,7 +9,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Data
-@Entity
+@Entity(name = "volunteer")
 @EntityListeners(AuditingEntityListener.class)
 public class VolunteerEntity {
 
@@ -20,6 +20,8 @@ public class VolunteerEntity {
 
     private String phoneNumber;
     private boolean verifiedPhoneNumber;
+    private boolean verifiedDonor;
+    private LocalDateTime lastDonationDate;
 
     @CreatedDate
     private LocalDateTime creationDate;
