@@ -19,21 +19,12 @@ public class VolunteerRegistrationTest extends BaseTest {
     public void createVolunteer() throws Exception {
         String phoneNumber = "+962-79-123-4567";
 
-        HospitalEntity[] availableHospitals = objectMapper.readValue(mockMvc.perform(
-                                MockMvcRequestBuilders.get(HOSPITAL_API)
-                                        .contentType("application/json")
-                        )
-                        .andExpect(status().isOk())
-                        .andReturn()
-                        .getResponse().getContentAsString(),
-                HospitalEntity[].class);
+        HospitalEntity[] availableHospitals = fetchAvailableHospitals();
         String hospitalUuid = availableHospitals[1].getUuid();
 
         VolunteerRegistrationRequest request = new VolunteerRegistrationRequest();
         request.setPhoneNumber(phoneNumber);
-        request.setSelectedHospitals(
-                List.of(hospitalUuid)
-        );
+        request.setSelectedHospitals(List.of(hospitalUuid));
 
         String responseString = mockMvc.perform(
                         MockMvcRequestBuilders.post(VOLUNTEER_API)
@@ -53,6 +44,18 @@ public class VolunteerRegistrationTest extends BaseTest {
         HospitalEntity hospital = result.getAlertableHospitals().get(0);
         assertThat(hospital.getHospitalName()).isNotNull();
         assertThat(hospital.getUuid()).isEqualTo(hospitalUuid);
+    }
+
+    private HospitalEntity[] fetchAvailableHospitals() throws Exception {
+        String contentAsString = mockMvc.perform(
+                        MockMvcRequestBuilders.get(HOSPITAL_API)
+                                .contentType("application/json")
+                )
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse().getContentAsString();
+        return objectMapper.readValue(contentAsString,
+                HospitalEntity[].class);
     }
 
 }
