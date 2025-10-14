@@ -27,9 +27,9 @@ public class VolunteerEntity {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "volunteer_hospital",
-            joinColumns = @JoinColumn(name = "volunteer_uuid"),
-            inverseJoinColumns = @JoinColumn(name = "hospital_uuid")
+            name = "volunteer_hospital_mapping",
+            joinColumns = @JoinColumn(name = "volunteer_id"),
+            inverseJoinColumns = @JoinColumn(name = "hospital_id")
     )
     private List<HospitalEntity> alertableHospitals;
 

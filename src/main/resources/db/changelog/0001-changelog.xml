@@ -7,7 +7,7 @@
 
     <changeSet id="0001" author="Yazan">
         <createTable tableName="volunteer">
-            <column name="id" type="identity">
+            <column name="id" type="bigserial">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="creation_date" type="datetime2">
@@ -32,7 +32,7 @@
         </createTable>
 
         <createTable tableName="doctor">
-            <column name="id" type="identity">
+            <column name="id" type="bigserial">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="full_name" type="varchar(255)">
@@ -44,7 +44,7 @@
         </createTable>
 
         <createTable tableName="hospital">
-            <column name="id" type="identity">
+            <column name="id" type="bigserial">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="uuid" type="char(36)">
@@ -61,11 +61,11 @@
             </column>
         </createTable>
 
-        <createTable tableName="volunteer_hospital">
-            <column name="volunteer_uuid" type="char(36)">
+        <createTable tableName="volunteer_hospital_mapping">
+            <column name="volunteer_id" type="bigint">
                 <constraints nullable="false"/>
             </column>
-            <column name="hospital_uuid" type="char(36)">
+            <column name="hospital_id" type="bigint">
                 <constraints nullable="false"/>
             </column>
         </createTable>
