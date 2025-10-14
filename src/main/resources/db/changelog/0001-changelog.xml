@@ -47,6 +47,9 @@
             <column name="id" type="identity">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
+            <column name="uuid" type="char(36)">
+                <constraints nullable="false"/>
+            </column>
             <column name="hospital_name" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
@@ -54,6 +57,15 @@
                 <constraints nullable="false"/>
             </column>
             <column name="y_coordinate" type="float">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="volunteer_hospital">
+            <column name="volunteer_uuid" type="char(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hospital_uuid" type="char(36)">
                 <constraints nullable="false"/>
             </column>
         </createTable>
