@@ -7,13 +7,22 @@
 
     <changeSet id="0001" author="Yazan">
         <createTable tableName="volunteer_entity">
-            <column name="id" type="int">
+            <column name="id" type="identity">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="creation_date" type="datetime2">
                 <constraints nullable="false"/>
             </column>
             <column name="last_updated_date" type="datetime2">
+                <constraints nullable="false"/>
+            </column>
+            <column name="uuid" type="char(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="phone_number" type="varchar(20)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="verified_phone_number" type="bool">
                 <constraints nullable="false"/>
             </column>
         </createTable>
