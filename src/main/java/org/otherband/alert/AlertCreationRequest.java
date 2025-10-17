@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 
 public record AlertCreationRequest(
         @NotBlank(message = "please enter a hospital uuid") String hospitalUuid,
-        @NotNull AlertLevel alertLevel,
+        @NotNull(message = "Alert level must be specified") AlertLevel alertLevel,
         String doctorMessage
 ) {
 }
