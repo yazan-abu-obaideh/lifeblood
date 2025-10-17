@@ -85,6 +85,27 @@
             </column>
         </createTable>
 
+        <createTable tableName="alert">
+            <column name="id" type="bigserial">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="hospital_uuid" type="char(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="alert_level" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="fulfilment_date" type="datetime2">
+                <constraints nullable="true"/>
+            </column>
+            <column name="creation_date" type="datetime2">
+                <constraints nullable="true"/>
+            </column>
+            <column name="doctor_message" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
     </changeSet>
 
 </databaseChangeLog>

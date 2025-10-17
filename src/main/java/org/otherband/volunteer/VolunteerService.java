@@ -36,7 +36,7 @@ public class VolunteerService {
     public VolunteerEntity registerVolunteer(VolunteerRegistrationRequest volunteerRequest) {
         VolunteerEntity entity = mapper.toEntity(volunteerRequest);
         entity.setUuid(UUID.randomUUID().toString());
-        entity.setAlertableHospitals(volunteerRequest.getSelectedHospitals().stream()
+        entity.setAlertableHospitals(volunteerRequest.selectedHospitals().stream()
                 .map(hospitalJpaRepository::findByUuid)
                 .filter(hospital -> {
                     if (hospital.isEmpty()) {
@@ -48,7 +48,7 @@ public class VolunteerService {
                 .toList());
 
         VerificationCodeEntity verificationCode = new VerificationCodeEntity();
-        verificationCode.setPhoneNumber(volunteerRequest.getPhoneNumber());
+        verificationCode.setPhoneNumber(volunteerRequest.phoneNumber());
         verificationCode.setVerificationCode(UUID.randomUUID().toString());
 
         verificationCodeJpaRepository.save(verificationCode);

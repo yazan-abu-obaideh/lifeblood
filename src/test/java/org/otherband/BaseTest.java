@@ -15,10 +15,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+
+import static org.otherband.HospitalController.HOSPITAL_API;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(properties =
         "spring.profiles.active=test"
@@ -54,5 +58,18 @@ public abstract class BaseTest {
         HospitalEntity[] hospitalEntities = objectMapper.readValue(hospitals, HospitalEntity[].class);
         hospitalJpaRepository.saveAll(Arrays.asList(hospitalEntities));
     }
+
+    protected HospitalEntity[] fetchAvailableHospitals() throws Exception {
+        String contentAsString = mockMvc.perform(
+                        MockMvcRequestBuilders.get(HOSPITAL_API)
+                                .contentType("application/json")
+                )
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse().getContentAsString();
+        return objectMapper.readValue(contentAsString,
+                HospitalEntity[].class);
+    }
+
 
 }

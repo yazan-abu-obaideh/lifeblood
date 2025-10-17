@@ -18,15 +18,30 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class VolunteerRegistrationTest extends BaseTest {
 
     @Test
+    void requestValidations() throws Exception {
+        String errorResponse = mockMvc.perform(
+                        MockMvcRequestBuilders.post(VOLUNTEER_API)
+                                .contentType("application/json")
+                                .content("{}")
+                )
+                .andExpect(status().isBadRequest())
+                .andReturn()
+                .getResponse().getContentAsString();
+        assertThat(errorResponse).contains("please enter your phone number");
+        assertThat(errorResponse).contains("please choose at least one hospital of interest");
+    }
+
+    @Test
     void createVolunteer() throws Exception {
         String phoneNumber = "+962-79-123-4567";
 
         HospitalEntity[] availableHospitals = fetchAvailableHospitals();
         String hospitalUuid = availableHospitals[1].getUuid();
 
-        VolunteerRegistrationRequest request = new VolunteerRegistrationRequest();
-        request.setPhoneNumber(phoneNumber);
-        request.setSelectedHospitals(List.of(hospitalUuid));
+        VolunteerRegistrationRequest request = new VolunteerRegistrationRequest(
+                phoneNumber,
+                List.of(hospitalUuid)
+        );
 
         VolunteerEntity result = createVolunteer(request);
 
@@ -47,9 +62,10 @@ public class VolunteerRegistrationTest extends BaseTest {
         HospitalEntity[] availableHospitals = fetchAvailableHospitals();
         String hospitalUuid = availableHospitals[1].getUuid();
 
-        VolunteerRegistrationRequest request = new VolunteerRegistrationRequest();
-        request.setPhoneNumber(phoneNumber);
-        request.setSelectedHospitals(List.of(hospitalUuid));
+        VolunteerRegistrationRequest request = new VolunteerRegistrationRequest(
+                phoneNumber,
+                List.of(hospitalUuid)
+        );
 
         VolunteerEntity volunteer = createVolunteer(request);
 
@@ -91,16 +107,5 @@ public class VolunteerRegistrationTest extends BaseTest {
         return objectMapper.readValue(responseString, VolunteerEntity.class);
     }
 
-    private HospitalEntity[] fetchAvailableHospitals() throws Exception {
-        String contentAsString = mockMvc.perform(
-                        MockMvcRequestBuilders.get(HOSPITAL_API)
-                                .contentType("application/json")
-                )
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse().getContentAsString();
-        return objectMapper.readValue(contentAsString,
-                HospitalEntity[].class);
-    }
 
 }
