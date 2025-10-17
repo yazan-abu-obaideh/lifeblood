@@ -1,12 +1,13 @@
 package org.otherband.dev;
 
 import lombok.extern.slf4j.Slf4j;
+import org.otherband.ProfileConstants;
 import org.otherband.volunteer.VerificationCodeSender;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-@Profile("dev")
+@Profile(ProfileConstants.DEVELOPMENT)
 @Configuration
 @Slf4j
 public class DevConfig {
