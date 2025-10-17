@@ -70,6 +70,21 @@
             </column>
         </createTable>
 
+        <createTable tableName="phone_number_verification_code">
+            <column name="id" type="bigserial">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="phone_number" type="varchar(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="verification_code" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="creation_date" type="datetime2">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
     </changeSet>
 
 </databaseChangeLog>
