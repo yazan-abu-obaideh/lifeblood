@@ -7,8 +7,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      working-directory: backend
     steps:
       - name: Check out the repository
         uses: actions/checkout@v5
@@ -19,3 +17,4 @@ jobs:
           distribution: "zulu"
       - name: Verify package
         run: mvn clean verify
+        working-directory: backend
