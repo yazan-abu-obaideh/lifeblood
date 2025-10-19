@@ -32,6 +32,10 @@ public class VolunteerEntity {
             inverseJoinColumns = @JoinColumn(name = "hospital_id")
     )
     private List<HospitalEntity> alertableHospitals;
+    private int minimumSeverity;
+
+    @Column(columnDefinition = "varchar(50) array")
+    private List<String> notificationChannels;
 
     @CreatedDate
     private LocalDateTime creationDate;

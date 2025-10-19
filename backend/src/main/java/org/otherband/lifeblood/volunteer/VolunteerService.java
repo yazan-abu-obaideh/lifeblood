@@ -3,10 +3,14 @@ package org.otherband.lifeblood.volunteer;
 import org.otherband.lifeblood.ApplicationMapper;
 import org.otherband.lifeblood.TimeService;
 import org.otherband.lifeblood.UserException;
+import org.otherband.lifeblood.hospital.HospitalEntity;
 import org.otherband.lifeblood.hospital.HospitalJpaRepository;
+import org.otherband.lifeblood.notifications.NotificationChannel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -36,16 +40,9 @@ public class VolunteerService {
     public VolunteerEntity registerVolunteer(VolunteerRegistrationRequest volunteerRequest) {
         VolunteerEntity entity = mapper.toEntity(volunteerRequest);
         entity.setUuid(UUID.randomUUID().toString());
-        entity.setAlertableHospitals(volunteerRequest.selectedHospitals().stream()
-                .map(hospitalJpaRepository::findByUuid)
-                .filter(hospital -> {
-                    if (hospital.isEmpty()) {
-                        throw new IllegalArgumentException("Hospital with uuid [%s] does not exist");
-                    }
-                    return true;
-                })
-                .map(Optional::get)
-                .toList());
+        entity.setAlertableHospitals(mapToHospitals(volunteerRequest.selectedHospitals()));
+        entity.setNotificationChannels(Arrays.stream(NotificationChannel.values()).map(Enum::name).toList());
+        entity.setMinimumSeverity(0);
 
         VerificationCodeEntity verificationCode = new VerificationCodeEntity();
         verificationCode.setPhoneNumber(volunteerRequest.phoneNumber());
@@ -56,6 +53,7 @@ public class VolunteerService {
         return volunteerJpaRepository.save(entity);
     }
 
+    @Transactional
     public void verifyPhoneNumber(PhoneVerificationRequest request) {
         Optional<VerificationCodeEntity> result = verificationCodeJpaRepository.findByPhoneNumberAndVerificationCode(
                 request.phoneNumber(), request.verificationCode()
@@ -78,6 +76,19 @@ public class VolunteerService {
 
         volunteer.setVerifiedPhoneNumber(true);
         volunteerJpaRepository.save(volunteer);
+    }
+
+    private List<HospitalEntity> mapToHospitals(List<String> hospitalUuids) {
+        return hospitalUuids.stream()
+                .map(hospitalJpaRepository::findByUuid)
+                .filter(hospital -> {
+                    if (hospital.isEmpty()) {
+                        throw new IllegalArgumentException("Hospital with uuid [%s] does not exist");
+                    }
+                    return true;
+                })
+                .map(Optional::get)
+                .toList();
     }
 
 }

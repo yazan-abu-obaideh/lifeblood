@@ -2,12 +2,14 @@ package org.otherband.lifeblood;
 
 import org.junit.jupiter.api.Test;
 import org.otherband.lifeblood.hospital.HospitalEntity;
+import org.otherband.lifeblood.notifications.NotificationChannel;
 import org.otherband.lifeblood.volunteer.PhoneVerificationRequest;
 import org.otherband.lifeblood.volunteer.VerificationCodeEntity;
 import org.otherband.lifeblood.volunteer.VolunteerEntity;
 import org.otherband.lifeblood.volunteer.VolunteerRegistrationRequest;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,6 +49,9 @@ public class VolunteerRegistrationTest extends BaseTest {
         assertThat(result.getCreationDate()).isNotNull();
         assertThat(result.getLastUpdatedDate()).isNotNull();
         assertThat(result.getUuid()).isNotNull();
+        assertThat(result.getMinimumSeverity()).isEqualTo(0);
+        assertThat(result.getNotificationChannels().stream().map(NotificationChannel::valueOf))
+                .containsAll(Arrays.asList(NotificationChannel.values()));
         assertThat(result.getPhoneNumber()).isEqualTo(phoneNumber);
         assertThat(result.isVerifiedPhoneNumber()).isFalse();
         assertThat(result.getAlertableHospitals()).hasSize(1);

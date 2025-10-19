@@ -16,4 +16,12 @@ public enum AlertLevel {
         return ordinal;
     }
 
+    public static int minimumSeverity() {
+        return 0;
+    }
+
+    public static int maximumSeverity() {
+        return values().length;
+    }
+
 }
