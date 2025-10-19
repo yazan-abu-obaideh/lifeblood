@@ -1,6 +1,6 @@
 package org.otherband.lifeblood.notifications;
 
-import org.otherband.lifeblood.volunteer.VerificationCodeEntity;
+import org.otherband.lifeblood.volunteer.PhoneNumberVerificationCodeEntity;
 import org.otherband.lifeblood.volunteer.VerificationCodeSender;
 
 import java.util.List;
@@ -14,14 +14,9 @@ public class NotificationSender implements VerificationCodeSender {
     }
 
     @Override
-    public void send(VerificationCodeEntity verificationCode) {
+    public void send(PhoneNumberVerificationCodeEntity verificationCode) {
+        RecipientDetails details = RecipientDetails.builder().phoneNumber(verificationCode.getPhoneNumber()).build();
         genericSenders.forEach(sender -> {
-            RecipientDetails details = new RecipientDetails(
-                    verificationCode.getPhoneNumber(),
-                    "",
-                    "",
-                    ""
-            );
             if (sender.canSend(details)) {
                 GenericNotification notification = new GenericNotification(
                         "Verification Code Received",

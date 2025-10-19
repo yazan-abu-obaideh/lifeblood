@@ -20,7 +20,7 @@
             <column name="uuid" type="char(36)">
                 <constraints nullable="false"/>
             </column>
-            <column name="phone_number" type="varchar(20)">
+            <column name="phone_number" type="varchar(30)">
                 <constraints unique="true" nullable="false"/>
             </column>
             <column name="verified_phone_number" type="bool">
@@ -80,7 +80,7 @@
             <column name="id" type="bigserial">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="phone_number" type="varchar(20)">
+            <column name="phone_number" type="varchar(30)">
                 <constraints nullable="false"/>
             </column>
             <column name="verification_code" type="varchar(36)">

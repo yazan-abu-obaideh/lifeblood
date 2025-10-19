@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.otherband.lifeblood.hospital.HospitalEntity;
 import org.otherband.lifeblood.notifications.NotificationChannel;
 import org.otherband.lifeblood.volunteer.PhoneVerificationRequest;
-import org.otherband.lifeblood.volunteer.VerificationCodeEntity;
+import org.otherband.lifeblood.volunteer.PhoneNumberVerificationCodeEntity;
 import org.otherband.lifeblood.volunteer.VolunteerEntity;
 import org.otherband.lifeblood.volunteer.VolunteerRegistrationRequest;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -76,7 +76,7 @@ public class VolunteerRegistrationTest extends BaseTest {
 
         assertThat(volunteer.isVerifiedPhoneNumber()).isFalse();
 
-        VerificationCodeEntity verificationCode = verificationCodeJpaRepository.findAll()
+        PhoneNumberVerificationCodeEntity verificationCode = verificationCodeJpaRepository.findAll()
                 .stream()
                 .filter(code -> phoneNumber.equals(code.getPhoneNumber()))
                 .findFirst()

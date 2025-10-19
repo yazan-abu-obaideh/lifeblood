@@ -44,7 +44,7 @@ public class VolunteerService {
         entity.setNotificationChannels(Arrays.stream(NotificationChannel.values()).map(Enum::name).toList());
         entity.setMinimumSeverity(0);
 
-        VerificationCodeEntity verificationCode = new VerificationCodeEntity();
+        PhoneNumberVerificationCodeEntity verificationCode = new PhoneNumberVerificationCodeEntity();
         verificationCode.setPhoneNumber(volunteerRequest.phoneNumber());
         verificationCode.setVerificationCode(UUID.randomUUID().toString());
 
@@ -55,7 +55,7 @@ public class VolunteerService {
 
     @Transactional
     public void verifyPhoneNumber(PhoneVerificationRequest request) {
-        Optional<VerificationCodeEntity> result = verificationCodeJpaRepository.findByPhoneNumberAndVerificationCode(
+        Optional<PhoneNumberVerificationCodeEntity> result = verificationCodeJpaRepository.findByPhoneNumberAndVerificationCode(
                 request.phoneNumber(), request.verificationCode()
         );
 
@@ -66,7 +66,7 @@ public class VolunteerService {
             );
         }
 
-        VerificationCodeEntity verificationCode = result.get();
+        PhoneNumberVerificationCodeEntity verificationCode = result.get();
         if (verificationCode.getCreationDate().isBefore(timeService.now().minusMinutes(10))) {
             throw new UserException("Verification code has expired. Please request a new one.");
         }

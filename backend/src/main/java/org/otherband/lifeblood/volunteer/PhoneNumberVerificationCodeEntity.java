@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Data
 @Entity(name = "phone_number_verification_code")
 @EntityListeners(AuditingEntityListener.class)
-public class VerificationCodeEntity {
+public class PhoneNumberVerificationCodeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
