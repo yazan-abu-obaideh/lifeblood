@@ -56,7 +56,7 @@ public class VolunteerRegistrationTest extends BaseTest {
         assertThat(result.getPhoneNumber()).isEqualTo(phoneNumber);
         assertThat(result.isVerifiedPhoneNumber()).isFalse();
         assertThat(result.getAlertableHospitals()).hasSize(1);
-        HospitalEntity hospital = result.getAlertableHospitals().get(0);
+        HospitalEntity hospital = result.getAlertableHospitals().getFirst();
         assertThat(hospital.getHospitalName()).isNotNull();
         assertThat(hospital.getUuid()).isEqualTo(hospitalUuid);
     }
