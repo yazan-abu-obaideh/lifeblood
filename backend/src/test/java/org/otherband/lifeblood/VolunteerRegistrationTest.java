@@ -18,6 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class VolunteerRegistrationTest extends BaseTest {
 
+
     @Test
     void requestValidations() throws Exception {
         String errorResponse = mockMvc.perform(
@@ -34,7 +35,7 @@ public class VolunteerRegistrationTest extends BaseTest {
 
     @Test
     void createVolunteer() throws Exception {
-        String phoneNumber = "+962-79-123-4567";
+        String phoneNumber = FAKER.phoneNumber().phoneNumber();
 
         HospitalEntity[] availableHospitals = fetchAvailableHospitals();
         String hospitalUuid = availableHospitals[1].getUuid();
@@ -62,7 +63,7 @@ public class VolunteerRegistrationTest extends BaseTest {
 
     @Test
     void verifyPhoneNumber() throws Exception {
-        String phoneNumber = "+962-77-123-4567";
+        String phoneNumber = FAKER.phoneNumber().phoneNumber();
         HospitalEntity[] availableHospitals = fetchAvailableHospitals();
         String hospitalUuid = availableHospitals[1].getUuid();
 

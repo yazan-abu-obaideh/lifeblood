@@ -1,6 +1,7 @@
 package org.otherband.lifeblood;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.javafaker.Faker;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
 import org.otherband.lifeblood.hospital.HospitalEntity;
@@ -30,6 +31,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class BaseTest {
+
+    public static final Faker FAKER = new Faker();
 
     @Autowired
     public MockMvc mockMvc;
