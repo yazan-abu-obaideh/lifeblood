@@ -1,5 +1,7 @@
 package org.otherband.lifeblood;
 
+import org.hibernate.AssertionFailure;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.otherband.lifeblood.hospital.HospitalEntity;
 import org.otherband.lifeblood.notifications.NotificationChannel;
@@ -31,6 +33,11 @@ public class VolunteerRegistrationTest extends BaseTest {
                 .getResponse().getContentAsString();
         assertThat(errorResponse).contains("please enter your phone number");
         assertThat(errorResponse).contains("please choose at least one hospital of interest");
+    }
+
+    @Test
+    void assertVerificationCodeNotSentOnDatabaseCommitException() {
+        throw new AssertionFailure("You done goofed");
     }
 
     @Test
