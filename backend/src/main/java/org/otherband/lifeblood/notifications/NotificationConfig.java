@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.Resource;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -26,7 +27,7 @@ public class NotificationConfig {
     }
 
     /**
-    Received every implementation of GenericNotificationSender (e.g. WhatsApp, Firebase, iOS, etc)
+     * Received every implementation of GenericNotificationSender (e.g. WhatsApp, Firebase, iOS, etc)
      */
     @Bean
     public NotificationSender notificationSender(List<GenericNotificationSender> genericSenders) {
@@ -36,6 +37,21 @@ public class NotificationConfig {
     @Bean
     public FirebaseNotificationSender fireBaseNotificationSender() {
         return new FirebaseNotificationSender();
+    }
+
+    @Bean
+    public WhatsAppMessageSender whatsAppMessageSender(
+            @Value("${whatsapp.api.url}") String whatsappApiUrl,
+            @Value("${whatsapp.sender.phone.id}") String senderPhoneId,
+            @Value("${whatsapp.api.bearer.token}") String bearerToken,
+            @Value("${whatsapp.template.name}") String templateName
+    ) {
+        return new WhatsAppMessageSender(new RestTemplate(), new WhatsAppSenderConfig(
+                whatsappApiUrl,
+                senderPhoneId,
+                bearerToken,
+                templateName
+        ));
     }
 
     @PostConstruct

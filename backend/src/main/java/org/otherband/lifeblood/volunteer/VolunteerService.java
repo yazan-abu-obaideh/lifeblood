@@ -80,12 +80,12 @@ public class VolunteerService {
 
     private List<HospitalEntity> mapToHospitals(List<String> hospitalUuids) {
         return hospitalUuids.stream()
-                .map(hospitalJpaRepository::findByUuid)
-                .filter(hospital -> {
+                .map(hospitalUuid -> {
+                    Optional<HospitalEntity> hospital = hospitalJpaRepository.findByUuid(hospitalUuid);
                     if (hospital.isEmpty()) {
                         throw new IllegalArgumentException("Hospital with uuid [%s] does not exist");
                     }
-                    return true;
+                    return hospital;
                 })
                 .map(Optional::get)
                 .toList();
