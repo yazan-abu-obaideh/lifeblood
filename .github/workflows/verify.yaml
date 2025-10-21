@@ -5,7 +5,7 @@ on:
     branches: [ "*" ]
 
 jobs:
-  build:
+  build-backend:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repository
@@ -18,3 +18,27 @@ jobs:
       - name: Verify package
         run: mvn clean verify
         working-directory: backend
+
+  build-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v5
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: '10'
+      - name: Set up node
+        uses: actions/setup-node@v4
+        with:
+          version: '22'
+      - name: 🏗 Setup Expo and EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run TypeScript type check
+        run: pnpm tsc --noEmit
+      - name: 🚀 Build Android APK (Preview)
+        run: eas build --platform android --profile preview --non-interactive --no-wait
