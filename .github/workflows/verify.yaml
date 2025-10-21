@@ -42,6 +42,6 @@ jobs:
       - name: Run TypeScript type check
         run: pnpm tsc --noEmit
         working-directory: frontend/lifeblood-mobile
-      - name: 🚀 Build Android APK (Preview)
-        run: eas build --platform android --profile preview --non-interactive --no-wait
+      - name: Prebuild App
+        run: npx expo prebuild
         working-directory: frontend/lifeblood-mobile
