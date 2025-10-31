@@ -6,6 +6,8 @@ import org.otherband.lifeblood.UserException;
 import org.otherband.lifeblood.hospital.HospitalEntity;
 import org.otherband.lifeblood.hospital.HospitalJpaRepository;
 import org.otherband.lifeblood.notifications.NotificationChannel;
+import org.otherband.lifeblood.notifications.whatsapp.WhatsAppMessageEntity;
+import org.otherband.lifeblood.notifications.whatsapp.WhatsAppMessageRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,19 +22,20 @@ public class VolunteerService {
     private final HospitalJpaRepository hospitalJpaRepository;
     private final VerificationCodeJpaRepository verificationCodeJpaRepository;
     private final TimeService timeService;
-    private final VerificationCodeSender verificationCodeSender;
+    private final WhatsAppMessageRepository whatsAppMessageRepository;
     private final ApplicationMapper mapper;
 
     public VolunteerService(VolunteerJpaRepository volunteerJpaRepository,
                             HospitalJpaRepository hospitalJpaRepository,
                             VerificationCodeJpaRepository verificationCodeJpaRepository,
-                            TimeService timeService, VerificationCodeSender verificationCodeSender,
+                            TimeService timeService,
+                            WhatsAppMessageRepository whatsAppMessageRepository,
                             ApplicationMapper mapper) {
         this.volunteerJpaRepository = volunteerJpaRepository;
         this.hospitalJpaRepository = hospitalJpaRepository;
         this.verificationCodeJpaRepository = verificationCodeJpaRepository;
         this.timeService = timeService;
-        this.verificationCodeSender = verificationCodeSender;
+        this.whatsAppMessageRepository = whatsAppMessageRepository;
         this.mapper = mapper;
     }
 
@@ -49,7 +52,13 @@ public class VolunteerService {
         verificationCode.setVerificationCode(UUID.randomUUID().toString());
 
         verificationCodeJpaRepository.save(verificationCode);
-        verificationCodeSender.send(verificationCode);
+
+        whatsAppMessageRepository.save(WhatsAppMessageEntity.builder()
+                        .templateName("verification_code")
+                        .phoneNumber(volunteerRequest.phoneNumber())
+                        .templateVariables(List.of(verificationCode.getVerificationCode()))
+                .build());
+
         return volunteerJpaRepository.save(entity);
     }
 

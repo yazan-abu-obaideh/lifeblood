@@ -5,6 +5,9 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import jakarta.annotation.PostConstruct;
 import org.otherband.lifeblood.ProfileConstants;
+import org.otherband.lifeblood.notifications.push.FirebaseNotificationSender;
+import org.otherband.lifeblood.notifications.whatsapp.WhatsAppMessageSender;
+import org.otherband.lifeblood.notifications.whatsapp.WhatsAppSenderConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,15 +17,14 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.List;
 
 @Configuration
 @Profile(ProfileConstants.PRODUCTION)
-public class NotificationConfig {
+public class ProdNotificationConfig {
 
     private final Resource firebaseAdminJson;
 
-    public NotificationConfig(@Value("classpath:blood-banker-firebase-admin.json") Resource firebaseAdminJson) {
+    public ProdNotificationConfig(@Value("classpath:blood-banker-firebase-admin.json") Resource firebaseAdminJson) {
         this.firebaseAdminJson = firebaseAdminJson;
     }
 
@@ -30,8 +32,9 @@ public class NotificationConfig {
      * Received every implementation of GenericNotificationSender (e.g. WhatsApp, Firebase, iOS, etc)
      */
     @Bean
-    public NotificationSender notificationSender(List<GenericNotificationSender> genericSenders) {
-        return new NotificationSender(genericSenders);
+    public NotificationSender notificationSender(FirebaseNotificationSender firebaseNotificationSender,
+                                                 WhatsAppMessageSender whatsAppMessageSender) {
+        return new DelegatingNotificationSender(whatsAppMessageSender, firebaseNotificationSender);
     }
 
     @Bean

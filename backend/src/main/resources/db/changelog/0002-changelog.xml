@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="0002" author="Yazan" dbms="postgresql,h2">
+        <createTable tableName="whatsapp_message">
+            <column name="id" type="bigserial">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="creation_date" type="datetime2">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sent" type="bool">
+                <constraints nullable="false"/>
+            </column>
+            <column name="template_name" type="varchar(255)">
+                <constraints unique="false" nullable="false"/>
+            </column>
+            <column name="template_variables" type="varchar(255) array">
+                <constraints nullable="true"/>
+            </column>
+            <column name="phone_number" type="varchar(30)">
+                <constraints unique="false" nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="push_notification">
+            <column name="id" type="bigserial">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="creation_date" type="datetime2">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sent" type="bool">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="push_notification_type" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="body" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="token" type="varchar(30)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

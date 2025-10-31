@@ -2,6 +2,41 @@ import React, { useEffect, useState } from "react";
 import { Text, View, StyleSheet } from "react-native";
 import * as Notifications from "expo-notifications";
 import { firebase } from "@react-native-firebase/messaging";
+import firebaseConfig from "./google-services.json";
+import SignedInScreen from "./SignedIn";
+import SignUp from "./SignUp";
+
+const notificationsEnabled: string = process.env.NOTIFICATIONS_ENABLED || "";
+const messagingSenderId: string = process.env.MESSAGING_SENDER_ID || "";
+
+if (messagingSenderId === "") {
+  console.warn("No messaging sender ID found");
+}
+
+function enableNotifications(tokenSetter: (token: string) => void) {
+  localGetMessaging().then(async (messaging) => {
+    await messaging.registerDeviceForRemoteMessages();
+    const firebaseToken = await messaging.getToken();
+    tokenSetter(firebaseToken);
+    console.log(`Firebase token received: ${firebaseToken}`);
+
+    messaging.onMessage(async (msg) => {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: msg.notification?.title || "New",
+          body: msg.notification?.body || "",
+        },
+        trigger: null,
+      });
+    });
+  });
+  return () => {
+    localGetMessaging().then((messaging) => {
+      messaging.unregisterDeviceForRemoteMessages();
+      messaging.onMessage(() => {});
+    });
+  };
+}
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -16,12 +51,12 @@ Notifications.setNotificationHandler({
 export async function localGetMessaging() {
   try {
     const app = await firebase.initializeApp({
-      appId: "1:xxx",
-      projectId: "app-name-xxxx",
-      apiKey: "xxxxx",
+      appId: firebaseConfig.client[0].client_info.mobilesdk_app_id,
+      projectId: firebaseConfig.project_info.project_id,
+      apiKey: firebaseConfig.client[0].api_key[0].current_key,
       databaseURL: "",
-      messagingSenderId: "xxxx",
-      storageBucket: "xxxx",
+      messagingSenderId: process.env.MESSAGING_SENDER_ID,
+      storageBucket: firebaseConfig.project_info.storage_bucket,
     });
     return app.messaging();
   } catch (err) {
@@ -30,59 +65,14 @@ export async function localGetMessaging() {
 }
 
 export default function App() {
-  console.log("Running");
-
   const [token, setToken] = useState("");
+  const [signedIn, setSignedIn] = useState(false);
 
   useEffect(() => {
-    localGetMessaging().then(async (messaging) => {
-      await messaging.registerDeviceForRemoteMessages();
-      const firebaseToken = await messaging.getToken();
-      setToken(firebaseToken);
-      console.log(`Firebase token received: ${firebaseToken}`);
-
-      messaging.onMessage(async (msg) => {
-        await Notifications.scheduleNotificationAsync({
-          content: {
-            title: msg.notification?.title || "New",
-            body: msg.notification?.body || "",
-          },
-          trigger: null,
-        });
-      });
-    });
-
-    return () => {
-      localGetMessaging().then((messaging) => {
-        messaging.unregisterDeviceForRemoteMessages();
-        messaging.onMessage(() => {});
-      });
-    };
+    if ("TRUE" === notificationsEnabled.toUpperCase()) {
+      return enableNotifications(setToken);
+    }
   }, []);
 
-  return (
-    <View style={styles.container}>
-      <Text> Hello!! </Text>
-      <Text style={styles.title}>Push Notifications Ready ✅</Text>
-      <Text style={styles.token} selectable>
-        {token || "Loading token..."}
-      </Text>
-    </View>
-  );
+  return <SignUp pushNotificationToken={token} />;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    padding: 20,
-    backgroundColor: "#f5f5f5",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 20,
-  },
-  token: { fontSize: 10, color: "#007AFF", textAlign: "center" },
-});

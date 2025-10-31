@@ -1,12 +1,10 @@
 package org.otherband.lifeblood;
 
-import org.hibernate.AssertionFailure;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.otherband.lifeblood.hospital.HospitalEntity;
 import org.otherband.lifeblood.notifications.NotificationChannel;
-import org.otherband.lifeblood.volunteer.PhoneVerificationRequest;
 import org.otherband.lifeblood.volunteer.PhoneNumberVerificationCodeEntity;
+import org.otherband.lifeblood.volunteer.PhoneVerificationRequest;
 import org.otherband.lifeblood.volunteer.VolunteerEntity;
 import org.otherband.lifeblood.volunteer.VolunteerRegistrationRequest;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -33,11 +31,6 @@ public class VolunteerRegistrationTest extends BaseTest {
                 .getResponse().getContentAsString();
         assertThat(errorResponse).contains("please enter your phone number");
         assertThat(errorResponse).contains("please choose at least one hospital of interest");
-    }
-
-    @Test
-    void assertVerificationCodeNotSentOnDatabaseCommitException() {
-        throw new AssertionFailure("You done goofed");
     }
 
     @Test

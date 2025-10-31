@@ -1,10 +1,11 @@
-package org.otherband.lifeblood.notifications;
+package org.otherband.lifeblood.notifications.whatsapp;
 
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
 
-public class WhatsAppMessageSender implements GenericNotificationSender {
+public class WhatsAppMessageSender {
 
     private final RestTemplate restTemplate;
     private final WhatsAppSenderConfig config;
@@ -14,21 +15,14 @@ public class WhatsAppMessageSender implements GenericNotificationSender {
         this.config = config;
     }
 
-    @Override
-    public boolean canSend(RecipientDetails recipientDetails) {
-        return !StringUtils.isBlank(recipientDetails.phoneNumber());
-    }
-
-    @Override
-    public void send(GenericNotification genericNotification) {
+    public void send(WhatsAppMessageEntity genericNotification) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setBearerAuth(config.bearerToken());
             restTemplate.postForEntity(config.whatsappApiUrl(),
-                    new HttpEntity<>(
-                            buildMessage(genericNotification.recipientDetails().phoneNumber(),
-                                    config.templateName()), headers),
+                    new HttpEntity<>(buildMessage(genericNotification.getPhoneNumber(),
+                            genericNotification.getTemplateName()), headers),
                     Void.class,
                     config.senderPhoneId());
         } catch (Exception e) {
@@ -48,17 +42,20 @@ public class WhatsAppMessageSender implements GenericNotificationSender {
         );
     }
 
-    record WhatsAppMessage(
+    private record WhatsAppMessage(
             String messaging_product,
             String to,
             String type,
             Template template
-    ) {}
+    ) {
+    }
 
-    record Template(
+    private record Template(
             String name,
-            Language language) {}
+            Language language) {
+    }
 
-    record Language(String code) {}
+    private record Language(String code) {
+    }
 
 }

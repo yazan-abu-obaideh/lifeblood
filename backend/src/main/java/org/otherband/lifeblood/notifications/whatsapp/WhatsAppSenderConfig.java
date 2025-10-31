@@ -1,4 +1,4 @@
-package org.otherband.lifeblood.notifications;
+package org.otherband.lifeblood.notifications.whatsapp;
 
 public record WhatsAppSenderConfig(
         String whatsappApiUrl,

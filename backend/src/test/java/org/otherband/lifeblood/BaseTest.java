@@ -6,8 +6,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
 import org.otherband.lifeblood.hospital.HospitalEntity;
 import org.otherband.lifeblood.hospital.HospitalJpaRepository;
+import org.otherband.lifeblood.notifications.NotificationSender;
 import org.otherband.lifeblood.volunteer.VerificationCodeJpaRepository;
-import org.otherband.lifeblood.volunteer.VerificationCodeSender;
 import org.otherband.lifeblood.volunteer.VolunteerJpaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,7 +47,7 @@ public abstract class BaseTest {
     public VolunteerJpaRepository volunteerJpaRepository;
 
     @MockitoBean
-    public VerificationCodeSender mockVerificationCodeSender;
+    public NotificationSender notificationSender;
 
     @Autowired
     public VerificationCodeJpaRepository verificationCodeJpaRepository;
