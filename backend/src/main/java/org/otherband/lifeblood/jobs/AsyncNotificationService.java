@@ -1,11 +1,10 @@
-package org.otherband.lifeblood.notifications;
+package org.otherband.lifeblood.jobs;
 
+import org.otherband.lifeblood.notifications.NotificationSender;
 import org.otherband.lifeblood.notifications.push.PushNotificationRepository;
 import org.otherband.lifeblood.notifications.whatsapp.WhatsAppMessageRepository;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 
-@Service
 public class AsyncNotificationService {
     private final NotificationSender delegatingNotificationSender;
     private final WhatsAppMessageRepository whatsAppMessageRepository;

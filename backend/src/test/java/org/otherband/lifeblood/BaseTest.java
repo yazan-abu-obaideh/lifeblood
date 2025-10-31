@@ -25,9 +25,7 @@ import java.util.Arrays;
 import static org.otherband.lifeblood.hospital.HospitalController.HOSPITAL_API;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(properties =
-        "spring.profiles.active=test"
-)
+@SpringBootTest(properties = {"spring.profiles.active=test", "app.config.jobs.enabled=false"})
 @AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class BaseTest {
@@ -63,15 +61,8 @@ public abstract class BaseTest {
     }
 
     protected HospitalEntity[] fetchAvailableHospitals() throws Exception {
-        String contentAsString = mockMvc.perform(
-                        MockMvcRequestBuilders.get(HOSPITAL_API)
-                                .contentType("application/json")
-                )
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse().getContentAsString();
-        return objectMapper.readValue(contentAsString,
-                HospitalEntity[].class);
+        String contentAsString = mockMvc.perform(MockMvcRequestBuilders.get(HOSPITAL_API).contentType("application/json")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        return objectMapper.readValue(contentAsString, HospitalEntity[].class);
     }
 
 

@@ -3,6 +3,7 @@ package org.otherband.lifeblood.volunteer;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.otherband.lifeblood.hospital.HospitalEntity;
+import org.otherband.lifeblood.notifications.push.PushNotificationType;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -24,6 +25,10 @@ public class VolunteerEntity {
     private boolean verifiedPhoneNumber;
     private boolean verifiedDonor;
     private LocalDateTime lastDonationDate;
+
+    private String pushNotificationToken;
+    @Enumerated(EnumType.STRING)
+    private PushNotificationType pushNotificationType;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
