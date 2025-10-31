@@ -5,6 +5,8 @@ import com.github.javafaker.Faker;
 import org.hibernate.AssertionFailure;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.otherband.lifeblood.hospital.HospitalEntity;
 import org.otherband.lifeblood.hospital.HospitalJpaRepository;
 import org.otherband.lifeblood.notifications.NotificationSender;
@@ -37,6 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(properties = {"spring.profiles.active=test", "app.config.jobs.enabled=false"})
 @AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Execution(ExecutionMode.CONCURRENT)
 public abstract class BaseTest {
 
     public static final Faker FAKER = new Faker();
