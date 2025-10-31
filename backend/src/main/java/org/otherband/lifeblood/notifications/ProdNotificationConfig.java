@@ -6,6 +6,8 @@ import com.google.firebase.FirebaseOptions;
 import jakarta.annotation.PostConstruct;
 import org.otherband.lifeblood.ProfileConstants;
 import org.otherband.lifeblood.notifications.push.FirebaseNotificationSender;
+import org.otherband.lifeblood.notifications.push.PushNotificationRepository;
+import org.otherband.lifeblood.notifications.whatsapp.WhatsAppMessageRepository;
 import org.otherband.lifeblood.notifications.whatsapp.WhatsAppMessageSender;
 import org.otherband.lifeblood.notifications.whatsapp.WhatsAppSenderConfig;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,8 +35,13 @@ public class ProdNotificationConfig {
      */
     @Bean
     public NotificationSender notificationSender(FirebaseNotificationSender firebaseNotificationSender,
-                                                 WhatsAppMessageSender whatsAppMessageSender) {
-        return new DelegatingNotificationSender(whatsAppMessageSender, firebaseNotificationSender);
+                                                 WhatsAppMessageSender whatsAppMessageSender,
+                                                 PushNotificationRepository pushNotificationRepository,
+                                                 WhatsAppMessageRepository whatsAppMessageRepository) {
+        return new DelegatingNotificationSender(whatsAppMessageSender,
+                firebaseNotificationSender,
+                pushNotificationRepository,
+                whatsAppMessageRepository);
     }
 
     @Bean

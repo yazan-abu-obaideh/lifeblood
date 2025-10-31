@@ -42,7 +42,9 @@ public class VolunteerRegistrationTest extends BaseTest {
 
         VolunteerRegistrationRequest request = new VolunteerRegistrationRequest(
                 phoneNumber,
-                List.of(hospitalUuid)
+                List.of(hospitalUuid),
+                null,
+                null
         );
 
         VolunteerEntity result = createVolunteer(request);
@@ -69,7 +71,9 @@ public class VolunteerRegistrationTest extends BaseTest {
 
         VolunteerRegistrationRequest request = new VolunteerRegistrationRequest(
                 phoneNumber,
-                List.of(hospitalUuid)
+                List.of(hospitalUuid),
+                null,
+                null
         );
 
         VolunteerEntity volunteer = createVolunteer(request);
@@ -97,19 +101,6 @@ public class VolunteerRegistrationTest extends BaseTest {
         VolunteerEntity updatedVolunteer = volunteerJpaRepository.findByPhoneNumber(phoneNumber)
                 .orElseThrow(() -> new AssertionError("Where did the volunteer disappear"));
         assertThat(updatedVolunteer.isVerifiedPhoneNumber()).isTrue();
-    }
-
-    private VolunteerEntity createVolunteer(VolunteerRegistrationRequest request) throws Exception {
-        String responseString = mockMvc.perform(
-                        MockMvcRequestBuilders.post(VOLUNTEER_API)
-                                .contentType("application/json")
-                                .content(objectMapper.writeValueAsString(request))
-                )
-                .andExpect(status().isCreated())
-                .andReturn()
-                .getResponse().getContentAsString();
-
-        return objectMapper.readValue(responseString, VolunteerEntity.class);
     }
 
 

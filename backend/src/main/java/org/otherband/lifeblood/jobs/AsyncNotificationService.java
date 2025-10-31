@@ -22,10 +22,8 @@ public class AsyncNotificationService {
     @Scheduled(fixedDelayString = "${notifications.fixed.delay.nano.seconds}")
     public void sendNotifications() {
         whatsAppMessageRepository.findTop100BySentIsFalseOrderByCreationDateAsc()
-                .parallelStream()
                 .forEach(delegatingNotificationSender::sendWhatsAppMessage);
         pushNotificationRepository.findTop100BySentIsFalseOrderByCreationDateAsc()
-                .parallelStream()
                 .forEach(delegatingNotificationSender::sendPushNotification);
     }
 

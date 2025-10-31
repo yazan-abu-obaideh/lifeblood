@@ -46,7 +46,7 @@
             <column name="body" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="token" type="varchar(30)">
+            <column name="user_token" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
         </createTable>
