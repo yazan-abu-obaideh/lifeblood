@@ -12,10 +12,10 @@ import org.springframework.context.annotation.Configuration;
 public class JobsConfig {
 
     @Bean
-    public AsyncNotificationService asyncNotificationService(NotificationSender delegatingNotificationSender,
+    public AsyncNotificationService asyncNotificationService(NotificationSender notificationSender,
                                                              WhatsAppMessageRepository whatsAppMessageRepository,
                                                              PushNotificationRepository pushNotificationRepository) {
-        return new AsyncNotificationService(delegatingNotificationSender,
+        return new AsyncNotificationService(notificationSender,
                 whatsAppMessageRepository,
                 pushNotificationRepository);
     }
