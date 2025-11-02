@@ -74,5 +74,5 @@ export default function App() {
     }
   }, []);
 
-  return <SignUp pushNotificationToken={token} />;
+  return <SignUp />;
 }

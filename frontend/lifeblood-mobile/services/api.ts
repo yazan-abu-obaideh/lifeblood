@@ -84,8 +84,9 @@ interface VerifyCodeResponse {
 /**
  * Send verification code to phone number
  */
-export const submitPhoneNumber = async (
-  phoneNumber: string
+export const registerVolunteer = async (
+  phoneNumber: string,
+  hospitalUuids: string[]
 ): Promise<SendVerificationCodeResponse> => {
   const url = `${config.apiBaseUrl}${config.endpoints.registerVolunteer}`;
 
@@ -97,7 +98,7 @@ export const submitPhoneNumber = async (
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ phoneNumber }),
+      body: JSON.stringify({ phoneNumber, selectedHospitals: hospitalUuids }),
     });
 
     // Log response status
