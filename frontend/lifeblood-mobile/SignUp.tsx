@@ -23,14 +23,12 @@ const SignUp: React.FC<SignUpProps> = ({ onComplete }) => {
       setSelectedHospitalIds(hospitalIds);
       setStep("verify");
     } catch (error) {
-      // Error is already logged in api.ts
-      // Just show alert to user
       if (error instanceof ApiError) {
         Alert.alert("Error", error.message);
       } else {
         Alert.alert("Error", "Failed to send verification code");
       }
-      throw error; // Re-throw so child component can handle it
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -39,23 +37,20 @@ const SignUp: React.FC<SignUpProps> = ({ onComplete }) => {
   const verifyCodeHandler = async (code: string): Promise<void> => {
     setLoading(true);
     try {
-      const response = await verifyCode(phoneNumber, code);
+      await verifyCode(phoneNumber, code);
 
-      // Call onComplete with the result
       onComplete?.({
         phoneNumber,
         verified: true,
-        token: response.token,
         selectedHospitalIds,
       });
     } catch (error) {
-      // Error is already logged in api.ts
       if (error instanceof ApiError) {
         Alert.alert("Error", error.message);
       } else {
         Alert.alert("Error", "Failed to verify code");
       }
-      throw error; // Re-throw so child component can handle it
+      throw error;
     } finally {
       setLoading(false);
     }

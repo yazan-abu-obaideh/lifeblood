@@ -40,14 +40,13 @@ export const VerificationScreen: React.FC<VerificationScreenProps> = ({
 
       <TextInput
         style={[styles.input, error && styles.inputError]}
-        placeholder="6-digit code"
+        placeholder="verification code"
         value={code}
         onChangeText={(text) => {
           setCode(text);
           setError("");
         } }
         keyboardType="number-pad"
-        maxLength={6}
         autoFocus
         editable={!loading} />
 

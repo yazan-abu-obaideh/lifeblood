@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Text, View, StyleSheet } from "react-native";
 import * as Notifications from "expo-notifications";
 import { firebase } from "@react-native-firebase/messaging";
 import firebaseConfig from "./google-services.json";
-import SignedInScreen from "./SignedIn";
 import SignUp from "./SignUp";
 
 const notificationsEnabled: string = process.env.NOTIFICATIONS_ENABLED || "";

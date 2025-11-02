@@ -1,9 +1,4 @@
-/**
- * API Service for authentication
- */
-
 import { config } from "../config/config";
-
 
 export class ApiError extends Error {
   constructor(
@@ -19,24 +14,24 @@ export class ApiError extends Error {
 export const getHospitals = async (): Promise<Hospital[]> => {
   const url = `${config.apiBaseUrl}${config.endpoints.hospitals}`;
 
-  console.log('[API] Fetching hospitals');
+  console.log("[API] Fetching hospitals");
 
   try {
     const response = await fetch(url, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
-    console.log('[API] Get hospitals response status:', response.status);
+    console.log("[API] Get hospitals response status:", response.status);
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       const errorMessage =
         errorData.message || `HTTP error! status: ${response.status}`;
 
-      console.error('[API] Get hospitals failed:', {
+      console.error("[API] Get hospitals failed:", {
         status: response.status,
         error: errorMessage,
         data: errorData,
@@ -46,7 +41,7 @@ export const getHospitals = async (): Promise<Hospital[]> => {
     }
 
     const data = await response.json();
-    console.log('[API] Get hospitals success:', data);
+    console.log("[API] Get hospitals success:", data);
 
     return data;
   } catch (error) {
@@ -54,10 +49,10 @@ export const getHospitals = async (): Promise<Hospital[]> => {
       throw error;
     }
 
-    console.error('[API] Network error fetching hospitals:', error);
+    console.error("[API] Network error fetching hospitals:", error);
 
     throw new ApiError(
-      'Network error. Please check your connection and try again.',
+      "Network error. Please check your connection and try again.",
       undefined,
       error
     );
@@ -66,7 +61,7 @@ export const getHospitals = async (): Promise<Hospital[]> => {
 
 export interface Hospital {
   id: string;
-  uuid: string,
+  uuid: string;
   hospitalName: string;
 }
 
@@ -75,15 +70,6 @@ interface SendVerificationCodeResponse {
   message?: string;
 }
 
-interface VerifyCodeResponse {
-  success: boolean;
-  token?: string;
-  message?: string;
-}
-
-/**
- * Send verification code to phone number
- */
 export const registerVolunteer = async (
   phoneNumber: string,
   hospitalUuids: string[]
@@ -101,10 +87,8 @@ export const registerVolunteer = async (
       body: JSON.stringify({ phoneNumber, selectedHospitals: hospitalUuids }),
     });
 
-    // Log response status
     console.log("[API] Send code response status:", response.status);
 
-    // Handle non-OK responses
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       const errorMessage =
@@ -124,7 +108,6 @@ export const registerVolunteer = async (
 
     return data;
   } catch (error) {
-    // Handle network errors
     if (error instanceof ApiError) {
       throw error;
     }
@@ -139,13 +122,10 @@ export const registerVolunteer = async (
   }
 };
 
-/**
- * Verify code for phone number
- */
 export const verifyCode = async (
   phoneNumber: string,
-  code: string
-): Promise<VerifyCodeResponse> => {
+  verificationCode: string
+): Promise<void> => {
   const url = `${config.apiBaseUrl}${config.endpoints.verifyCode}`;
 
   console.log("[API] Verifying code for:", phoneNumber);
@@ -156,7 +136,7 @@ export const verifyCode = async (
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ phoneNumber, code }),
+      body: JSON.stringify({ phoneNumber, verificationCode }),
     });
 
     console.log("[API] Verify code response status:", response.status);
@@ -175,10 +155,9 @@ export const verifyCode = async (
       throw new ApiError(errorMessage, response.status, errorData);
     }
 
-    const data = await response.json();
-    console.log("[API] Verify code success:", data);
+    console.log("[API] Verify code success:");
 
-    return data;
+    return;
   } catch (error) {
     if (error instanceof ApiError) {
       throw error;
