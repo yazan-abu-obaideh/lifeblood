@@ -4,22 +4,27 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.platform.commons.util.StringUtils;
+import org.mockito.internal.verification.api.VerificationData;
+import org.mockito.invocation.Invocation;
 import org.otherband.lifeblood.alert.AlertCreationRequest;
 import org.otherband.lifeblood.alert.AlertEntity;
 import org.otherband.lifeblood.alert.AlertLevel;
 import org.otherband.lifeblood.hospital.HospitalEntity;
 import org.otherband.lifeblood.jobs.AsyncNotificationService;
 import org.otherband.lifeblood.notifications.NotificationChannel;
+import org.otherband.lifeblood.notifications.push.PushNotification;
+import org.otherband.lifeblood.notifications.whatsapp.WhatsAppMessageEntity;
 import org.otherband.lifeblood.volunteer.VolunteerEntity;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
 import static org.otherband.lifeblood.alert.AlertController.ALERT_API;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -27,16 +32,11 @@ public class AlertTest extends BaseTest {
 
     @Test
     void notifyAllWhenLifeOrDeath() throws Exception {
-        List<VolunteerEntity> startingVolunteers = volunteerJpaRepository.findAll();
-        int countWhatsApp = (int) countWhatsApp(startingVolunteers);
-        int countPush = (int) countPush(startingVolunteers);
-
-        if ((countPush + countWhatsApp) == 0) {
-            List<VolunteerEntity> volunteers = createVolunteers();
-            countPush = (int) countPush(volunteers);
-            countWhatsApp = (int) countWhatsApp(volunteers);
-            assertThat(countPush + countWhatsApp).isGreaterThan(0);
-        }
+        List<VolunteerEntity> volunteers = createVolunteers();
+        List<String> pushNotificationTokens = getPushNotificationTokens(volunteers);
+        List<String> whatsAppPhoneNumbers = getWhatsAppPhoneNumbers(volunteers);
+        assertThat(pushNotificationTokens.size()).isGreaterThan(0);
+        assertThat(whatsAppPhoneNumbers.size()).isGreaterThan(0);
 
         HospitalEntity[] hospitals = fetchAvailableHospitals();
         AlertCreationRequest creationRequest = new AlertCreationRequest(
@@ -58,24 +58,28 @@ public class AlertTest extends BaseTest {
                 pushNotificationRepository
         ).sendNotifications();
 
-        /* our tests run in parallel, extra users may be created */
-        verify(notificationSender, atLeast(countWhatsApp)).sendWhatsAppMessage(any());
-        verify(notificationSender, atLeast(countPush)).sendPushNotification(any());
-    }
+        pushNotificationTokens.forEach(token -> {
+            verify(notificationSender, verificationData -> {
+                findMatchingInvocation(verificationData, invocation -> {
+                    if (invocation.getArgument(0) instanceof PushNotification pushNotification) {
+                        return token.equals(pushNotification.getUserToken());
+                    }
+                    return false;
+                });
+            }).sendPushNotification(any());
+        });
 
-    private static long countPush(List<VolunteerEntity> startingVolunteers) {
-        return startingVolunteers
-                .stream().filter(volunteerEntity2 ->
-                        volunteerEntity2.getNotificationChannels().contains(NotificationChannel.PUSH_NOTIFICATIONS.name()))
-                .filter(volunteerEntity -> StringUtils.isNotBlank(volunteerEntity.getPushNotificationToken()))
-                .count();
-    }
+        whatsAppPhoneNumbers.forEach(phoneNumber -> {
+            verify(notificationSender, verificationData -> {
+                findMatchingInvocation(verificationData, invocation -> {
+                    if (invocation.getArgument(0) instanceof WhatsAppMessageEntity whatsAppMessage) {
+                        return phoneNumber.equals(whatsAppMessage.getPhoneNumber());
+                    }
+                    return false;
+                });
+            }).sendWhatsAppMessage(any());
+        });
 
-    private static long countWhatsApp(List<VolunteerEntity> startingVolunteers) {
-        return startingVolunteers
-                .stream().filter(volunteerEntity3 ->
-                        volunteerEntity3.getNotificationChannels().contains(NotificationChannel.WHATSAPP_MESSAGES.name()))
-                .count();
     }
 
     @ParameterizedTest
@@ -111,6 +115,30 @@ public class AlertTest extends BaseTest {
             volunteers.add(createAnyVolunteer());
         }
         return volunteers;
+    }
+
+    private static void findMatchingInvocation(VerificationData verificationData, Predicate<Invocation> invocationFilter) {
+        verificationData.getAllInvocations().stream().filter(invocationFilter)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Push notification not sent"))
+        ;
+    }
+
+    private static List<String> getPushNotificationTokens(List<VolunteerEntity> startingVolunteers) {
+        return startingVolunteers
+                .stream().filter(volunteerEntity ->
+                        volunteerEntity.getNotificationChannels().contains(NotificationChannel.PUSH_NOTIFICATIONS.name()))
+                .map(VolunteerEntity::getPushNotificationToken)
+                .filter(StringUtils::isNotBlank)
+                .toList();
+    }
+
+    private static List<String> getWhatsAppPhoneNumbers(List<VolunteerEntity> startingVolunteers) {
+        return startingVolunteers
+                .stream().filter(volunteerEntity ->
+                        volunteerEntity.getNotificationChannels().contains(NotificationChannel.WHATSAPP_MESSAGES.name()))
+                .map(VolunteerEntity::getPhoneNumber)
+                .toList();
     }
 
     public Stream<String> doctorMessage() {
