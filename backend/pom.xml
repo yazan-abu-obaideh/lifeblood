@@ -129,7 +129,11 @@
                         <configuration>
                             <skipValidateSpec>true</skipValidateSpec>
                             <generateApiTests>false</generateApiTests>
+                            <generateApis>false</generateApis>
                             <generateModelTests>false</generateModelTests>
+                            <generateApiDocumentation>false</generateApiDocumentation>
+                            <generateModelDocumentation>false</generateModelDocumentation>
+                            <generateSupportingFiles>false</generateSupportingFiles>
                             <inputSpec>${project.basedir}/../open-api/api-docs.json</inputSpec>
                             <generatorName>spring</generatorName>
                             <modelPackage>org.otherband.lifeblood.generated.model</modelPackage>
