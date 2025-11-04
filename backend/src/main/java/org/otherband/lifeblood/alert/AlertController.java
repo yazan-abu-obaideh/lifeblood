@@ -14,6 +14,7 @@ import org.otherband.lifeblood.notifications.whatsapp.WhatsAppMessageEntity;
 import org.otherband.lifeblood.notifications.whatsapp.WhatsAppMessageRepository;
 import org.otherband.lifeblood.volunteer.VolunteerEntity;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -49,13 +50,15 @@ public class AlertController {
     @GetMapping
     public PageAlertResponse getAlerts(
             @RequestParam(required = false, defaultValue = "10", name = "pageSize") int pageSize,
+            @RequestParam(required = false, defaultValue = "0", name = "pageNumber") int pageNumber,
             @RequestParam(required = false, name = "activeOnly") boolean activeOnly
     ) {
         final Page<AlertEntity> result;
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
         if (activeOnly) {
-            result = alertJpaRepository.findAllByFulfilmentDateIsNullOrderByCreationDateDesc(Pageable.ofSize(pageSize));
+            result = alertJpaRepository.findAllByFulfilmentDateIsNullOrderByCreationDateDesc(pageable);
         } else {
-            result = alertJpaRepository.findAllByOrderByCreationDateDesc(Pageable.ofSize(pageSize));
+            result = alertJpaRepository.findAllByOrderByCreationDateDesc(pageable);
         }
         return mapper.toResponse(result);
     }
