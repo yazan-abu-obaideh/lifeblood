@@ -31,6 +31,26 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class AlertTest extends BaseTest {
 
     @Test
+    void getPaginatedAlerts() throws Exception {
+        HospitalEntity[] hospitals = fetchAvailableHospitals();
+        for (int i = 0; i < 30; i++) {
+            AlertCreationRequest creationRequest = new AlertCreationRequest(
+                    hospitals[0].getUuid(),
+                    AlertLevel.ROUTINE,
+                    ""
+            );
+            createAlert(creationRequest);
+        }
+
+        String responseString = mockMvc.perform(
+                        MockMvcRequestBuilders.get(ALERT_API)
+                                .contentType("application/json")
+                )
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+    }
+
+    @Test
     void notifyAllWhenLifeOrDeath() throws Exception {
         List<VolunteerEntity> volunteers = createVolunteers();
         List<String> pushNotificationTokens = getPushNotificationTokens(volunteers);
@@ -91,6 +111,16 @@ public class AlertTest extends BaseTest {
                 AlertLevel.ROUTINE,
                 doctorMessage
         );
+        AlertEntity alert = createAlert(creationRequest);
+
+        assertThat(alert.getAlertLevel()).isEqualTo(AlertLevel.ROUTINE);
+        assertThat(alert.getHospital()).isNotNull();
+        assertThat(alert.getHospital().getUuid()).isEqualTo(creationRequest.hospitalUuid());
+        assertThat(alert.getDoctorMessage()).isEqualTo(doctorMessage);
+
+    }
+
+    private AlertEntity createAlert(AlertCreationRequest creationRequest) throws Exception {
         String alertString = mockMvc.perform(
                         MockMvcRequestBuilders.post(ALERT_API)
                                 .contentType("application/json")
@@ -101,12 +131,7 @@ public class AlertTest extends BaseTest {
                 .getResponse().getContentAsString();
 
         AlertEntity alert = objectMapper.readValue(alertString, AlertEntity.class);
-
-        assertThat(alert.getAlertLevel()).isEqualTo(AlertLevel.ROUTINE);
-        assertThat(alert.getHospital()).isNotNull();
-        assertThat(alert.getHospital().getUuid()).isEqualTo(creationRequest.hospitalUuid());
-        assertThat(alert.getDoctorMessage()).isEqualTo(doctorMessage);
-
+        return alert;
     }
 
     private List<VolunteerEntity> createVolunteers() throws Exception {

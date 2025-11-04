@@ -1,6 +1,8 @@
 package org.otherband.lifeblood.volunteer;
 
 import jakarta.validation.Valid;
+import org.otherband.lifeblood.ApplicationMapper;
+import org.otherband.lifeblood.generated.model.VolunteerResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,15 +13,22 @@ public class VolunteerController {
     public static final String VOLUNTEER_API = "/api/v1/volunteer";
 
     private final VolunteerService volunteerService;
+    private final ApplicationMapper mapper;
 
-    public VolunteerController(VolunteerService volunteerService) {
+    public VolunteerController(VolunteerService volunteerService, ApplicationMapper mapper) {
         this.volunteerService = volunteerService;
+        this.mapper = mapper;
+    }
+
+    @GetMapping("/{uuid}")
+    public VolunteerResponse getData(@PathVariable String volunteerUuid) {
+        return mapper.toResponse(volunteerService.findActiveUserByUuid(volunteerUuid));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public VolunteerEntity registerVolunteer(@RequestBody @Valid VolunteerRegistrationRequest volunteerRequest) {
-        return volunteerService.registerVolunteer(volunteerRequest);
+    public VolunteerResponse registerVolunteer(@RequestBody @Valid VolunteerRegistrationRequest volunteerRequest) {
+        return mapper.toResponse(volunteerService.registerVolunteer(volunteerRequest));
     }
 
     @PostMapping("/verify-phone-number")

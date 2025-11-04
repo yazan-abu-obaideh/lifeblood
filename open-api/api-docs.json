@@ -1,0 +1,130 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "OpenAPI definition", "version": "v0" },
+  "components": {
+    "schemas": {
+      "VolunteerRegistrationRequest": {
+        "type": "object",
+        "properties": {
+          "phoneNumber": { "type": "string", "minLength": 1 },
+          "selectedHospitals": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 1
+          },
+          "pushNotificationToken": { "type": "string" },
+          "pushNotificationType": {
+            "type": "string",
+            "enum": ["FIREBASE", "APPLE_PUSH_NOTIFICATION"]
+          }
+        },
+        "required": ["phoneNumber", "selectedHospitals"]
+      },
+      "HospitalResponse": {
+        "type": "object",
+        "properties": {
+          "uuid": { "type": "string" },
+          "hospitalName": { "type": "string" },
+          "xcoordinate": { "type": "number", "format": "float" },
+          "ycoordinate": { "type": "number", "format": "float" }
+        }
+      },
+      "VolunteerResponse": {
+        "type": "object",
+        "properties": {
+          "uuid": { "type": "string" },
+          "phoneNumber": { "type": "string" },
+          "verifiedPhoneNumber": { "type": "boolean" },
+          "verifiedDonor": { "type": "boolean" },
+          "lastDonationDate": { "type": "string", "format": "date-time" },
+          "pushNotificationToken": { "type": "string" },
+          "pushNotificationType": {
+            "type": "string",
+            "enum": ["FIREBASE", "APPLE_PUSH_NOTIFICATION"]
+          },
+          "alertableHospitals": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/HospitalResponse" }
+          },
+          "minimumSeverity": { "type": "integer", "format": "int32" },
+          "notificationChannels": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "creationDate": { "type": "string", "format": "date-time" },
+          "lastUpdatedDate": { "type": "string", "format": "date-time" }
+        }
+      },
+      "PhoneVerificationRequest": {
+        "type": "object",
+        "properties": {
+          "verificationCode": { "type": "string" },
+          "phoneNumber": { "type": "string" }
+        }
+      },
+      "AlertCreationRequest": {
+        "type": "object",
+        "properties": {
+          "hospitalUuid": { "type": "string", "minLength": 1 },
+          "alertLevel": {
+            "type": "string",
+            "enum": ["ROUTINE", "URGENT", "LIFE_OR_DEATH"]
+          },
+          "doctorMessage": { "type": "string" }
+        },
+        "required": ["alertLevel", "hospitalUuid"]
+      },
+      "AlertResponse": {
+        "type": "object",
+        "properties": {
+          "fulfilmentDate": { "type": "string", "format": "date-time" },
+          "alertLevel": {
+            "type": "string",
+            "enum": ["ROUTINE", "URGENT", "LIFE_OR_DEATH"]
+          },
+          "doctorMessage": { "type": "string" },
+          "creationDate": { "type": "string", "format": "date-time" },
+          "hospital": { "$ref": "#/components/schemas/HospitalResponse" }
+        }
+      },
+      "PageAlertResponse": {
+        "type": "object",
+        "properties": {
+          "totalElements": { "type": "integer", "format": "int64" },
+          "totalPages": { "type": "integer", "format": "int32" },
+          "pageable": { "$ref": "#/components/schemas/PageableObject" },
+          "size": { "type": "integer", "format": "int32" },
+          "content": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/AlertResponse" }
+          },
+          "number": { "type": "integer", "format": "int32" },
+          "sort": { "$ref": "#/components/schemas/SortObject" },
+          "numberOfElements": { "type": "integer", "format": "int32" },
+          "first": { "type": "boolean" },
+          "last": { "type": "boolean" },
+          "empty": { "type": "boolean" }
+        }
+      },
+      "PageableObject": {
+        "type": "object",
+        "properties": {
+          "paged": { "type": "boolean" },
+          "pageNumber": { "type": "integer", "format": "int32" },
+          "pageSize": { "type": "integer", "format": "int32" },
+          "offset": { "type": "integer", "format": "int64" },
+          "sort": { "$ref": "#/components/schemas/SortObject" },
+          "unpaged": { "type": "boolean" }
+        }
+      },
+      "SortObject": {
+        "type": "object",
+        "properties": {
+          "sorted": { "type": "boolean" },
+          "empty": { "type": "boolean" },
+          "unsorted": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}

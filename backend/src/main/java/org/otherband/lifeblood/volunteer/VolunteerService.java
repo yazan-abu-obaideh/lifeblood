@@ -39,6 +39,18 @@ public class VolunteerService {
         this.mapper = mapper;
     }
 
+    public VolunteerEntity findActiveUserByUuid(String volunteerUuid) {
+        Optional<VolunteerEntity> byUuid = volunteerJpaRepository.findByUuid(volunteerUuid);
+        if (byUuid.isEmpty()) {
+            throw new UserException("No user was found with uuid [%s]".formatted(volunteerUuid));
+        }
+        VolunteerEntity user = byUuid.get();
+        if (!user.isVerifiedPhoneNumber()) {
+            throw new UserException("Please verify your phone number before accessing home screen");
+        }
+        return user;
+    }
+
     @Transactional
     public VolunteerEntity registerVolunteer(VolunteerRegistrationRequest volunteerRequest) {
         VolunteerEntity entity = mapper.toEntity(volunteerRequest);
@@ -92,12 +104,11 @@ public class VolunteerService {
                 .map(hospitalUuid -> {
                     Optional<HospitalEntity> hospital = hospitalJpaRepository.findByUuid(hospitalUuid);
                     if (hospital.isEmpty()) {
-                        throw new IllegalArgumentException("Hospital with uuid [%s] does not exist");
+                        throw new IllegalArgumentException("Hospital with uuid [%s] does not exist".formatted(hospitalUuid));
                     }
                     return hospital;
                 })
                 .map(Optional::get)
                 .toList();
     }
-
 }

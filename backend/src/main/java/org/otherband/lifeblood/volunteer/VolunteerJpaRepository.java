@@ -10,5 +10,6 @@ import java.util.Optional;
 @Repository
 public interface VolunteerJpaRepository extends JpaRepository<VolunteerEntity, Long> {
     Optional<VolunteerEntity> findByPhoneNumber(String phoneNumber);
+    Optional<VolunteerEntity> findByUuid(String uuid);
     List<VolunteerEntity> findByAlertableHospitalsContainsAndMinimumSeverityGreaterThanEqual(HospitalEntity hospitalEntity, int minimumSeverity);
 }

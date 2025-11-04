@@ -11,3 +11,5 @@
 .vscode/
 
 **/*-firebase-admin.json
+
+**/benchmark-suite

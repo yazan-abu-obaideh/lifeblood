@@ -4,6 +4,8 @@ import jakarta.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.otherband.lifeblood.ApplicationMapper;
 import org.otherband.lifeblood.UserException;
+import org.otherband.lifeblood.generated.model.AlertResponse;
+import org.otherband.lifeblood.generated.model.PageAlertResponse;
 import org.otherband.lifeblood.hospital.HospitalJpaRepository;
 import org.otherband.lifeblood.notifications.NotificationChannel;
 import org.otherband.lifeblood.notifications.push.PushNotification;
@@ -11,14 +13,14 @@ import org.otherband.lifeblood.notifications.push.PushNotificationRepository;
 import org.otherband.lifeblood.notifications.whatsapp.WhatsAppMessageEntity;
 import org.otherband.lifeblood.notifications.whatsapp.WhatsAppMessageRepository;
 import org.otherband.lifeblood.volunteer.VolunteerEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Locale;
 
 import static java.util.Optional.ofNullable;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @RestController
 @RequestMapping(AlertController.ALERT_API)
@@ -44,9 +46,23 @@ public class AlertController {
         this.mapper = mapper;
     }
 
+    @GetMapping
+    public PageAlertResponse getAlerts(
+            @RequestParam(required = false, defaultValue = "10", name = "pageSize") int pageSize,
+            @RequestParam(required = false, name = "activeOnly") boolean activeOnly
+    ) {
+        final Page<AlertEntity> result;
+        if (activeOnly) {
+            result = alertJpaRepository.findAllByFulfilmentDateIsNullOrderByCreationDateDesc(Pageable.ofSize(pageSize));
+        } else {
+            result = alertJpaRepository.findAllByOrderByCreationDateDesc(Pageable.ofSize(pageSize));
+        }
+        return mapper.toResponse(result);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public AlertEntity createAlert(@RequestBody @Valid AlertCreationRequest request) {
+    public AlertResponse createAlert(@RequestBody @Valid AlertCreationRequest request) {
         AlertEntity alert = mapper.toEntity(request);
         alert.setHospital(hospitalJpaRepository.findByUuid(request.hospitalUuid())
                 .orElseThrow(() -> new UserException("Hospital with uuid [%s] does not exist"))
@@ -55,7 +71,7 @@ public class AlertController {
         List<VolunteerEntity> volunteers = alertListenersFinder.findListeners(alert);
         whatsAppMessageRepository.saveAll(toWhatsAppMessages(request, volunteers));
         pushNotificationRepository.saveAll(toPushNotifications(alert, volunteers));
-        return saved;
+        return mapper.toResponse(saved);
     }
 
     private List<PushNotification> toPushNotifications(AlertEntity alert, List<VolunteerEntity> volunteers) {
