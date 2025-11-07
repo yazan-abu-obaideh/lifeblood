@@ -30,9 +30,6 @@ public class ProdNotificationConfig {
         this.firebaseAdminJson = firebaseAdminJson;
     }
 
-    /**
-     * Received every implementation of GenericNotificationSender (e.g. WhatsApp, Firebase, iOS, etc)
-     */
     @Bean
     public NotificationSender notificationSender(FirebaseNotificationSender firebaseNotificationSender,
                                                  WhatsAppMessageSender whatsAppMessageSender,

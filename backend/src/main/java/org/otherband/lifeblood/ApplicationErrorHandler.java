@@ -17,22 +17,6 @@ import java.util.List;
 @ControllerAdvice
 public class ApplicationErrorHandler {
 
-    @ExceptionHandler(HandlerMethodValidationException.class)
-    public ResponseEntity<ErrorResponse> handleException(HandlerMethodValidationException exception) {
-        List<String> messages = exception
-                .getParameterValidationResults()
-                .stream()
-                .map(ParameterValidationResult::getResolvableErrors)
-                .filter(messageSourceResolvables -> !messageSourceResolvables.isEmpty())
-                .map(List::getFirst)
-                .map(MessageSourceResolvable::getDefaultMessage)
-                .toList();
-
-        System.out.println(messages);
-
-        return ResponseEntity.badRequest().body(new ErrorResponse("Boo, not cool"));
-    }
-
     @ExceptionHandler(UserException.class)
     public ResponseEntity<ErrorResponse> handleException(UserException userException) {
         log.warn("User exception occurred", userException);
