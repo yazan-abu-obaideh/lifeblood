@@ -1,5 +1,5 @@
 import { config } from "../config/config";
-import { components } from '../open-api';
+import { components } from '../generated-open-api/open-api';
 
 export class ApiError extends Error {
   constructor(

@@ -22,6 +22,7 @@
       },
       "HospitalResponse": {
         "type": "object",
+        "required": ["uuid", "hospitalName", "xcoordinate", "ycoordinate"],
         "properties": {
           "uuid": { "type": "string" },
           "hospitalName": { "type": "string" },
@@ -31,6 +32,12 @@
       },
       "VolunteerResponse": {
         "type": "object",
+        "required": [
+          "uuid",
+          "phoneNumber",
+          "verifiedPhoneNumber",
+          "verifiedDonor"
+        ],
         "properties": {
           "uuid": { "type": "string" },
           "phoneNumber": { "type": "string" },
@@ -76,6 +83,7 @@
       },
       "AlertResponse": {
         "type": "object",
+        "required": ["alertLevel", "creationDate", "hospital"],
         "properties": {
           "fulfilmentDate": { "type": "string", "format": "date-time" },
           "alertLevel": {

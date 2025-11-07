@@ -9,7 +9,7 @@ import {
 import { config } from "../config/config";
 import { HospitalResponse } from "../services/api";
 import { styles } from "./VolunteerSummaryStyles";
-import { components } from "../open-api";
+import { components } from "../generated-open-api/open-api";
 
 type VolunteerResponse = components["schemas"]["VolunteerResponse"];
 
