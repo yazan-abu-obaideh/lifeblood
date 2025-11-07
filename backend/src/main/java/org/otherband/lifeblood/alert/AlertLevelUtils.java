@@ -2,7 +2,11 @@ package org.otherband.lifeblood.alert;
 
 import org.otherband.lifeblood.generated.model.AlertLevel;
 
-public class AlertLevelUtils {
+public final class AlertLevelUtils {
+    private AlertLevelUtils() {
+
+    }
+
     public static int toLevel(AlertLevel alertLevel) {
         return switch (alertLevel) {
             case null -> 0;

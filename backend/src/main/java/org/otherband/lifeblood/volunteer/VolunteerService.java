@@ -4,6 +4,8 @@ import org.otherband.lifeblood.ApplicationMapper;
 import org.otherband.lifeblood.TimeService;
 import org.otherband.lifeblood.UserException;
 import org.otherband.lifeblood.generated.model.NotificationChannel;
+import org.otherband.lifeblood.generated.model.PhoneVerificationRequest;
+import org.otherband.lifeblood.generated.model.VolunteerRegistrationRequest;
 import org.otherband.lifeblood.hospital.HospitalEntity;
 import org.otherband.lifeblood.hospital.HospitalJpaRepository;
 import org.otherband.lifeblood.notifications.whatsapp.WhatsAppMessageEntity;
@@ -55,19 +57,19 @@ public class VolunteerService {
     public VolunteerEntity registerVolunteer(VolunteerRegistrationRequest volunteerRequest) {
         VolunteerEntity entity = mapper.toEntity(volunteerRequest);
         entity.setUuid(UUID.randomUUID().toString());
-        entity.setAlertableHospitals(mapToHospitals(volunteerRequest.selectedHospitals()));
+        entity.setAlertableHospitals(mapToHospitals(volunteerRequest.getSelectedHospitals()));
         entity.setNotificationChannels(Arrays.stream(NotificationChannel.values()).map(Enum::name).toList());
         entity.setMinimumSeverity(0);
 
         PhoneNumberVerificationCodeEntity verificationCode = new PhoneNumberVerificationCodeEntity();
-        verificationCode.setPhoneNumber(volunteerRequest.phoneNumber());
+        verificationCode.setPhoneNumber(volunteerRequest.getPhoneNumber());
         verificationCode.setVerificationCode(UUID.randomUUID().toString());
 
         verificationCodeJpaRepository.save(verificationCode);
 
         whatsAppMessageRepository.save(WhatsAppMessageEntity.builder()
                         .templateName("verification_code")
-                        .phoneNumber(volunteerRequest.phoneNumber())
+                        .phoneNumber(volunteerRequest.getPhoneNumber())
                         .templateVariables(List.of(verificationCode.getVerificationCode()))
                 .build());
 
@@ -77,13 +79,13 @@ public class VolunteerService {
     @Transactional
     public void verifyPhoneNumber(PhoneVerificationRequest request) {
         Optional<PhoneNumberVerificationCodeEntity> result = verificationCodeJpaRepository.findByPhoneNumberAndVerificationCode(
-                request.phoneNumber(), request.verificationCode()
+                request.getPhoneNumber(), request.getVerificationCode()
         );
 
         if (result.isEmpty()) {
             throw new UserException(
                     "Verification code '%s' for phone number '%s' invalid or expired"
-                            .formatted(request.verificationCode(), request.phoneNumber())
+                            .formatted(request.getVerificationCode(), request.getPhoneNumber())
             );
         }
 
@@ -92,7 +94,7 @@ public class VolunteerService {
             throw new UserException("Verification code has expired. Please request a new one.");
         }
 
-        VolunteerEntity volunteer = volunteerJpaRepository.findByPhoneNumber(request.phoneNumber())
+        VolunteerEntity volunteer = volunteerJpaRepository.findByPhoneNumber(request.getPhoneNumber())
                 .orElseThrow(() -> new AssertionError("This should never happen."));
 
         volunteer.setVerifiedPhoneNumber(true);

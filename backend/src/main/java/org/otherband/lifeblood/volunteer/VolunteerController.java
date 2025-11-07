@@ -1,8 +1,10 @@
 package org.otherband.lifeblood.volunteer;
 
-import jakarta.validation.Valid;
 import org.otherband.lifeblood.ApplicationMapper;
+import org.otherband.lifeblood.generated.model.PhoneVerificationRequest;
+import org.otherband.lifeblood.generated.model.VolunteerRegistrationRequest;
 import org.otherband.lifeblood.generated.model.VolunteerResponse;
+import org.otherband.lifeblood.validations.SimpleValidator;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +29,8 @@ public class VolunteerController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public VolunteerResponse registerVolunteer(@RequestBody @Valid VolunteerRegistrationRequest volunteerRequest) {
+    public VolunteerResponse registerVolunteer(@RequestBody VolunteerRegistrationRequest volunteerRequest) {
+        SimpleValidator.INSTANCE.validate(volunteerRequest);
         return mapper.toResponse(volunteerService.registerVolunteer(volunteerRequest));
     }
 

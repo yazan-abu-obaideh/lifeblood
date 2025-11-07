@@ -8,6 +8,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.otherband.lifeblood.generated.model.PushNotificationType;
+import org.otherband.lifeblood.generated.model.VolunteerRegistrationRequest;
 import org.otherband.lifeblood.hospital.HospitalEntity;
 import org.otherband.lifeblood.hospital.HospitalJpaRepository;
 import org.otherband.lifeblood.notifications.NotificationSender;
@@ -16,7 +17,6 @@ import org.otherband.lifeblood.notifications.whatsapp.WhatsAppMessageRepository;
 import org.otherband.lifeblood.volunteer.VerificationCodeJpaRepository;
 import org.otherband.lifeblood.volunteer.VolunteerEntity;
 import org.otherband.lifeblood.volunteer.VolunteerJpaRepository;
-import org.otherband.lifeblood.volunteer.VolunteerRegistrationRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -81,12 +81,12 @@ public abstract class BaseTest {
     public VolunteerEntity createAnyVolunteer() throws Exception {
         String chosenHospitalUuid = Arrays.stream(fetchAvailableHospitals()).findAny().map(HospitalEntity::getUuid)
                 .orElseThrow(() -> new AssertionFailure("Expected to find at least one hospital"));
-        return createVolunteer(new VolunteerRegistrationRequest(
-                FAKER.phoneNumber().phoneNumber(),
-                List.of(chosenHospitalUuid),
-                UUID.randomUUID().toString(),
-                PushNotificationType.FIREBASE
-        ));
+        VolunteerRegistrationRequest registrationRequest = new VolunteerRegistrationRequest();
+        registrationRequest.setPhoneNumber(FAKER.phoneNumber().phoneNumber());
+        registrationRequest.setSelectedHospitals(List.of(chosenHospitalUuid));
+        registrationRequest.setPushNotificationToken(UUID.randomUUID().toString());
+        registrationRequest.setPushNotificationType(PushNotificationType.FIREBASE);
+        return createVolunteer(registrationRequest);
     }
 
     protected HospitalEntity[] fetchAvailableHospitals() throws Exception {

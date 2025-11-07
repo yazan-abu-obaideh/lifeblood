@@ -2,11 +2,11 @@ package org.otherband.lifeblood;
 
 import org.junit.jupiter.api.Test;
 import org.otherband.lifeblood.generated.model.NotificationChannel;
+import org.otherband.lifeblood.generated.model.PhoneVerificationRequest;
+import org.otherband.lifeblood.generated.model.VolunteerRegistrationRequest;
 import org.otherband.lifeblood.hospital.HospitalEntity;
 import org.otherband.lifeblood.volunteer.PhoneNumberVerificationCodeEntity;
-import org.otherband.lifeblood.volunteer.PhoneVerificationRequest;
 import org.otherband.lifeblood.volunteer.VolunteerEntity;
-import org.otherband.lifeblood.volunteer.VolunteerRegistrationRequest;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.Arrays;
@@ -40,12 +40,10 @@ public class VolunteerRegistrationTest extends BaseTest {
         HospitalEntity[] availableHospitals = fetchAvailableHospitals();
         String hospitalUuid = availableHospitals[1].getUuid();
 
-        VolunteerRegistrationRequest request = new VolunteerRegistrationRequest(
-                phoneNumber,
-                List.of(hospitalUuid),
-                null,
-                null
-        );
+
+        VolunteerRegistrationRequest request = new VolunteerRegistrationRequest();
+        request.setPhoneNumber(phoneNumber);
+        request.setSelectedHospitals(List.of(hospitalUuid));
 
         VolunteerEntity result = createVolunteer(request);
 
@@ -69,12 +67,9 @@ public class VolunteerRegistrationTest extends BaseTest {
         HospitalEntity[] availableHospitals = fetchAvailableHospitals();
         String hospitalUuid = availableHospitals[1].getUuid();
 
-        VolunteerRegistrationRequest request = new VolunteerRegistrationRequest(
-                phoneNumber,
-                List.of(hospitalUuid),
-                null,
-                null
-        );
+        VolunteerRegistrationRequest request = new VolunteerRegistrationRequest();
+        request.setSelectedHospitals(List.of(hospitalUuid));
+        request.setPhoneNumber(phoneNumber);
 
         VolunteerEntity volunteer = createVolunteer(request);
 
@@ -88,13 +83,13 @@ public class VolunteerRegistrationTest extends BaseTest {
 
         String code = verificationCode.getVerificationCode();
 
+        PhoneVerificationRequest phoneVerificationRequest = new PhoneVerificationRequest();
+        phoneVerificationRequest.setPhoneNumber(phoneNumber);
+        phoneVerificationRequest.setVerificationCode(code);
         mockMvc.perform(
                         MockMvcRequestBuilders.post(VOLUNTEER_API.concat("/verify-phone-number"))
                                 .contentType("application/json")
-                                .content(objectMapper.writeValueAsString(new PhoneVerificationRequest(
-                                        code,
-                                        phoneNumber
-                                )))
+                                .content(objectMapper.writeValueAsString(phoneVerificationRequest))
                 )
                 .andExpect(status().isOk());
 
