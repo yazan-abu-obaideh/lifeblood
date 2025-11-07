@@ -7,11 +7,8 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { config } from "../../config/config";
-import { HospitalResponse } from "../../services/api";
 import { styles } from "./VolunteerSummaryStyles";
-import { components } from "../../generated-open-api/open-api";
-
-type VolunteerResponse = components["schemas"]["VolunteerResponse"];
+import { HospitalResponse, VolunteerResponse } from "../../generated-open-api";
 
 interface ProfileHeaderProps {
   onSettingsPress: () => void;
@@ -240,7 +237,7 @@ const VolunteerSummary: React.FC = () => {
       />
 
       <LastDonationSection
-        lastDonationDate={userData.lastDonationDate}
+        lastDonationDate={userData.lastDonationDate?.toDateString()}
         isVerifiedDonor={userData.verifiedDonor}
       />
 

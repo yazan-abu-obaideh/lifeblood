@@ -1,5 +1,5 @@
 import { config } from "../config/config";
-import { components } from '../generated-open-api/open-api';
+import { HospitalResponse } from "../generated-open-api";
 
 export class ApiError extends Error {
   constructor(
@@ -11,8 +11,6 @@ export class ApiError extends Error {
     this.name = "ApiError";
   }
 }
-
-export type HospitalResponse = components["schemas"]["HospitalResponse"];
 
 export const getHospitals = async (): Promise<HospitalResponse[]> => {
   const url = `${config.apiBaseUrl}${config.endpoints.hospitals}`;

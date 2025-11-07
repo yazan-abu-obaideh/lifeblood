@@ -7,10 +7,9 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
-import { HospitalResponse } from "../../services/api";
 import { styles } from "./VolunteerSettingsStyles";
 import { config } from "../../config/config";
-import { components } from "../../generated-open-api/open-api";
+import { HospitalResponse, VolunteerResponse } from "../../generated-open-api";
 
 enum SeverityLevel {
   ROUTINE = "ROUTINE",
@@ -42,10 +41,9 @@ const SEVERITY_DESCRIPTIONS: Record<SeverityLevel, string> = {
   [SeverityLevel.LIFE_OR_DEATH]: "Critical emergencies only",
 };
 
-type Hospital = HospitalResponse;
 type NotificationChannel = "" | "";
 
-type UserSettings = components["schemas"]["VolunteerResponse"];
+type UserSettings = VolunteerResponse;
 
 interface SettingsHeaderProps {
   onBackPress: () => void;
@@ -207,8 +205,8 @@ const NotificationChannelsSection: React.FC<
 };
 
 interface HospitalsSectionProps {
-  selectedHospitals: Hospital[];
-  onHospitalsChange: (hospitals: Hospital[]) => void;
+  selectedHospitals: HospitalResponse[];
+  onHospitalsChange: (hospitals: HospitalResponse[]) => void;
 }
 
 const HospitalsSection: React.FC<HospitalsSectionProps> = ({
@@ -309,7 +307,9 @@ const VolunteerSettings: React.FC<VolunteerSettingsProps> = ({
   const [notificationChannels, setNotificationChannels] = useState<string[]>(
     []
   );
-  const [selectedHospitals, setSelectedHospitals] = useState<Hospital[]>([]);
+  const [selectedHospitals, setSelectedHospitals] = useState<
+    HospitalResponse[]
+  >([]);
 
   useEffect(() => {
     fetchSettings();
@@ -355,7 +355,7 @@ const VolunteerSettings: React.FC<VolunteerSettingsProps> = ({
     );
   };
 
-  const handleHospitalsChange = (hospitals: Hospital[]): void => {
+  const handleHospitalsChange = (hospitals: HospitalResponse[]): void => {
     setSelectedHospitals(hospitals);
   };
 

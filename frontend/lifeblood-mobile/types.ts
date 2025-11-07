@@ -1,9 +1,4 @@
-export interface SignUpData {
-  phoneNumber: string;
-  verified: boolean;
-  token?: string;
-  selectedHospitalIds: string[];
-}
+import { VolunteerRegistrationRequest } from "./generated-open-api";
 
 export interface PhoneInputScreenProps {
   sendVerificationCode: (
@@ -21,5 +16,5 @@ export interface VerificationScreenProps {
 }
 
 export interface SignUpProps {
-  onComplete?: (data: SignUpData) => void;
+  onComplete?: (data: VolunteerRegistrationRequest) => void;
 }

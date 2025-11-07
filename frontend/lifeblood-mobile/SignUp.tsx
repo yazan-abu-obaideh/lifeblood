@@ -41,8 +41,7 @@ const SignUp: React.FC<SignUpProps> = ({ onComplete }) => {
 
       onComplete?.({
         phoneNumber,
-        verified: true,
-        selectedHospitalIds,
+        selectedHospitals: selectedHospitalIds,
       });
     } catch (error) {
       if (error instanceof ApiError) {

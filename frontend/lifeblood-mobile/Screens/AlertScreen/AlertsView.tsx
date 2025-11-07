@@ -8,12 +8,9 @@ import {
   RefreshControl,
 } from "react-native";
 
-import { components } from "../../generated-open-api/open-api";
 import { config } from "../../config/config";
 import { styles } from "./AlertsViewStyles";
-
-type AlertResponse = components["schemas"]["AlertResponse"];
-type PageAlertResponse = components["schemas"]["PageAlertResponse"];
+import { AlertResponse, PageAlertResponse } from "../../generated-open-api";
 
 interface AlertItemProps {
   alert: AlertResponse;
@@ -86,10 +83,12 @@ const AlertItem: React.FC<AlertItemProps> = ({ alert }) => {
       )}
 
       <View style={styles.alertFooter}>
-        <Text style={styles.dateText}>{formatDate(alert.creationDate)}</Text>
+        <Text style={styles.dateText}>
+          {formatDate(alert.creationDate.toDateString())}
+        </Text>
         {isFulfilled && alert.fulfilmentDate && (
           <Text style={styles.fulfilledDate}>
-            Fulfilled: {formatDate(alert.fulfilmentDate)}
+            Fulfilled: {formatDate(alert.fulfilmentDate.toDateString())}
           </Text>
         )}
       </View>
