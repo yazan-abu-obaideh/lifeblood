@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.otherband.lifeblood.ApplicationMapper;
 import org.otherband.lifeblood.UserException;
+import org.otherband.lifeblood.generated.model.AlertCreationRequest;
 import org.otherband.lifeblood.generated.model.AlertResponse;
 import org.otherband.lifeblood.generated.model.NotificationChannel;
 import org.otherband.lifeblood.generated.model.PageAlertResponse;
@@ -36,8 +37,11 @@ public class AlertController {
     private final PushNotificationRepository pushNotificationRepository;
     private final ApplicationMapper mapper;
 
-    public AlertController(AlertJpaRepository alertJpaRepository, AlertListenersFinder alertListenersFinder,
-                           HospitalJpaRepository hospitalJpaRepository, WhatsAppMessageRepository whatsAppMessageRepository, PushNotificationRepository pushNotificationRepository,
+    public AlertController(AlertJpaRepository alertJpaRepository,
+                           AlertListenersFinder alertListenersFinder,
+                           HospitalJpaRepository hospitalJpaRepository,
+                           WhatsAppMessageRepository whatsAppMessageRepository,
+                           PushNotificationRepository pushNotificationRepository,
                            ApplicationMapper mapper) {
         this.alertJpaRepository = alertJpaRepository;
         this.alertListenersFinder = alertListenersFinder;
@@ -67,7 +71,7 @@ public class AlertController {
     @ResponseStatus(HttpStatus.CREATED)
     public AlertResponse createAlert(@RequestBody @Valid AlertCreationRequest request) {
         AlertEntity alert = mapper.toEntity(request);
-        alert.setHospital(hospitalJpaRepository.findByUuid(request.hospitalUuid())
+        alert.setHospital(hospitalJpaRepository.findByUuid(request.getHospitalUuid())
                 .orElseThrow(() -> new UserException("Hospital with uuid [%s] does not exist"))
         );
         AlertEntity saved = alertJpaRepository.save(alert);
@@ -82,41 +86,58 @@ public class AlertController {
                 .stream()
                 .filter(
                         volunteerEntity ->
-                                volunteerEntity.getNotificationChannels().contains(NotificationChannel.PUSH_NOTIFICATIONS.name()))
+                                receivesNotification(volunteerEntity, NotificationChannel.PUSH_NOTIFICATIONS))
                 .filter(volunteerEntity -> StringUtils.isNotBlank(volunteerEntity.getPushNotificationToken()))
-                .map(volunteerEntity ->
-                        PushNotification.builder()
-                                .pushNotificationType(volunteerEntity.getPushNotificationType())
-                                .userToken(volunteerEntity.getPushNotificationToken())
-                                .title("%s alert".formatted(AlertLevelUtils.toDisplayName(alert.getAlertLevel())))
-                                .body(buildPushNotificationBody(alert))
-                                .build())
+                .map(volunteerEntity -> toPushNotification(alert, volunteerEntity))
                 .toList();
+    }
+
+    private static PushNotification toPushNotification(AlertEntity alert, VolunteerEntity volunteerEntity) {
+        return PushNotification.builder()
+                .pushNotificationType(volunteerEntity.getPushNotificationType())
+                .userToken(volunteerEntity.getPushNotificationToken())
+                .title("%s alert".formatted(AlertLevelUtils.toDisplayName(alert.getAlertLevel())))
+                .body(buildPushNotificationBody(alert))
+                .build();
     }
 
     private static String buildPushNotificationBody(AlertEntity alert) {
+        String hospitalName = alert.getHospital().getHospitalName();
+        String alertLevel = AlertLevelUtils.toDisplayName(alert.getAlertLevel());
         return "Donation request at hospital %s with level %s."
-                .formatted(alert.getHospital().getHospitalName(), AlertLevelUtils.toDisplayName(alert.getAlertLevel()))
-
-                .concat(ofNullable(alert.getDoctorMessage()).filter(StringUtils::isNotBlank).map(" Doctor message: %s"::formatted).orElse(""));
+                .formatted(hospitalName, alertLevel)
+                .concat(doctorMessageOrEmpty(alert));
     }
 
-    private static List<WhatsAppMessageEntity> toWhatsAppMessages(AlertCreationRequest request, List<VolunteerEntity> volunteers) {
+    private List<WhatsAppMessageEntity> toWhatsAppMessages(AlertCreationRequest request, List<VolunteerEntity> volunteers) {
         return volunteers
                 .stream()
-                .filter(
-                        volunteerEntity ->
-                                volunteerEntity.getNotificationChannels().contains(NotificationChannel.WHATSAPP_MESSAGES.name()))
-                .map(volunteerEntity ->
-                        WhatsAppMessageEntity.builder()
-                                .templateName("donation_alert")
-                                .phoneNumber(volunteerEntity.getPhoneNumber())
-                                .templateVariables(List.of(
-                                        request.alertLevel().name(),
-                                        request.doctorMessage()
-                                ))
-                                .build())
+                .filter(volunteerEntity ->
+                        receivesNotification(volunteerEntity, NotificationChannel.WHATSAPP_MESSAGES))
+                .map(volunteerEntity -> toWhatsAppMessage(request, volunteerEntity))
                 .toList();
+    }
+
+    private static WhatsAppMessageEntity toWhatsAppMessage(AlertCreationRequest request, VolunteerEntity volunteerEntity) {
+        return WhatsAppMessageEntity.builder()
+                .templateName("donation_alert")
+                .phoneNumber(volunteerEntity.getPhoneNumber())
+                .templateVariables(List.of(
+                        request.getAlertLevel().name(),
+                        ofNullable(request.getDoctorMessage()).orElse("")
+                ))
+                .build();
+    }
+
+    private static boolean receivesNotification(VolunteerEntity volunteerEntity, NotificationChannel notificationChannel) {
+        return volunteerEntity.getNotificationChannels().contains(notificationChannel.name());
+    }
+
+    private static String doctorMessageOrEmpty(AlertEntity alert) {
+        return ofNullable(alert.getDoctorMessage())
+                .filter(StringUtils::isNotBlank)
+                .map(" Doctor message: %s"::formatted)
+                .orElse("");
     }
 
 }

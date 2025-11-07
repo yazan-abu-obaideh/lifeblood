@@ -93,8 +93,17 @@ public class VolunteerRegistrationTest extends BaseTest {
                 )
                 .andExpect(status().isOk());
 
-        VolunteerEntity updatedVolunteer = volunteerJpaRepository.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new AssertionError("Where did the volunteer disappear"));
+        String updatedResponseString = mockMvc.perform(
+                        MockMvcRequestBuilders.get(VOLUNTEER_API.concat("/").concat(volunteer.getUuid()))
+                )
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        VolunteerEntity updatedVolunteer = objectMapper.readValue(updatedResponseString,
+                VolunteerEntity.class);
+
         assertThat(updatedVolunteer.isVerifiedPhoneNumber()).isTrue();
     }
 

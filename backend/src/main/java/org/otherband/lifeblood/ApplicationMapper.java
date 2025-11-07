@@ -1,7 +1,6 @@
 package org.otherband.lifeblood;
 
 import org.mapstruct.Mapper;
-import org.otherband.lifeblood.alert.AlertCreationRequest;
 import org.otherband.lifeblood.alert.AlertEntity;
 import org.otherband.lifeblood.generated.model.*;
 import org.otherband.lifeblood.hospital.HospitalEntity;

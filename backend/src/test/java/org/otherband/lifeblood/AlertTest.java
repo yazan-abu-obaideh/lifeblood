@@ -7,8 +7,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.platform.commons.util.StringUtils;
 import org.mockito.internal.verification.api.VerificationData;
 import org.mockito.invocation.Invocation;
-import org.otherband.lifeblood.alert.AlertCreationRequest;
 import org.otherband.lifeblood.alert.AlertEntity;
+import org.otherband.lifeblood.generated.model.AlertCreationRequest;
 import org.otherband.lifeblood.generated.model.AlertLevel;
 import org.otherband.lifeblood.generated.model.NotificationChannel;
 import org.otherband.lifeblood.generated.model.PageAlertResponse;
@@ -38,11 +38,13 @@ public class AlertTest extends BaseTest {
     void getPaginatedAlerts() throws Exception {
         HospitalEntity[] hospitals = fetchAvailableHospitals();
         for (int i = 0; i < 10; i++) {
-            AlertCreationRequest creationRequest = new AlertCreationRequest(
-                    hospitals[0].getUuid(),
-                    AlertLevel.ROUTINE,
-                    ""
-            );
+            //                     hospitals[0].getUuid(),
+            //                    AlertLevel.ROUTINE,
+            //                    ""
+            AlertCreationRequest creationRequest = new AlertCreationRequest();
+            creationRequest.setHospitalUuid(hospitals[0].getUuid());
+            creationRequest.setAlertLevel(AlertLevel.ROUTINE);
+            creationRequest.setDoctorMessage("");
             createAlert(creationRequest);
         }
 
@@ -76,11 +78,10 @@ public class AlertTest extends BaseTest {
         assertThat(whatsAppPhoneNumbers.size()).isGreaterThan(0);
 
         HospitalEntity[] hospitals = fetchAvailableHospitals();
-        AlertCreationRequest creationRequest = new AlertCreationRequest(
-                hospitals[0].getUuid(),
-                AlertLevel.LIFE_OR_DEATH,
-                "Life or death alert"
-        );
+        AlertCreationRequest creationRequest = new AlertCreationRequest();
+        creationRequest.setHospitalUuid(hospitals[0].getUuid());
+        creationRequest.setAlertLevel(AlertLevel.LIFE_OR_DEATH);
+        creationRequest.setDoctorMessage("Life or death alert");
 
         mockMvc.perform(
                         MockMvcRequestBuilders.post(ALERT_API)
@@ -95,27 +96,22 @@ public class AlertTest extends BaseTest {
                 pushNotificationRepository
         ).sendNotifications();
 
-        pushNotificationTokens.forEach(token -> {
-            verify(notificationSender, verificationData -> {
-                findMatchingInvocation(verificationData, invocation -> {
+        pushNotificationTokens.forEach(token ->
+                verify(notificationSender, verificationData ->
+                        findMatchingInvocation(verificationData, invocation -> {
                     if (invocation.getArgument(0) instanceof PushNotification pushNotification) {
                         return token.equals(pushNotification.getUserToken());
                     }
                     return false;
-                });
-            }).sendPushNotification(any());
-        });
+                })).sendPushNotification(any()));
 
-        whatsAppPhoneNumbers.forEach(phoneNumber -> {
-            verify(notificationSender, verificationData -> {
+        whatsAppPhoneNumbers.forEach(phoneNumber -> verify(notificationSender, verificationData ->
                 findMatchingInvocation(verificationData, invocation -> {
-                    if (invocation.getArgument(0) instanceof WhatsAppMessageEntity whatsAppMessage) {
-                        return phoneNumber.equals(whatsAppMessage.getPhoneNumber());
-                    }
-                    return false;
-                });
-            }).sendWhatsAppMessage(any());
-        });
+            if (invocation.getArgument(0) instanceof WhatsAppMessageEntity whatsAppMessage) {
+                return phoneNumber.equals(whatsAppMessage.getPhoneNumber());
+            }
+            return false;
+        })).sendWhatsAppMessage(any()));
 
     }
 
@@ -123,16 +119,15 @@ public class AlertTest extends BaseTest {
     @MethodSource("doctorMessage")
     void createAlert(String doctorMessage) throws Exception {
         HospitalEntity[] hospitals = fetchAvailableHospitals();
-        AlertCreationRequest creationRequest = new AlertCreationRequest(
-                hospitals[0].getUuid(),
-                AlertLevel.ROUTINE,
-                doctorMessage
-        );
+        AlertCreationRequest creationRequest = new AlertCreationRequest();
+        creationRequest.setAlertLevel(AlertLevel.ROUTINE);
+        creationRequest.setHospitalUuid(hospitals[0].getUuid());
+        creationRequest.setDoctorMessage(doctorMessage);
         AlertEntity alert = createAlert(creationRequest);
 
         assertThat(alert.getAlertLevel()).isEqualTo(AlertLevel.ROUTINE);
         assertThat(alert.getHospital()).isNotNull();
-        assertThat(alert.getHospital().getUuid()).isEqualTo(creationRequest.hospitalUuid());
+        assertThat(alert.getHospital().getUuid()).isEqualTo(creationRequest.getHospitalUuid());
         assertThat(alert.getDoctorMessage()).isEqualTo(doctorMessage);
 
     }
@@ -147,8 +142,7 @@ public class AlertTest extends BaseTest {
                 .andReturn()
                 .getResponse().getContentAsString();
 
-        AlertEntity alert = objectMapper.readValue(alertString, AlertEntity.class);
-        return alert;
+        return objectMapper.readValue(alertString, AlertEntity.class);
     }
 
     private List<VolunteerEntity> createVolunteers() throws Exception {
