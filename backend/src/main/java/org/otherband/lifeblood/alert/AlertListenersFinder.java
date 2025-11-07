@@ -1,5 +1,6 @@
 package org.otherband.lifeblood.alert;
 
+import org.otherband.lifeblood.generated.model.AlertLevel;
 import org.otherband.lifeblood.volunteer.VolunteerEntity;
 import org.otherband.lifeblood.volunteer.VolunteerJpaRepository;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,7 @@ public class AlertListenersFinder {
         return switch (alertLevel) {
             case ROUTINE, URGENT -> volunteerJpaRepository
                     .findByAlertableHospitalsContainsAndMinimumSeverityGreaterThanEqual(alertEntity.getHospital(),
-                            alertEntity.getAlertLevel().level());
+                            AlertLevelUtils.toLevel(alertLevel));
             case LIFE_OR_DEATH -> volunteerJpaRepository.findAll();
         };
     }

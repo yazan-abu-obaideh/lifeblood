@@ -9,7 +9,7 @@ import org.mockito.internal.verification.api.VerificationData;
 import org.mockito.invocation.Invocation;
 import org.otherband.lifeblood.alert.AlertCreationRequest;
 import org.otherband.lifeblood.alert.AlertEntity;
-import org.otherband.lifeblood.alert.AlertLevel;
+import org.otherband.lifeblood.generated.model.AlertLevel;
 import org.otherband.lifeblood.generated.model.NotificationChannel;
 import org.otherband.lifeblood.generated.model.PageAlertResponse;
 import org.otherband.lifeblood.hospital.HospitalEntity;

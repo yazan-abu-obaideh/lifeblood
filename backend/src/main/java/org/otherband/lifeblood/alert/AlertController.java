@@ -88,7 +88,7 @@ public class AlertController {
                         PushNotification.builder()
                                 .pushNotificationType(volunteerEntity.getPushNotificationType())
                                 .userToken(volunteerEntity.getPushNotificationToken())
-                                .title("%s alert".formatted(alert.getAlertLevel().getDisplayName()))
+                                .title("%s alert".formatted(AlertLevelUtils.toDisplayName(alert.getAlertLevel())))
                                 .body(buildPushNotificationBody(alert))
                                 .build())
                 .toList();
@@ -96,7 +96,7 @@ public class AlertController {
 
     private static String buildPushNotificationBody(AlertEntity alert) {
         return "Donation request at hospital %s with level %s."
-                .formatted(alert.getHospital().getHospitalName(), alert.getAlertLevel().getDisplayName())
+                .formatted(alert.getHospital().getHospitalName(), AlertLevelUtils.toDisplayName(alert.getAlertLevel()))
 
                 .concat(ofNullable(alert.getDoctorMessage()).filter(StringUtils::isNotBlank).map(" Doctor message: %s"::formatted).orElse(""));
     }

@@ -2,7 +2,7 @@ package org.otherband.lifeblood.validations;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import org.otherband.lifeblood.alert.AlertLevel;
+import org.otherband.lifeblood.alert.AlertLevelUtils;
 
 public class AlertSeverityValidator implements ConstraintValidator<ValidAlertSeverity, Integer> {
 
@@ -11,7 +11,7 @@ public class AlertSeverityValidator implements ConstraintValidator<ValidAlertSev
         if (value == null) {
             return true;
         }
-        return value >= AlertLevel.minimumSeverity() &&
-                value <= AlertLevel.maximumSeverity();
+        return value >= AlertLevelUtils.minimumSeverity() &&
+                value <= AlertLevelUtils.maximumSeverity();
     }
 }

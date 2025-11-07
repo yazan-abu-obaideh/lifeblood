@@ -2,6 +2,7 @@ package org.otherband.lifeblood.alert;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.otherband.lifeblood.generated.model.AlertLevel;
 import org.otherband.lifeblood.hospital.HospitalEntity;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
