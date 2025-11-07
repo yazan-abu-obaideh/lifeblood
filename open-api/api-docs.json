@@ -1,33 +1,87 @@
 {
   "openapi": "3.1.0",
-  "info": { "title": "OpenAPI definition", "version": "v0" },
+  "info": {
+    "title": "OpenAPI definition",
+    "version": "v0"
+  },
   "components": {
     "schemas": {
+      "PushNotificationType": {
+        "type": "string",
+        "enum": [
+          "FIREBASE",
+          "APPLE_PUSH_NOTIFICATION"
+        ]
+      },
+      "NotificationChannel": {
+        "type": "string",
+        "enum": [
+          "PUSH_NOTIFICATIONS",
+          "WHATSAPP_MESSAGES"
+        ]
+      },
+      "AlertLevel": {
+        "type": "string",
+        "enum": [
+          "ROUTINE",
+          "URGENT",
+          "LIFE_OR_DEATH"
+        ]
+      },
+      "PhoneVerificationRequest": {
+        "type": "object",
+        "properties": {
+          "phoneNumber": {
+            "type": "string"
+          },
+          "verificationCode": {
+            "type": "string"
+          }
+        }
+      },
       "VolunteerRegistrationRequest": {
         "type": "object",
         "properties": {
-          "phoneNumber": { "type": "string", "minLength": 1 },
+          "phoneNumber": {
+            "type": "string"
+          },
           "selectedHospitals": {
             "type": "array",
-            "items": { "type": "string" },
-            "minItems": 1
+            "items": {
+              "type": "string"
+            }
           },
-          "pushNotificationToken": { "type": "string" },
+          "pushNotificationToken": {
+            "type": "string"
+          },
           "pushNotificationType": {
-            "type": "string",
-            "enum": ["FIREBASE", "APPLE_PUSH_NOTIFICATION"]
+            "$ref": "#/components/schemas/PushNotificationType"
           }
-        },
-        "required": ["phoneNumber", "selectedHospitals"]
+        }
       },
       "HospitalResponse": {
         "type": "object",
-        "required": ["uuid", "hospitalName", "xcoordinate", "ycoordinate"],
+        "required": [
+          "uuid",
+          "hospitalName",
+          "xcoordinate",
+          "ycoordinate"
+        ],
         "properties": {
-          "uuid": { "type": "string" },
-          "hospitalName": { "type": "string" },
-          "xcoordinate": { "type": "number", "format": "float" },
-          "ycoordinate": { "type": "number", "format": "float" }
+          "uuid": {
+            "type": "string"
+          },
+          "hospitalName": {
+            "type": "string"
+          },
+          "xcoordinate": {
+            "type": "number",
+            "format": "float"
+          },
+          "ycoordinate": {
+            "type": "number",
+            "format": "float"
+          }
         }
       },
       "VolunteerResponse": {
@@ -39,98 +93,194 @@
           "verifiedDonor"
         ],
         "properties": {
-          "uuid": { "type": "string" },
-          "phoneNumber": { "type": "string" },
-          "verifiedPhoneNumber": { "type": "boolean" },
-          "verifiedDonor": { "type": "boolean" },
-          "lastDonationDate": { "type": "string", "format": "date-time" },
-          "pushNotificationToken": { "type": "string" },
-          "pushNotificationType": {
+          "uuid": {
+            "type": "string"
+          },
+          "phoneNumber": {
+            "type": "string"
+          },
+          "verifiedPhoneNumber": {
+            "type": "boolean"
+          },
+          "verifiedDonor": {
+            "type": "boolean"
+          },
+          "lastDonationDate": {
             "type": "string",
-            "enum": ["FIREBASE", "APPLE_PUSH_NOTIFICATION"]
+            "format": "date-time"
+          },
+          "pushNotificationToken": {
+            "type": "string"
+          },
+          "pushNotificationType": {
+            "$ref": "#/components/schemas/PushNotificationType"
           },
           "alertableHospitals": {
             "type": "array",
-            "items": { "$ref": "#/components/schemas/HospitalResponse" }
+            "items": {
+              "$ref": "#/components/schemas/HospitalResponse"
+            }
           },
-          "minimumSeverity": { "type": "integer", "format": "int32" },
+          "minimumSeverity": {
+            "type": "integer",
+            "format": "int32"
+          },
           "notificationChannels": {
             "type": "array",
-            "items": { "type": "string" }
+            "items": {
+              "type": "string"
+            }
           },
-          "creationDate": { "type": "string", "format": "date-time" },
-          "lastUpdatedDate": { "type": "string", "format": "date-time" }
-        }
-      },
-      "PhoneVerificationRequest": {
-        "type": "object",
-        "properties": {
-          "verificationCode": { "type": "string" },
-          "phoneNumber": { "type": "string" }
+          "creationDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastUpdatedDate": {
+            "type": "string",
+            "format": "date-time"
+          }
         }
       },
       "AlertCreationRequest": {
         "type": "object",
         "properties": {
-          "hospitalUuid": { "type": "string", "minLength": 1 },
-          "alertLevel": {
+          "hospitalUuid": {
             "type": "string",
-            "enum": ["ROUTINE", "URGENT", "LIFE_OR_DEATH"]
+            "minLength": 1
           },
-          "doctorMessage": { "type": "string" }
+          "alertLevel": {
+            "$ref": "#/components/schemas/AlertLevel"
+          },
+          "doctorMessage": {
+            "type": "string"
+          }
         },
-        "required": ["alertLevel", "hospitalUuid"]
+        "required": [
+          "alertLevel",
+          "hospitalUuid"
+        ]
       },
       "AlertResponse": {
         "type": "object",
-        "required": ["alertLevel", "creationDate", "hospital"],
+        "required": [
+          "alertLevel",
+          "creationDate",
+          "hospital"
+        ],
         "properties": {
-          "fulfilmentDate": { "type": "string", "format": "date-time" },
-          "alertLevel": {
+          "fulfilmentDate": {
             "type": "string",
-            "enum": ["ROUTINE", "URGENT", "LIFE_OR_DEATH"]
+            "format": "date-time"
           },
-          "doctorMessage": { "type": "string" },
-          "creationDate": { "type": "string", "format": "date-time" },
-          "hospital": { "$ref": "#/components/schemas/HospitalResponse" }
+          "alertLevel": {
+            "$ref": "#/components/schemas/AlertLevel"
+          },
+          "doctorMessage": {
+            "type": "string"
+          },
+          "creationDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "hospital": {
+            "$ref": "#/components/schemas/HospitalResponse"
+          }
         }
       },
       "PageAlertResponse": {
         "type": "object",
         "properties": {
-          "totalElements": { "type": "integer", "format": "int64" },
-          "totalPages": { "type": "integer", "format": "int32" },
-          "pageable": { "$ref": "#/components/schemas/PageableObject" },
-          "size": { "type": "integer", "format": "int32" },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
           "content": {
             "type": "array",
-            "items": { "$ref": "#/components/schemas/AlertResponse" }
+            "items": {
+              "$ref": "#/components/schemas/AlertResponse"
+            }
           },
-          "number": { "type": "integer", "format": "int32" },
-          "sort": { "$ref": "#/components/schemas/SortObject" },
-          "numberOfElements": { "type": "integer", "format": "int32" },
-          "first": { "type": "boolean" },
-          "last": { "type": "boolean" },
-          "empty": { "type": "boolean" }
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "empty": {
+            "type": "boolean"
+          }
         }
       },
       "PageableObject": {
         "type": "object",
         "properties": {
-          "paged": { "type": "boolean" },
-          "pageNumber": { "type": "integer", "format": "int32" },
-          "pageSize": { "type": "integer", "format": "int32" },
-          "offset": { "type": "integer", "format": "int64" },
-          "sort": { "$ref": "#/components/schemas/SortObject" },
-          "unpaged": { "type": "boolean" }
+          "paged": {
+            "type": "boolean"
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "unpaged": {
+            "type": "boolean"
+          }
         }
       },
       "SortObject": {
         "type": "object",
         "properties": {
-          "sorted": { "type": "boolean" },
-          "empty": { "type": "boolean" },
-          "unsorted": { "type": "boolean" }
+          "sorted": {
+            "type": "boolean"
+          },
+          "empty": {
+            "type": "boolean"
+          },
+          "unsorted": {
+            "type": "boolean"
+          }
+        }
+      },
+      "x-error-messages": {
+        "phoneNumber": {
+          "required": "please enter your phone number",
+          "minLength": "please enter a valid phone number"
+        },
+        "verificationCode": {
+          "required": "please enter your verification code",
+          "minLength": "please enter a valid verification code"
         }
       }
     }

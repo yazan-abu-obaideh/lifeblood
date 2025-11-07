@@ -9,7 +9,7 @@ public final class AlertLevelUtils {
 
     public static int toLevel(AlertLevel alertLevel) {
         return switch (alertLevel) {
-            case null -> 0;
+            case null -> -1;
             case ROUTINE -> 0;
             case URGENT -> 1;
             case LIFE_OR_DEATH -> 2;

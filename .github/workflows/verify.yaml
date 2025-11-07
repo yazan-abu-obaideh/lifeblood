@@ -39,6 +39,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
         working-directory: frontend/lifeblood-mobile
+      - name: Replace google-services # necessary for build to pass
+        run: mv example-google-services.json google-services.json
+        working-directory: frontend/lifeblood-mobile
       - name: Run TypeScript type check
         run: pnpm tsc --noEmit
         working-directory: frontend/lifeblood-mobile

@@ -1,6 +1,5 @@
-import { View, Text } from "react-native";
-import VolunteerSummary from "./VolunteerScreen/VolunteerSummary";
+import AlertsView from "./Screens/AlertScreen/AlertsView";
 
 export default function SignedInScreen() {
-  return <VolunteerSummary navigation={() => {}} />;
+  return <AlertsView />;
 }
