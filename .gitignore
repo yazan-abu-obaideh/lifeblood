@@ -13,3 +13,5 @@
 **/*-firebase-admin.json
 
 **/benchmark-suite
+
+**/generated-open-api
