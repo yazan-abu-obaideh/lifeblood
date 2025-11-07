@@ -48,7 +48,7 @@ public class AlertTest extends BaseTest {
 
         PageAlertResponse firstPage = getPageAlertResponse(Map.of());
         assertThat(firstPage.getNumber()).isEqualTo(0);
-        assertThat(firstPage.getContent().size()).isEqualTo(10);
+        assertThat(firstPage.getContent().size()).isEqualTo(10); // default page size
         PageAlertResponse secondPage = getPageAlertResponse(Map.of("pageNumber", "1", "pageSize", "1"));
         assertThat(secondPage.getNumber()).isEqualTo(1);
         assertThat(secondPage.getContent().size()).isEqualTo(1);
