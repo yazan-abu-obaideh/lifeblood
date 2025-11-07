@@ -3,6 +3,7 @@ import * as Notifications from "expo-notifications";
 import { firebase } from "@react-native-firebase/messaging";
 import firebaseConfig from "./google-services.json";
 import SignUp from "./SignUp";
+import SignedInScreen from "./SignedIn";
 
 const notificationsEnabled: string = process.env.NOTIFICATIONS_ENABLED || "";
 const messagingSenderId: string = process.env.MESSAGING_SENDER_ID || "";
@@ -64,13 +65,17 @@ export async function localGetMessaging() {
 
 export default function App() {
   const [token, setToken] = useState("");
-  const [signedIn, setSignedIn] = useState(false);
+  const [signedIn, setSignedIn] = useState(true);
 
   useEffect(() => {
     if ("TRUE" === notificationsEnabled.toUpperCase()) {
       return enableNotifications(setToken);
     }
   }, []);
+
+  if (signedIn) {
+    return <SignedInScreen />;
+  }
 
   return <SignUp />;
 }

@@ -7,6 +7,7 @@ const BASE_URLS: Record<string, string> = {
 };
 
 export const endpoints = {
+  volunteer: "/api/v1/volunteer/{uuid}",
   registerVolunteer: "/api/v1/volunteer",
   verifyCode: "/api/v1/volunteer/verify-phone-number",
   hospitals: "/api/v1/hospital",

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
+    "gen-open-api": "npx openapi-typescript ../../open-api/api-docs.json -o ./open-api.d.ts",
     "start": "expo start",
     "android": "expo run:android",
     "ios": "echo 'not yet supported'",
@@ -15,6 +16,7 @@
     "expo-dev-client": "^6.0.15",
     "expo-notifications": "^0.32.12",
     "expo-status-bar": "~3.0.8",
+    "openapi-typescript": "^7.10.1",
     "react": "19.1.0",
     "react-native": "0.81.4"
   },

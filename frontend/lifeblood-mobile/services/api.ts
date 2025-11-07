@@ -1,4 +1,5 @@
 import { config } from "../config/config";
+import { components } from '../open-api';
 
 export class ApiError extends Error {
   constructor(
@@ -11,7 +12,9 @@ export class ApiError extends Error {
   }
 }
 
-export const getHospitals = async (): Promise<Hospital[]> => {
+export type HospitalResponse = components["schemas"]["HospitalResponse"];
+
+export const getHospitals = async (): Promise<HospitalResponse[]> => {
   const url = `${config.apiBaseUrl}${config.endpoints.hospitals}`;
 
   console.log("[API] Fetching hospitals");
@@ -58,12 +61,6 @@ export const getHospitals = async (): Promise<Hospital[]> => {
     );
   }
 };
-
-export interface Hospital {
-  id: string;
-  uuid: string;
-  hospitalName: string;
-}
 
 interface SendVerificationCodeResponse {
   success: boolean;

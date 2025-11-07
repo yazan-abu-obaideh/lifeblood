@@ -1,6 +1,5 @@
 import { StyleSheet } from "react-native";
 
-
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -70,6 +69,8 @@ export const styles = StyleSheet.create({
     borderColor: "#ddd",
     borderRadius: 8,
     marginBottom: 12,
+    width: "70%",
+    alignSelf: "center",
   },
   hospitalItemSelected: {
     backgroundColor: "#000",

@@ -1,17 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { ScrollView, Text, TextInput, View, ActivityIndicator, TouchableOpacity } from "react-native";
-import { type Hospital, getHospitals, ApiError } from "./services/api";
+import {
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+  ActivityIndicator,
+  TouchableOpacity,
+} from "react-native";
+import { type HospitalResponse, getHospitals, ApiError } from "./services/api";
 import { styles } from "./styles";
 import { PhoneInputScreenProps } from "./types";
 import { validatePhoneNumber } from "./utils/validation";
 
-
 export const PhoneInputScreen: React.FC<PhoneInputScreenProps> = ({
-  sendVerificationCode, loading,
+  sendVerificationCode,
+  loading,
 }) => {
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [error, setError] = useState<string>("");
-  const [hospitals, setHospitals] = useState<Hospital[]>([]);
+  const [hospitals, setHospitals] = useState<HospitalResponse[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [loadingHospitals, setLoadingHospitals] = useState<boolean>(true);
   const [hospitalError, setHospitalError] = useState<string>("");
@@ -92,9 +99,10 @@ export const PhoneInputScreen: React.FC<PhoneInputScreenProps> = ({
         onChangeText={(text) => {
           setPhoneNumber(text);
           setError("");
-        } }
+        }}
         keyboardType="phone-pad"
-        editable={!loading} />
+        editable={!loading}
+      />
 
       <Text style={styles.sectionTitle}>Select Hospitals</Text>
       <Text style={styles.sectionSubtitle}>
