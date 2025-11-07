@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
-    "gen-open-api": "npx openapi-typescript ../../open-api/api-docs.json -o ./generated-open-api/open-api.d.ts",
+    "gen-open-api": "npx openapi-generator-cli generate --generator-name typescript -i ../../open-api/api-docs.json -o generated-open-api",
     "start": "expo start",
     "android": "expo run:android",
     "ios": "echo 'not yet supported'",
