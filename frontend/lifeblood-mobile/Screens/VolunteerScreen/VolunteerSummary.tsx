@@ -6,10 +6,10 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
-import { config } from "../config/config";
-import { HospitalResponse } from "../services/api";
+import { config } from "../../config/config";
+import { HospitalResponse } from "../../services/api";
 import { styles } from "./VolunteerSummaryStyles";
-import { components } from "../generated-open-api/open-api";
+import { components } from "../../generated-open-api/open-api";
 
 type VolunteerResponse = components["schemas"]["VolunteerResponse"];
 
@@ -17,10 +17,12 @@ interface ProfileHeaderProps {
   onSettingsPress: () => void;
 }
 
+type CurrentScreen = "summary" | "settings" | "alerts";
+
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({ onSettingsPress }) => {
   return (
     <View style={styles.header}>
-      <Text style={styles.headerTitle}>My Profile</Text>
+      <Text style={styles.headerTitle}>My Data</Text>
       <TouchableOpacity onPress={onSettingsPress} style={styles.settingsButton}>
         <Text style={styles.settingsIcon}>⚙️</Text>
       </TouchableOpacity>
@@ -180,11 +182,8 @@ const ErrorView: React.FC = () => {
   );
 };
 
-interface VolunteerSummaryProps {
-  navigation: any;
-}
-
-const VolunteerSummary: React.FC<VolunteerSummaryProps> = ({ navigation }) => {
+const VolunteerSummary: React.FC = () => {
+  const [currScreen, setCurrScreen] = useState<CurrentScreen>("summary");
   const [userData, setUserData] = useState<VolunteerResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -220,7 +219,7 @@ const VolunteerSummary: React.FC<VolunteerSummaryProps> = ({ navigation }) => {
   };
 
   const handleNavigateToSettings = (): void => {
-    navigation.navigate("Settings");
+    setCurrScreen("settings");
   };
 
   if (loading) {
