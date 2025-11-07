@@ -48,5 +48,5 @@ jobs:
         run: pnpm tsc --noEmit
         working-directory: frontend/lifeblood-mobile
       - name: Prebuild App
-        run: npx expo prebuild
+        run: npx expo prebuild --platform android
         working-directory: frontend/lifeblood-mobile
