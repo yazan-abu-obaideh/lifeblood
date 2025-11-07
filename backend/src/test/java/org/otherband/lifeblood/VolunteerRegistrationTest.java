@@ -1,8 +1,8 @@
 package org.otherband.lifeblood;
 
 import org.junit.jupiter.api.Test;
+import org.otherband.lifeblood.generated.model.NotificationChannel;
 import org.otherband.lifeblood.hospital.HospitalEntity;
-import org.otherband.lifeblood.notifications.NotificationChannel;
 import org.otherband.lifeblood.volunteer.PhoneNumberVerificationCodeEntity;
 import org.otherband.lifeblood.volunteer.PhoneVerificationRequest;
 import org.otherband.lifeblood.volunteer.VolunteerEntity;
