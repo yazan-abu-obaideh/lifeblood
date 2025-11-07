@@ -21,8 +21,8 @@ public class VolunteerController {
     }
 
     @GetMapping("/{uuid}")
-    public VolunteerResponse getData(@PathVariable String volunteerUuid) {
-        return mapper.toResponse(volunteerService.findActiveUserByUuid(volunteerUuid));
+    public VolunteerResponse getData(@PathVariable("uuid") String uuid) {
+        return mapper.toResponse(volunteerService.findActiveUserByUuid(uuid));
     }
 
     @PostMapping
