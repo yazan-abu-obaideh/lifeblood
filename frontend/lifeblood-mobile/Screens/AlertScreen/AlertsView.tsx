@@ -84,7 +84,7 @@ const AlertItem: React.FC<AlertItemProps> = ({ alert }) => {
 
       <View style={styles.alertFooter}>
         <Text style={styles.dateText}>
-          {formatDate(alert.creationDate.toDateString())}
+          {alert.creationDate.toString()}
         </Text>
         {isFulfilled && alert.fulfilmentDate && (
           <Text style={styles.fulfilledDate}>

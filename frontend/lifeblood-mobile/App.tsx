@@ -5,6 +5,7 @@ import firebaseConfig from "./google-services.json";
 import SignUp from "./SignUp";
 import SignedInScreen from "./SignedIn";
 
+
 const notificationsEnabled: string = process.env.NOTIFICATIONS_ENABLED || "";
 const messagingSenderId: string = process.env.MESSAGING_SENDER_ID || "";
 
@@ -15,11 +16,13 @@ if (messagingSenderId === "") {
 function enableNotifications(tokenSetter: (token: string) => void) {
   localGetMessaging().then(async (messaging) => {
     await messaging.registerDeviceForRemoteMessages();
+    console.debug("Device registered for messaging");
     const firebaseToken = await messaging.getToken();
     tokenSetter(firebaseToken);
-    console.log(`Firebase token received: ${firebaseToken}`);
+    console.debug(`Firebase token received: ${firebaseToken}`);
 
     messaging.onMessage(async (msg) => {
+      console.log("Notification received");
       await Notifications.scheduleNotificationAsync({
         content: {
           title: msg.notification?.title || "New",
@@ -57,11 +60,15 @@ export async function localGetMessaging() {
       messagingSenderId: process.env.MESSAGING_SENDER_ID,
       storageBucket: firebaseConfig.project_info.storage_bucket,
     });
-    return app.messaging();
+    console.debug("Firebase app initialized");
+    const messaging = app.messaging();
+    console.debug("Messaging obtained from firebase app");
+    return messaging;
   } catch (err) {
     throw Error("failed to init firebase: " + err);
   }
 }
+
 
 export default function App() {
   const [token, setToken] = useState("");
@@ -69,13 +76,18 @@ export default function App() {
 
   useEffect(() => {
     if ("TRUE" === notificationsEnabled.toUpperCase()) {
+      console.log("Notifications enabled...");
       return enableNotifications(setToken);
+    } else {
+      console.log("Notifications disabled...");
     }
   }, []);
 
+  let startScreen = <SignUp />;
+
   if (signedIn) {
-    return <SignedInScreen />;
+    startScreen = <SignedInScreen />;
   }
 
-  return <SignUp />;
+  return startScreen;
 }

@@ -10,6 +10,10 @@ import {
 import { styles } from "./VolunteerSettingsStyles";
 import { config } from "../../config/config";
 import { HospitalResponse, VolunteerResponse } from "../../generated-open-api";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../../SignedIn";
+import { useUser } from "../UserContext";
 
 enum SeverityLevel {
   ROUTINE = "ROUTINE",
@@ -288,13 +292,11 @@ const LoadingView: React.FC = () => {
   );
 };
 
-interface VolunteerSettingsProps {
-  setCurrScreen: (currScreen: string) => void;
-}
+const VolunteerSettings: React.FC = () => {
+  const user = useUser();
+  type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+  const navigation = useNavigation<NavigationProp>();
 
-const VolunteerSettings: React.FC<VolunteerSettingsProps> = ({
-  setCurrScreen,
-}) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
 
@@ -317,11 +319,14 @@ const VolunteerSettings: React.FC<VolunteerSettingsProps> = ({
 
   const fetchSettings = async (): Promise<void> => {
     try {
+      if (!user.userUuid) {
+        throw Error("User uuid not found");
+      }
       const token = "your-jwt-token";
       const response = await fetch(
         `${config.apiBaseUrl}${config.endpoints.volunteer.replace(
           "{uuid}",
-          "dce73dc4-85c4-4d17-a603-27ec6ce8734d"
+          user.userUuid
         )}`,
         {
           headers: {
@@ -421,7 +426,7 @@ const VolunteerSettings: React.FC<VolunteerSettingsProps> = ({
 
   return (
     <View style={styles.container}>
-      <SettingsHeader onBackPress={() => setCurrScreen("summary")} />
+      <SettingsHeader onBackPress={() => navigation.goBack()} />
 
       <ScrollView style={styles.scrollView}>
         <NotificationChannelsSection

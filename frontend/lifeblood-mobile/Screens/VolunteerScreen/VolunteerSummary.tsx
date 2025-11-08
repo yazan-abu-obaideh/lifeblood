@@ -9,6 +9,10 @@ import {
 import { config } from "../../config/config";
 import { styles } from "./VolunteerSummaryStyles";
 import { HospitalResponse, VolunteerResponse } from "../../generated-open-api";
+import { useUser } from "../UserContext";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../../SignedIn";
 
 interface ProfileHeaderProps {
   onSettingsPress: () => void;
@@ -70,6 +74,9 @@ const LastDonationSection: React.FC<LastDonationSectionProps> = ({
   lastDonationDate,
   isVerifiedDonor,
 }) => {
+  type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+  const navigation = useNavigation<NavigationProp>();
+
   const formatDate = (dateString: string | undefined): string => {
     if (!dateString) return "Never";
     const date = new Date(dateString);
@@ -155,10 +162,10 @@ interface EditProfileButtonProps {
   onPress: () => void;
 }
 
-const EditProfileButton: React.FC<EditProfileButtonProps> = ({ onPress }) => {
+const ViewAlertsButton: React.FC<EditProfileButtonProps> = ({ onPress }) => {
   return (
     <TouchableOpacity style={styles.editButton} onPress={onPress}>
-      <Text style={styles.editButtonText}>Edit Profile</Text>
+      <Text style={styles.editButtonText}>View Alerts</Text>
     </TouchableOpacity>
   );
 };
@@ -180,7 +187,10 @@ const ErrorView: React.FC = () => {
 };
 
 const VolunteerSummary: React.FC = () => {
-  const [currScreen, setCurrScreen] = useState<CurrentScreen>("summary");
+  const { userUuid } = useUser();
+  type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+  const navigation = useNavigation<NavigationProp>();
+
   const [userData, setUserData] = useState<VolunteerResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -190,11 +200,14 @@ const VolunteerSummary: React.FC = () => {
 
   const fetchUserData = async (): Promise<void> => {
     try {
+      if (!userUuid) {
+        throw Error(`User uuid is not present`);
+      }
       const token = "your-jwt-token";
       const response = await fetch(
         `${config.apiBaseUrl}${config.endpoints.volunteer.replace(
           "{uuid}",
-          "dce73dc4-85c4-4d17-a603-27ec6ce8734d"
+          userUuid
         )}`,
         {
           headers: {
@@ -215,10 +228,6 @@ const VolunteerSummary: React.FC = () => {
     }
   };
 
-  const handleNavigateToSettings = (): void => {
-    setCurrScreen("settings");
-  };
-
   if (loading) {
     return <LoadingView />;
   }
@@ -229,7 +238,7 @@ const VolunteerSummary: React.FC = () => {
 
   return (
     <ScrollView style={styles.container}>
-      <ProfileHeader onSettingsPress={handleNavigateToSettings} />
+      <ProfileHeader onSettingsPress={() => navigation.navigate("settings")} />
 
       <PhoneNumberSection
         phoneNumber={userData.phoneNumber}
@@ -243,7 +252,7 @@ const VolunteerSummary: React.FC = () => {
 
       <HospitalsSection hospitals={userData.alertableHospitals ?? []} />
 
-      <EditProfileButton onPress={handleNavigateToSettings} />
+      <ViewAlertsButton onPress={() => navigation.navigate("alerts")} />
     </ScrollView>
   );
 };

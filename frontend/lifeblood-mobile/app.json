@@ -45,6 +45,9 @@
     ],
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "ios": {
+      "bundleIdentifier": "org.otherband.lifeblood"
     }
   }
 }
