@@ -11,9 +11,9 @@ import { styles } from "./VolunteerSettingsStyles";
 import { config } from "../../config/config";
 import { HospitalResponse, VolunteerResponse } from "../../generated-open-api";
 import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../SignedIn";
 import { useUser } from "../UserContext";
+import { NavigationProp } from "../navigationUtils";
+import { getHospitals } from "../../services/api";
 
 enum SeverityLevel {
   ROUTINE = "ROUTINE",
@@ -217,6 +217,21 @@ const HospitalsSection: React.FC<HospitalsSectionProps> = ({
   selectedHospitals,
   onHospitalsChange,
 }) => {
+  const [allHsopitals, setAllHospitals] = useState<HospitalResponse[]>([]);
+  const [selectedUuids, setSelectedUuids] = useState<string[]>(
+    selectedHospitals.map((hospital) => hospital.uuid)
+  );
+
+  useEffect(() => {
+    getHospitals().then((hospitals) => setAllHospitals(hospitals));
+  }, []);
+
+  useEffect(() => {
+    onHospitalsChange(
+      allHsopitals.filter((hospital) => selectedUuids.includes(hospital.uuid))
+    );
+  }, [selectedUuids]);
+
   return (
     <View style={styles.section}>
       <View style={styles.sectionHeader}>
@@ -233,24 +248,39 @@ const HospitalsSection: React.FC<HospitalsSectionProps> = ({
         activeOpacity={0.7}
       >
         <Text style={styles.hospitalSelectorText}>
-          {selectedHospitals.length > 0
-            ? `${selectedHospitals.length} hospital(s) selected`
+          {selectedUuids.length > 0
+            ? `${selectedUuids.length} hospital(s) selected`
             : "Select hospitals"}
         </Text>
         <Text style={styles.chevron}>▼</Text>
       </TouchableOpacity>
 
-      {selectedHospitals.length > 0 && (
+      {
         <View style={styles.selectedHospitalsList}>
-          {selectedHospitals.map((hospital) => (
-            <View key={hospital.uuid} style={styles.selectedHospitalItem}>
-              <Text style={styles.selectedHospitalName}>
-                {hospital.hospitalName}
-              </Text>
-            </View>
-          ))}
+          {allHsopitals.map((hospital) => {
+            const contained = selectedUuids.includes(hospital.uuid);
+            return (
+              <TouchableOpacity
+                key={hospital.uuid}
+                style={styles.selectedHospitalItem}
+                onPress={() => {
+                  if (contained) {
+                    setSelectedUuids(
+                      selectedUuids.filter((uuid) => uuid !== hospital.uuid)
+                    );
+                  } else {
+                    setSelectedUuids([...selectedUuids, hospital.uuid]);
+                  }
+                }}
+              >
+                <Text style={styles.selectedHospitalName}>
+                  {hospital.hospitalName + (contained ? " (selected)" : "")}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
-      )}
+      }
     </View>
   );
 };
@@ -294,7 +324,6 @@ const LoadingView: React.FC = () => {
 
 const VolunteerSettings: React.FC = () => {
   const user = useUser();
-  type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
   const navigation = useNavigation<NavigationProp>();
 
   const [loading, setLoading] = useState<boolean>(true);

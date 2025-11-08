@@ -11,8 +11,7 @@ import { styles } from "./VolunteerSummaryStyles";
 import { HospitalResponse, VolunteerResponse } from "../../generated-open-api";
 import { useUser } from "../UserContext";
 import { useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../SignedIn";
+import { NavigationProp } from "../navigationUtils";
 
 interface ProfileHeaderProps {
   onSettingsPress: () => void;
@@ -74,9 +73,6 @@ const LastDonationSection: React.FC<LastDonationSectionProps> = ({
   lastDonationDate,
   isVerifiedDonor,
 }) => {
-  type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
-  const navigation = useNavigation<NavigationProp>();
-
   const formatDate = (dateString: string | undefined): string => {
     if (!dateString) return "Never";
     const date = new Date(dateString);
@@ -188,7 +184,6 @@ const ErrorView: React.FC = () => {
 
 const VolunteerSummary: React.FC = () => {
   const { userUuid } = useUser();
-  type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
   const navigation = useNavigation<NavigationProp>();
 
   const [userData, setUserData] = useState<VolunteerResponse | null>(null);

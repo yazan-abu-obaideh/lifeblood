@@ -1,5 +1,5 @@
 import { config } from "../config/config";
-import { HospitalResponse } from "../generated-open-api";
+import { HospitalResponse, PageAlertResponse } from "../generated-open-api";
 
 export class ApiError extends Error {
   constructor(
@@ -11,6 +11,13 @@ export class ApiError extends Error {
     this.name = "ApiError";
   }
 }
+
+export const getAlerts = async (
+  params: URLSearchParams
+): Promise<PageAlertResponse> => {
+  const response = await fetch(`${config.apiBaseUrl}/api/v1/alert?${params}`);
+  return response.json();
+};
 
 export const getHospitals = async (): Promise<HospitalResponse[]> => {
   const url = `${config.apiBaseUrl}${config.endpoints.hospitals}`;

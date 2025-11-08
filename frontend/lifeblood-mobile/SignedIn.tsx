@@ -6,12 +6,7 @@ import VolunteerSummary from "./Screens/VolunteerScreen/VolunteerSummary";
 import VolunteerSettings from "./Screens/VolunteerScreen/VolunteerSettings";
 import { useState } from "react";
 import { UserContext } from "./Screens/UserContext";
-
-export type RootStackParamList = {
-  summary: undefined;
-  alerts: undefined;
-  settings: undefined;
-};
+import { RootStackParamList } from "./Screens/navigationUtils";
 
 const stack = createNativeStackNavigator<RootStackParamList>();
 

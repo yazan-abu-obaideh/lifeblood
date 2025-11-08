@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
   ActivityIndicator,
+  FlatList,
   RefreshControl,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
-import { config } from "../../config/config";
-import { styles } from "./AlertsViewStyles";
 import { AlertResponse, PageAlertResponse } from "../../generated-open-api";
+import { getAlerts } from "../../services/api";
+import { styles } from "./AlertsViewStyles";
 
 interface AlertItemProps {
   alert: AlertResponse;
@@ -83,12 +83,10 @@ const AlertItem: React.FC<AlertItemProps> = ({ alert }) => {
       )}
 
       <View style={styles.alertFooter}>
-        <Text style={styles.dateText}>
-          {alert.creationDate.toString()}
-        </Text>
+        <Text style={styles.dateText}>{alert.creationDate.toString()}</Text>
         {isFulfilled && alert.fulfilmentDate && (
           <Text style={styles.fulfilledDate}>
-            Fulfilled: {formatDate(alert.fulfilmentDate.toDateString())}
+            Fulfilled: {formatDate(alert.fulfilmentDate.toString())}
           </Text>
         )}
       </View>
@@ -220,10 +218,7 @@ const AlertsView: React.FC = () => {
         activeOnly: activeOnly.toString(),
       });
 
-      const response = await fetch(
-        `${config.apiBaseUrl}/api/v1/alert?${params}`
-      );
-      const data: PageAlertResponse = await response.json();
+      const data: PageAlertResponse = await getAlerts(params);
 
       setAlerts(data.content || []);
       setTotalPages(data.totalPages || 0);
