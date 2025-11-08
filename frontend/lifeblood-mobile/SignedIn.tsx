@@ -30,9 +30,27 @@ export default function SignedInScreen() {
     >
       <NavigationContainer>
         <stack.Navigator initialRouteName="summary">
-          <stack.Screen name="summary" component={VolunteerSummary} />
-          <stack.Screen name="alerts" component={AlertsView} />
-          <stack.Screen name="settings" component={VolunteerSettings} />
+          <stack.Screen
+            name="summary"
+            component={VolunteerSummary}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <stack.Screen
+            name="alerts"
+            component={AlertsView}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <stack.Screen
+            name="settings"
+            component={VolunteerSettings}
+            options={{
+              headerShown: false,
+            }}
+          />
         </stack.Navigator>
       </NavigationContainer>
     </UserContext.Provider>
