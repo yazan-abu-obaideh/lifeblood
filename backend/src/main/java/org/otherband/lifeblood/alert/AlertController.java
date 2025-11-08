@@ -52,11 +52,9 @@ public class AlertController {
     }
 
     @GetMapping
-    public PageAlertResponse getAlerts(
-            @RequestParam(required = false, defaultValue = "10", name = "pageSize") int pageSize,
-            @RequestParam(required = false, defaultValue = "0", name = "pageNumber") int pageNumber,
-            @RequestParam(required = false, name = "activeOnly") boolean activeOnly
-    ) {
+    public PageAlertResponse getAlerts(@RequestParam(required = false, defaultValue = "10", name = "pageSize") int pageSize,
+                                       @RequestParam(required = false, defaultValue = "0", name = "pageNumber") int pageNumber,
+                                       @RequestParam(required = false, name = "activeOnly") boolean activeOnly) {
         final Page<AlertEntity> result;
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         if (activeOnly) {

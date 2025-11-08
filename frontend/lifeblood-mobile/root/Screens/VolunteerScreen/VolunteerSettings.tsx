@@ -195,20 +195,11 @@ const HospitalsSection: React.FC<HospitalsSectionProps> = ({
   selectedHospitals,
   onHospitalsChange,
 }) => {
-  const [allHsopitals, setAllHospitals] = useState<HospitalResponse[]>([]);
-  const [selectedUuids, setSelectedUuids] = useState<string[]>(
-    selectedHospitals.map((hospital) => hospital.uuid)
-  );
+  const [allHospitals, setAllHospitals] = useState<HospitalResponse[]>([]);
 
   useEffect(() => {
     getHospitals().then((hospitals) => setAllHospitals(hospitals));
   }, []);
-
-  useEffect(() => {
-    onHospitalsChange(
-      allHsopitals.filter((hospital) => selectedUuids.includes(hospital.uuid))
-    );
-  }, [selectedUuids]);
 
   return (
     <View style={styles.section}>
@@ -226,8 +217,8 @@ const HospitalsSection: React.FC<HospitalsSectionProps> = ({
         activeOpacity={0.7}
       >
         <Text style={styles.hospitalSelectorText}>
-          {selectedUuids.length > 0
-            ? `${selectedUuids.length} hospital(s) selected`
+          {selectedHospitals.length > 0
+            ? `${selectedHospitals.length} hospital(s) selected`
             : "Select hospitals"}
         </Text>
         <Text style={styles.chevron}>▼</Text>
@@ -235,19 +226,24 @@ const HospitalsSection: React.FC<HospitalsSectionProps> = ({
 
       {
         <View style={styles.selectedHospitalsList}>
-          {allHsopitals.map((hospital) => {
-            const contained = selectedUuids.includes(hospital.uuid);
+          {allHospitals.map((hospital) => {
+            const contained =
+              selectedHospitals.filter(
+                (aHospital) => hospital.uuid === aHospital.uuid
+              ).length > 0;
             return (
               <TouchableOpacity
                 key={hospital.uuid}
                 style={styles.selectedHospitalItem}
                 onPress={() => {
                   if (contained) {
-                    setSelectedUuids(
-                      selectedUuids.filter((uuid) => uuid !== hospital.uuid)
+                    onHospitalsChange(
+                      selectedHospitals.filter(
+                        (aHospital) => aHospital.uuid !== hospital.uuid
+                      )
                     );
                   } else {
-                    setSelectedUuids([...selectedUuids, hospital.uuid]);
+                    onHospitalsChange([...selectedHospitals, hospital]);
                   }
                 }}
               >
