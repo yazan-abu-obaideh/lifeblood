@@ -2,9 +2,8 @@ import React, { useEffect, useState } from "react";
 import * as Notifications from "expo-notifications";
 import { firebase } from "@react-native-firebase/messaging";
 import firebaseConfig from "./google-services.json";
-import SignUp from "./SignUp";
-import SignedInScreen from "./SignedIn";
-
+import SignUp from "./root/SignUp";
+import SignedInScreen from "./root/SignedIn";
 
 const notificationsEnabled: string = process.env.NOTIFICATIONS_ENABLED || "";
 const messagingSenderId: string = process.env.MESSAGING_SENDER_ID || "";
@@ -68,7 +67,6 @@ export async function localGetMessaging() {
     throw Error("failed to init firebase: " + err);
   }
 }
-
 
 export default function App() {
   const [token, setToken] = useState("");
