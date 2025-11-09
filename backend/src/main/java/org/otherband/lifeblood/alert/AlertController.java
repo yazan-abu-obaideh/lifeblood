@@ -13,6 +13,7 @@ import org.otherband.lifeblood.notifications.push.PushNotification;
 import org.otherband.lifeblood.notifications.push.PushNotificationRepository;
 import org.otherband.lifeblood.notifications.whatsapp.WhatsAppMessageEntity;
 import org.otherband.lifeblood.notifications.whatsapp.WhatsAppMessageRepository;
+import org.otherband.lifeblood.validations.SimpleValidator;
 import org.otherband.lifeblood.volunteer.VolunteerEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -67,7 +68,9 @@ public class AlertController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public AlertResponse createAlert(@RequestBody @Valid AlertCreationRequest request) {
+    public AlertResponse createAlert(@RequestBody AlertCreationRequest request) {
+        SimpleValidator.INSTANCE.validate(request);
+
         AlertEntity alert = mapper.toEntity(request);
         alert.setHospital(hospitalJpaRepository.findByUuid(request.getHospitalUuid())
                 .orElseThrow(() -> new UserException("Hospital with uuid [%s] does not exist"))

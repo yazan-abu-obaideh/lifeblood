@@ -1,6 +1,7 @@
 package org.otherband.lifeblood.validations;
 
 import org.otherband.lifeblood.UserException;
+import org.otherband.lifeblood.generated.model.AlertCreationRequest;
 import org.otherband.lifeblood.generated.model.VolunteerRegistrationRequest;
 
 import java.util.ArrayList;
@@ -20,7 +21,19 @@ public enum SimpleValidator {
         if (object instanceof VolunteerRegistrationRequest volunteerRequest) {
             validate(volunteerRequest, violationMessages);
         }
+        if (object instanceof AlertCreationRequest request) {
+            validate(request, violationMessages);
+        }
         if (!violationMessages.isEmpty()) throw new UserException(String.join(",", violationMessages));
+    }
+
+    private void validate(AlertCreationRequest request, ArrayList<String> violationMessages) {
+        if (Objects.isNull(request.getAlertLevel())) {
+            violationMessages.add("Alert level must be set");
+        }
+        if (isBlank(request.getHospitalUuid())) {
+            violationMessages.add("Hospital uuid must be provided");
+        }
     }
 
     private static void validate(VolunteerRegistrationRequest volunteerRequest, ArrayList<String> violationMessages) {

@@ -1,5 +1,6 @@
 package org.otherband.lifeblood;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -35,12 +36,26 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class AlertTest extends BaseTest {
 
     @Test
+    void invalidAlertRequest() throws Exception {
+        AlertCreationRequest alertRequest = new AlertCreationRequest();
+        String responseString = mockMvc.perform(
+                        MockMvcRequestBuilders.post(ALERT_API)
+                                .contentType("application/json")
+                                .content(objectMapper.writeValueAsString(alertRequest))
+                )
+                .andExpect(status().isBadRequest())
+                .andReturn()
+                .getResponse().getContentAsString();
+        ApplicationErrorHandler.ErrorResponse errorResponse =
+                objectMapper.readValue(responseString, ApplicationErrorHandler.ErrorResponse.class);
+        assertThat(errorResponse.errorMessage()).contains("Alert level must be set");
+        assertThat(errorResponse.errorMessage()).contains("Hospital uuid must be provided");
+    }
+
+    @Test
     void getPaginatedAlerts() throws Exception {
         HospitalEntity[] hospitals = fetchAvailableHospitals();
         for (int i = 0; i < 10; i++) {
-            //                     hospitals[0].getUuid(),
-            //                    AlertLevel.ROUTINE,
-            //                    ""
             AlertCreationRequest creationRequest = new AlertCreationRequest();
             creationRequest.setHospitalUuid(hospitals[0].getUuid());
             creationRequest.setAlertLevel(AlertLevel.ROUTINE);
@@ -116,19 +131,19 @@ public class AlertTest extends BaseTest {
     }
 
     @ParameterizedTest
-    @MethodSource("doctorMessage")
-    void createAlert(String doctorMessage) throws Exception {
+    @MethodSource("internationalDoctorMessages")
+    void createAlert(String internationalDoctorMessage) throws Exception {
         HospitalEntity[] hospitals = fetchAvailableHospitals();
         AlertCreationRequest creationRequest = new AlertCreationRequest();
         creationRequest.setAlertLevel(AlertLevel.ROUTINE);
         creationRequest.setHospitalUuid(hospitals[0].getUuid());
-        creationRequest.setDoctorMessage(doctorMessage);
+        creationRequest.setDoctorMessage(internationalDoctorMessage);
         AlertEntity alert = createAlert(creationRequest);
 
         assertThat(alert.getAlertLevel()).isEqualTo(AlertLevel.ROUTINE);
         assertThat(alert.getHospital()).isNotNull();
         assertThat(alert.getHospital().getUuid()).isEqualTo(creationRequest.getHospitalUuid());
-        assertThat(alert.getDoctorMessage()).isEqualTo(doctorMessage);
+        assertThat(alert.getDoctorMessage()).isEqualTo(internationalDoctorMessage);
 
     }
 
@@ -156,8 +171,7 @@ public class AlertTest extends BaseTest {
     private static void findMatchingInvocation(VerificationData verificationData, Predicate<Invocation> invocationFilter) {
         verificationData.getAllInvocations().stream().filter(invocationFilter)
                 .findFirst()
-                .orElseThrow(() -> new AssertionError("Push notification not sent"))
-        ;
+                .orElseThrow(() -> new AssertionError("Push notification not sent"));
     }
 
     private static List<String> getPushNotificationTokens(List<VolunteerEntity> startingVolunteers) {
@@ -177,7 +191,7 @@ public class AlertTest extends BaseTest {
                 .toList();
     }
 
-    public Stream<String> doctorMessage() {
+    public Stream<String> internationalDoctorMessages() {
         return Stream.of(
                 "B- blood expected to run out within 2 weeks",
                 "حالة خطيرة في المستشفى"
