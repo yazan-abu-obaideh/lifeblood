@@ -1,6 +1,5 @@
 package org.otherband.lifeblood.alert;
 
-import jakarta.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.otherband.lifeblood.ApplicationMapper;
 import org.otherband.lifeblood.UserException;

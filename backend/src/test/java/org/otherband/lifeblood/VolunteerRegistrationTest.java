@@ -29,8 +29,9 @@ public class VolunteerRegistrationTest extends BaseTest {
                 .andExpect(status().isBadRequest())
                 .andReturn()
                 .getResponse().getContentAsString();
-        assertThat(errorResponse).contains("please enter your phone number");
-        assertThat(errorResponse).contains("please choose at least one hospital of interest");
+        assertThat(errorResponse)
+                .contains("please enter your phone number")
+                .contains("please choose at least one hospital of interest");
     }
 
     @Test

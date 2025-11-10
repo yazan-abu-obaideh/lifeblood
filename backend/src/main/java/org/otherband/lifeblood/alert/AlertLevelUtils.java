@@ -3,9 +3,7 @@ package org.otherband.lifeblood.alert;
 import org.otherband.lifeblood.generated.model.AlertLevel;
 
 public final class AlertLevelUtils {
-    private AlertLevelUtils() {
-
-    }
+    private AlertLevelUtils() {}
 
     public static int toLevel(AlertLevel alertLevel) {
         return switch (alertLevel) {
@@ -25,11 +23,4 @@ public final class AlertLevelUtils {
         };
     }
 
-    public static int minimumSeverity() {
-        return 0;
-    }
-
-    public static int maximumSeverity() {
-        return AlertLevel.values().length;
-    }
 }

@@ -39,6 +39,14 @@
           }
         }
       },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "errorMessage": {
+            "type": "string"
+          }
+        }
+      },
       "VolunteerRegistrationRequest": {
         "type": "object",
         "properties": {

@@ -1,6 +1,5 @@
 package org.otherband.lifeblood;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -9,10 +8,7 @@ import org.junit.platform.commons.util.StringUtils;
 import org.mockito.internal.verification.api.VerificationData;
 import org.mockito.invocation.Invocation;
 import org.otherband.lifeblood.alert.AlertEntity;
-import org.otherband.lifeblood.generated.model.AlertCreationRequest;
-import org.otherband.lifeblood.generated.model.AlertLevel;
-import org.otherband.lifeblood.generated.model.NotificationChannel;
-import org.otherband.lifeblood.generated.model.PageAlertResponse;
+import org.otherband.lifeblood.generated.model.*;
 import org.otherband.lifeblood.hospital.HospitalEntity;
 import org.otherband.lifeblood.jobs.AsyncNotificationService;
 import org.otherband.lifeblood.notifications.push.PushNotification;
@@ -46,10 +42,11 @@ public class AlertTest extends BaseTest {
                 .andExpect(status().isBadRequest())
                 .andReturn()
                 .getResponse().getContentAsString();
-        ApplicationErrorHandler.ErrorResponse errorResponse =
-                objectMapper.readValue(responseString, ApplicationErrorHandler.ErrorResponse.class);
-        assertThat(errorResponse.errorMessage()).contains("Alert level must be set");
-        assertThat(errorResponse.errorMessage()).contains("Hospital uuid must be provided");
+        ErrorResponse errorResponse =
+                objectMapper.readValue(responseString, ErrorResponse.class);
+        assertThat(errorResponse.getErrorMessage())
+                .contains("Alert level must be set")
+                .contains("Hospital uuid must be provided");
     }
 
     @Test
@@ -69,19 +66,6 @@ public class AlertTest extends BaseTest {
         PageAlertResponse secondPage = getPageAlertResponse(Map.of("pageNumber", "1", "pageSize", "1"));
         assertThat(secondPage.getNumber()).isEqualTo(1);
         assertThat(secondPage.getContent().size()).isEqualTo(1);
-    }
-
-    private PageAlertResponse getPageAlertResponse(Map<String, String> queryParams) throws Exception {
-        String responseString = mockMvc.perform(
-                        MockMvcRequestBuilders.get(ALERT_API)
-                                .contentType("application/json")
-                                .queryParams(MultiValueMap.fromSingleValue(queryParams))
-                )
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-
-        return objectMapper.readValue(responseString, new TypeReference<>() {
-        });
     }
 
     @Test
@@ -145,6 +129,19 @@ public class AlertTest extends BaseTest {
         assertThat(alert.getHospital().getUuid()).isEqualTo(creationRequest.getHospitalUuid());
         assertThat(alert.getDoctorMessage()).isEqualTo(internationalDoctorMessage);
 
+    }
+
+    private PageAlertResponse getPageAlertResponse(Map<String, String> queryParams) throws Exception {
+        String responseString = mockMvc.perform(
+                        MockMvcRequestBuilders.get(ALERT_API)
+                                .contentType("application/json")
+                                .queryParams(MultiValueMap.fromSingleValue(queryParams))
+                )
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        return objectMapper.readValue(responseString, new TypeReference<>() {
+        });
     }
 
     private AlertEntity createAlert(AlertCreationRequest creationRequest) throws Exception {
