@@ -3,6 +3,7 @@ package org.otherband.lifeblood;
 public final class ProfileConstants {
     public static final String PRODUCTION = "production";
     public static final String DEVELOPMENT = "dev";
+    public static final String TEST = "test";
 
     private ProfileConstants() {}
 }

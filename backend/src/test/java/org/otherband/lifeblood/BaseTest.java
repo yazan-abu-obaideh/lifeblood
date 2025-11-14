@@ -36,7 +36,12 @@ import static org.otherband.lifeblood.hospital.HospitalController.HOSPITAL_API;
 import static org.otherband.lifeblood.volunteer.VolunteerController.VOLUNTEER_API;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(properties = {"spring.profiles.active=test", "app.config.jobs.enabled=false"})
+@SpringBootTest(properties = {
+        "spring.profiles.active=test",
+        "app.config.jobs.enabled=false",
+        "jwt.secret.key=SOME_TOP_SECRET_JWT_KEY_THAT_MUST_NOT_BE_LEAKED",
+        "jwt.token.expiration.minutes=15"
+})
 @AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Execution(ExecutionMode.CONCURRENT)

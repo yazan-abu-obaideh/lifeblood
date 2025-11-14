@@ -1,5 +1,6 @@
 package org.otherband.lifeblood.auth;
 
+import org.otherband.lifeblood.ProfileConstants;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -7,7 +8,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 
-@Profile("dev | test")
+@Profile(ProfileConstants.DEVELOPMENT + " | " + ProfileConstants.TEST)
 @Configuration
 public class SecurityDisabledConfig {
     @Bean

@@ -18,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -52,6 +53,7 @@ public class AlertController {
     }
 
     @GetMapping
+    @PreAuthorize("permitAll()")
     public PageAlertResponse getAlerts(@RequestParam(required = false, defaultValue = "10", name = "pageSize") int pageSize,
                                        @RequestParam(required = false, defaultValue = "0", name = "pageNumber") int pageNumber,
                                        @RequestParam(required = false, name = "activeOnly") boolean activeOnly) {
@@ -67,6 +69,7 @@ public class AlertController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('DOCTOR')")
     public AlertResponse createAlert(@RequestBody AlertCreationRequest request) {
         SimpleValidator.INSTANCE.validate(request);
 
