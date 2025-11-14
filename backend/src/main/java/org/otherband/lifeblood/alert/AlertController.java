@@ -3,6 +3,7 @@ package org.otherband.lifeblood.alert;
 import org.apache.commons.lang3.StringUtils;
 import org.otherband.lifeblood.ApplicationMapper;
 import org.otherband.lifeblood.UserException;
+import org.otherband.lifeblood.auth.RoleConstants;
 import org.otherband.lifeblood.generated.model.AlertCreationRequest;
 import org.otherband.lifeblood.generated.model.AlertResponse;
 import org.otherband.lifeblood.generated.model.NotificationChannel;
@@ -53,7 +54,7 @@ public class AlertController {
     }
 
     @GetMapping
-    @PreAuthorize("permitAll()")
+    @PreAuthorize(RoleConstants.ALLOW_ALL)
     public PageAlertResponse getAlerts(@RequestParam(required = false, defaultValue = "10", name = "pageSize") int pageSize,
                                        @RequestParam(required = false, defaultValue = "0", name = "pageNumber") int pageNumber,
                                        @RequestParam(required = false, name = "activeOnly") boolean activeOnly) {
@@ -69,7 +70,7 @@ public class AlertController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasRole('doctor')")
+    @PreAuthorize(RoleConstants.HAS_DOCTOR_ROLE)
     public AlertResponse createAlert(@RequestBody AlertCreationRequest request) {
         SimpleValidator.INSTANCE.validate(request);
 

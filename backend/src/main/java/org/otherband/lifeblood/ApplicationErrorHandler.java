@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.otherband.lifeblood.generated.model.ErrorResponse;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -17,6 +18,13 @@ public class ApplicationErrorHandler {
 
     @ExceptionHandler(UserAuthException.class)
     public ResponseEntity<ErrorResponse> handleException(UserAuthException userAuthException) {
+        log.error("Authentication error", userAuthException);
+        return ResponseEntity.status(401).body(toErrorResponse(userAuthException.getMessage()));
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleException(AuthorizationDeniedException userAuthException) {
+        log.error("Authentication error", userAuthException);
         return ResponseEntity.status(401).body(toErrorResponse(userAuthException.getMessage()));
     }
 

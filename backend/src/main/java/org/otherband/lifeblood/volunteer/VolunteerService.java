@@ -5,6 +5,7 @@ import org.otherband.lifeblood.TimeService;
 import org.otherband.lifeblood.UserException;
 import org.otherband.lifeblood.auth.AuthEntity;
 import org.otherband.lifeblood.auth.AuthenticationJpaRepository;
+import org.otherband.lifeblood.auth.RoleConstants;
 import org.otherband.lifeblood.generated.model.NotificationChannel;
 import org.otherband.lifeblood.generated.model.PhoneVerificationRequest;
 import org.otherband.lifeblood.generated.model.VolunteerRegistrationRequest;
@@ -80,7 +81,7 @@ public class VolunteerService {
         authenticationRepository.save(AuthEntity.builder()
                         .username(entity.getPhoneNumber())
                         .hashedPassword(passwordEncoder.encode(volunteerRequest.getPassword()))
-                        .roles(Set.of())
+                        .roles(Set.of(RoleConstants.VOLUNTEER_ROLE))
                 .build());
 
         return volunteerJpaRepository.save(entity);

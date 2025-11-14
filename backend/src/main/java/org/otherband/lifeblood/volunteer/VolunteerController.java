@@ -1,6 +1,7 @@
 package org.otherband.lifeblood.volunteer;
 
 import org.otherband.lifeblood.ApplicationMapper;
+import org.otherband.lifeblood.auth.RoleConstants;
 import org.otherband.lifeblood.generated.model.PhoneVerificationRequest;
 import org.otherband.lifeblood.generated.model.VolunteerRegistrationRequest;
 import org.otherband.lifeblood.generated.model.VolunteerResponse;
@@ -24,21 +25,21 @@ public class VolunteerController {
     }
 
     @GetMapping("/{uuid}")
-    @PreAuthorize("hasRole('volunteer')")
+    @PreAuthorize(RoleConstants.HAS_VOLUNTEER_ROLE)
     public VolunteerResponse getData(@PathVariable("uuid") String uuid) {
         return mapper.toResponse(volunteerService.findActiveUserByUuid(uuid));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("permitAll()")
+    @PreAuthorize(RoleConstants.ALLOW_ALL)
     public VolunteerResponse registerVolunteer(@RequestBody VolunteerRegistrationRequest volunteerRequest) {
         SimpleValidator.INSTANCE.validate(volunteerRequest);
         return mapper.toResponse(volunteerService.registerVolunteer(volunteerRequest));
     }
 
     @PostMapping("/verify-phone-number")
-    @PreAuthorize("hasRole('volunteer')")
+    @PreAuthorize(RoleConstants.ALLOW_ALL)
     public void verifyPhoneNumber(@RequestBody PhoneVerificationRequest request) {
         volunteerService.verifyPhoneNumber(request);
     }

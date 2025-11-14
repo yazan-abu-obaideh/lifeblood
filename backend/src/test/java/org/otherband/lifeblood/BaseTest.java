@@ -2,12 +2,17 @@ package org.otherband.lifeblood;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
+import lombok.SneakyThrows;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hibernate.AssertionFailure;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.otherband.lifeblood.auth.AuthEntity;
+import org.otherband.lifeblood.auth.AuthenticationJpaRepository;
+import org.otherband.lifeblood.auth.RoleConstants;
+import org.otherband.lifeblood.generated.model.LoginRequest;
 import org.otherband.lifeblood.generated.model.PushNotificationType;
 import org.otherband.lifeblood.generated.model.VolunteerRegistrationRequest;
 import org.otherband.lifeblood.hospital.HospitalEntity;
@@ -23,6 +28,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -31,8 +37,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.otherband.lifeblood.auth.AuthController.AUTH_API;
 import static org.otherband.lifeblood.hospital.HospitalController.HOSPITAL_API;
 import static org.otherband.lifeblood.volunteer.VolunteerController.VOLUNTEER_API;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -49,6 +58,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public abstract class BaseTest {
 
     public static final Faker FAKER = new Faker();
+    public static final String DOCTOR_USERNAME = "doctor_user";
+    public static final String DOCTOR_PASSWORD = randomPassword();
+
+    public static final AtomicBoolean SETUP_DONE = new AtomicBoolean();
 
     @Autowired
     public MockMvc mockMvc;
@@ -74,17 +87,57 @@ public abstract class BaseTest {
     @Autowired
     public PushNotificationRepository pushNotificationRepository;
 
+    @Autowired
+    private AuthenticationJpaRepository authenticationJpaRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Value("classpath:hospitals.json")
     private Resource hospitals;
 
     @BeforeAll
     public void initialData() throws IOException {
-        String hospitals = this.hospitals.getContentAsString(StandardCharsets.UTF_8);
-        HospitalEntity[] hospitalEntities = objectMapper.readValue(hospitals, HospitalEntity[].class);
-        hospitalJpaRepository.saveAll(Arrays.asList(hospitalEntities));
+        doSetup(this.hospitals, hospitalJpaRepository, authenticationJpaRepository, passwordEncoder, objectMapper);
     }
 
-    public String randomPassword() {
+    private static synchronized void doSetup(Resource hospitals,
+                         HospitalJpaRepository hospitalJpaRepository,
+                         AuthenticationJpaRepository authenticationJpaRepository,
+                         PasswordEncoder passwordEncoder,
+                         ObjectMapper objectMapper) throws IOException {
+          /* because the test instance life cycle is per class,
+           the setup method runs multiple times.
+           This synchronization and boolean check prevent that.
+         */
+        if (!SETUP_DONE.get()) {
+            String hospitalsContent = hospitals.getContentAsString(StandardCharsets.UTF_8);
+            HospitalEntity[] hospitalEntities = objectMapper.readValue(hospitalsContent,
+                    HospitalEntity[].class);
+            hospitalJpaRepository.saveAll(Arrays.asList(hospitalEntities));
+            authenticationJpaRepository.save(
+                    AuthEntity.builder()
+                            .username(DOCTOR_USERNAME)
+                            .hashedPassword(passwordEncoder.encode(DOCTOR_PASSWORD))
+                            .roles(Set.of(RoleConstants.DOCTOR_ROLE))
+                            .build()
+            );
+            SETUP_DONE.set(true);
+        }
+    }
+
+    @SneakyThrows
+    public String login(LoginRequest loginRequest) {
+        return mockMvc.perform(
+                        MockMvcRequestBuilders.post(AUTH_API.concat("/login"))
+                                .contentType("application/json")
+                                .content(objectMapper.writeValueAsString(loginRequest))
+                )
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+    }
+
+    public static String randomPassword() {
         return RandomStringUtils.secure().next(16);
     }
 

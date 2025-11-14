@@ -1,13 +1,15 @@
 package org.otherband.lifeblood;
 
-import org.apache.commons.lang3.RandomStringUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
+import org.otherband.lifeblood.generated.model.LoginRequest;
 import org.otherband.lifeblood.generated.model.NotificationChannel;
 import org.otherband.lifeblood.generated.model.PhoneVerificationRequest;
 import org.otherband.lifeblood.generated.model.VolunteerRegistrationRequest;
 import org.otherband.lifeblood.hospital.HospitalEntity;
 import org.otherband.lifeblood.volunteer.PhoneNumberVerificationCodeEntity;
 import org.otherband.lifeblood.volunteer.VolunteerEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.util.Arrays;
@@ -17,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.otherband.lifeblood.volunteer.VolunteerController.VOLUNTEER_API;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Slf4j
 public class VolunteerRegistrationTest extends BaseTest {
 
 
@@ -66,14 +69,16 @@ public class VolunteerRegistrationTest extends BaseTest {
 
     @Test
     void verifyPhoneNumber() throws Exception {
-        String phoneNumber = FAKER.phoneNumber().phoneNumber();
+        final String phoneNumber = FAKER.phoneNumber().phoneNumber();
+        final String password = randomPassword();
+
         HospitalEntity[] availableHospitals = fetchAvailableHospitals();
         String hospitalUuid = availableHospitals[1].getUuid();
 
         VolunteerRegistrationRequest request = new VolunteerRegistrationRequest();
         request.setSelectedHospitals(List.of(hospitalUuid));
         request.setPhoneNumber(phoneNumber);
-        request.setPassword(randomPassword());
+        request.setPassword(password);
 
         VolunteerEntity volunteer = createVolunteer(request);
 
@@ -97,8 +102,17 @@ public class VolunteerRegistrationTest extends BaseTest {
                 )
                 .andExpect(status().isOk());
 
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setUsername(phoneNumber);
+        loginRequest.setPassword(password);
+
+        String accessToken = login(loginRequest);
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setBearerAuth(accessToken);
         String updatedResponseString = mockMvc.perform(
                         MockMvcRequestBuilders.get(VOLUNTEER_API.concat("/").concat(volunteer.getUuid()))
+                                .headers(httpHeaders)
                 )
                 .andExpect(status().isOk())
                 .andReturn()

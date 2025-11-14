@@ -1,6 +1,7 @@
 package org.otherband.lifeblood;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -13,6 +14,7 @@ import org.otherband.lifeblood.hospital.HospitalEntity;
 import org.otherband.lifeblood.notifications.push.PushNotification;
 import org.otherband.lifeblood.notifications.whatsapp.WhatsAppMessageEntity;
 import org.otherband.lifeblood.volunteer.VolunteerEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.util.MultiValueMap;
 
@@ -28,6 +30,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class AlertTest extends BaseTest {
 
+    public String loginDoctor() {
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setUsername(DOCTOR_USERNAME);
+        loginRequest.setPassword(DOCTOR_PASSWORD);
+        return login(loginRequest);
+    }
+
     @Test
     void invalidAlertRequest() throws Exception {
         AlertCreationRequest alertRequest = new AlertCreationRequest();
@@ -35,6 +44,7 @@ public class AlertTest extends BaseTest {
                         MockMvcRequestBuilders.post(ALERT_API)
                                 .contentType("application/json")
                                 .content(objectMapper.writeValueAsString(alertRequest))
+                                .headers(authHeaders())
                 )
                 .andExpect(status().isBadRequest())
                 .andReturn()
@@ -46,15 +56,22 @@ public class AlertTest extends BaseTest {
                 .contains("Hospital uuid must be provided");
     }
 
+    private HttpHeaders authHeaders() {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setBearerAuth(loginDoctor());
+        return httpHeaders;
+    }
+
     @Test
     void getPaginatedAlerts() throws Exception {
         HospitalEntity[] hospitals = fetchAvailableHospitals();
+        HttpHeaders httpHeaders = authHeaders();
         for (int i = 0; i < 10; i++) {
             AlertCreationRequest creationRequest = new AlertCreationRequest();
             creationRequest.setHospitalUuid(hospitals[0].getUuid());
             creationRequest.setAlertLevel(AlertLevel.ROUTINE);
             creationRequest.setDoctorMessage("");
-            createAlert(creationRequest);
+            createAlert(creationRequest, httpHeaders);
         }
 
         PageAlertResponse firstPage = getPageAlertResponse(Map.of());
@@ -83,6 +100,7 @@ public class AlertTest extends BaseTest {
                         MockMvcRequestBuilders.post(ALERT_API)
                                 .contentType("application/json")
                                 .content(objectMapper.writeValueAsString(creationRequest))
+                                .headers(authHeaders())
                 )
                 .andExpect(status().isCreated());
 
@@ -143,10 +161,16 @@ public class AlertTest extends BaseTest {
     }
 
     private AlertEntity createAlert(AlertCreationRequest creationRequest) throws Exception {
+        HttpHeaders httpHeaders = authHeaders();
+        return createAlert(creationRequest, httpHeaders);
+    }
+
+    private AlertEntity createAlert(AlertCreationRequest creationRequest, HttpHeaders httpHeaders) throws Exception {
         String alertString = mockMvc.perform(
                         MockMvcRequestBuilders.post(ALERT_API)
                                 .contentType("application/json")
                                 .content(objectMapper.writeValueAsString(creationRequest))
+                                .headers(httpHeaders)
                 )
                 .andExpect(status().isCreated())
                 .andReturn()
