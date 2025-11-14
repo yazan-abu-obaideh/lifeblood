@@ -10,7 +10,6 @@ import org.mockito.invocation.Invocation;
 import org.otherband.lifeblood.alert.AlertEntity;
 import org.otherband.lifeblood.generated.model.*;
 import org.otherband.lifeblood.hospital.HospitalEntity;
-import org.otherband.lifeblood.jobs.AsyncNotificationService;
 import org.otherband.lifeblood.notifications.push.PushNotification;
 import org.otherband.lifeblood.notifications.whatsapp.WhatsAppMessageEntity;
 import org.otherband.lifeblood.volunteer.VolunteerEntity;
@@ -24,8 +23,6 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 import static org.otherband.lifeblood.alert.AlertController.ALERT_API;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -89,28 +86,29 @@ public class AlertTest extends BaseTest {
                 )
                 .andExpect(status().isCreated());
 
-        new AsyncNotificationService(
-                notificationSender,
-                whatsAppMessageRepository,
-                pushNotificationRepository
-        ).sendNotifications();
+        List<PushNotification> allPush = pushNotificationRepository.findAll();
+        List<WhatsAppMessageEntity> allWhatsApp = whatsAppMessageRepository.findAll();
 
         pushNotificationTokens.forEach(token ->
-                verify(notificationSender, verificationData ->
-                        findMatchingInvocation(verificationData, invocation -> {
-                    if (invocation.getArgument(0) instanceof PushNotification pushNotification) {
-                        return token.equals(pushNotification.getUserToken());
-                    }
-                    return false;
-                })).sendPushNotification(any()));
-
-        whatsAppPhoneNumbers.forEach(phoneNumber -> verify(notificationSender, verificationData ->
-                findMatchingInvocation(verificationData, invocation -> {
-            if (invocation.getArgument(0) instanceof WhatsAppMessageEntity whatsAppMessage) {
-                return phoneNumber.equals(whatsAppMessage.getPhoneNumber());
-            }
-            return false;
-        })).sendWhatsAppMessage(any()));
+                assertThat(allPush.stream().anyMatch(pushNotification ->
+                                pushNotification.getUserToken().equals(token)
+                                        && !pushNotification.isSent()
+                                        && pushNotification.getTitle().equals("Life or death alert")
+                                        && pushNotification.getBody().equals("""
+                                        Donation request at hospital %s with level Life or death. Doctor message: Life or death alert""".formatted(hospitals[0].getHospitalName()))
+                        )).isTrue()
+                );
+        whatsAppPhoneNumbers.forEach(phoneNumber ->
+                        assertThat(allWhatsApp.stream().anyMatch(whatsAppMessage ->
+                                whatsAppMessage.getPhoneNumber().equals(phoneNumber)
+                                        && !whatsAppMessage.isSent()
+                                        && whatsAppMessage.getTemplateName().equals("donation_alert")
+                                        && List.copyOf(whatsAppMessage.getTemplateVariables()).equals(
+                                                List.of("Life or death", hospitals[0].getHospitalName(),
+                                                        "Life or death alert")
+                                )
+                                )
+                        ).isTrue());
 
     }
 

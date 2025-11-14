@@ -76,7 +76,7 @@ public class AlertController {
         );
         AlertEntity saved = alertJpaRepository.save(alert);
         List<VolunteerEntity> volunteers = alertListenersFinder.findListeners(alert);
-        whatsAppMessageRepository.saveAll(toWhatsAppMessages(request, volunteers));
+        whatsAppMessageRepository.saveAll(toWhatsAppMessages(alert, volunteers));
         pushNotificationRepository.saveAll(toPushNotifications(alert, volunteers));
         return mapper.toResponse(saved);
     }
@@ -109,22 +109,23 @@ public class AlertController {
                 .concat(doctorMessageOrEmpty(alert));
     }
 
-    private List<WhatsAppMessageEntity> toWhatsAppMessages(AlertCreationRequest request, List<VolunteerEntity> volunteers) {
+    private List<WhatsAppMessageEntity> toWhatsAppMessages(AlertEntity alert, List<VolunteerEntity> volunteers) {
         return volunteers
                 .stream()
                 .filter(volunteerEntity ->
                         receivesNotification(volunteerEntity, NotificationChannel.WHATSAPP_MESSAGES))
-                .map(volunteerEntity -> toWhatsAppMessage(request, volunteerEntity))
+                .map(volunteerEntity -> toWhatsAppMessage(alert, volunteerEntity))
                 .toList();
     }
 
-    private static WhatsAppMessageEntity toWhatsAppMessage(AlertCreationRequest request, VolunteerEntity volunteerEntity) {
+    private static WhatsAppMessageEntity toWhatsAppMessage(AlertEntity alert, VolunteerEntity volunteerEntity) {
         return WhatsAppMessageEntity.builder()
                 .templateName("donation_alert")
                 .phoneNumber(volunteerEntity.getPhoneNumber())
                 .templateVariables(List.of(
-                        request.getAlertLevel().name(),
-                        ofNullable(request.getDoctorMessage()).orElse("")
+                        AlertLevelUtils.toDisplayName(alert.getAlertLevel()),
+                        alert.getHospital().getHospitalName(),
+                        ofNullable(alert.getDoctorMessage()).orElse("")
                 ))
                 .build();
     }
