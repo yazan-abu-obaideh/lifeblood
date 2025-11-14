@@ -50,6 +50,20 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
+        <createTable tableName="auth">
+            <column name="id" type="bigserial">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hashed_password" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="roles" type="varchar(255) array">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
     </changeSet>
 
 </databaseChangeLog>

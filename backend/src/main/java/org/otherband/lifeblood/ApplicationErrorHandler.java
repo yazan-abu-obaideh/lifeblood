@@ -15,10 +15,15 @@ import java.util.List;
 @ControllerAdvice
 public class ApplicationErrorHandler {
 
+    @ExceptionHandler(UserAuthException.class)
+    public ResponseEntity<ErrorResponse> handleException(UserAuthException userAuthException) {
+        return ResponseEntity.status(401).body(toErrorResponse(userAuthException.getMessage()));
+    }
+
     @ExceptionHandler(UserException.class)
     public ResponseEntity<ErrorResponse> handleException(UserException userException) {
         log.warn("User exception occurred", userException);
-        return ResponseEntity.badRequest().body(toErrorMessage(userException.getMessage()));
+        return ResponseEntity.badRequest().body(toErrorResponse(userException.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -26,16 +31,16 @@ public class ApplicationErrorHandler {
         log.warn("Violation exception occurred", violationException);
         List<ObjectError> allErrors = violationException.getAllErrors();
         List<String> errorMessages = allErrors.stream().map(DefaultMessageSourceResolvable::getDefaultMessage).toList();
-        return ResponseEntity.badRequest().body(toErrorMessage(String.join(",", errorMessages)));
+        return ResponseEntity.badRequest().body(toErrorResponse(String.join(",", errorMessages)));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception anyException) {
         log.error("Internal server error", anyException);
-        return ResponseEntity.internalServerError().body(toErrorMessage("Something went wrong"));
+        return ResponseEntity.internalServerError().body(toErrorResponse("Something went wrong"));
     }
 
-    private ErrorResponse toErrorMessage(String message) {
+    private ErrorResponse toErrorResponse(String message) {
         ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setErrorMessage(message);
         return errorResponse;

@@ -3,6 +3,8 @@ package org.otherband.lifeblood.volunteer;
 import org.otherband.lifeblood.ApplicationMapper;
 import org.otherband.lifeblood.TimeService;
 import org.otherband.lifeblood.UserException;
+import org.otherband.lifeblood.auth.AuthEntity;
+import org.otherband.lifeblood.auth.AuthenticationJpaRepository;
 import org.otherband.lifeblood.generated.model.NotificationChannel;
 import org.otherband.lifeblood.generated.model.PhoneVerificationRequest;
 import org.otherband.lifeblood.generated.model.VolunteerRegistrationRequest;
@@ -10,13 +12,11 @@ import org.otherband.lifeblood.hospital.HospitalEntity;
 import org.otherband.lifeblood.hospital.HospitalJpaRepository;
 import org.otherband.lifeblood.notifications.whatsapp.WhatsAppMessageEntity;
 import org.otherband.lifeblood.notifications.whatsapp.WhatsAppMessageRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class VolunteerService {
@@ -25,19 +25,23 @@ public class VolunteerService {
     private final VerificationCodeJpaRepository verificationCodeJpaRepository;
     private final TimeService timeService;
     private final WhatsAppMessageRepository whatsAppMessageRepository;
+    private final AuthenticationJpaRepository authenticationRepository;
+    private final PasswordEncoder passwordEncoder;
     private final ApplicationMapper mapper;
 
     public VolunteerService(VolunteerJpaRepository volunteerJpaRepository,
                             HospitalJpaRepository hospitalJpaRepository,
                             VerificationCodeJpaRepository verificationCodeJpaRepository,
                             TimeService timeService,
-                            WhatsAppMessageRepository whatsAppMessageRepository,
+                            WhatsAppMessageRepository whatsAppMessageRepository, AuthenticationJpaRepository authenticationRepository, PasswordEncoder passwordEncoder,
                             ApplicationMapper mapper) {
         this.volunteerJpaRepository = volunteerJpaRepository;
         this.hospitalJpaRepository = hospitalJpaRepository;
         this.verificationCodeJpaRepository = verificationCodeJpaRepository;
         this.timeService = timeService;
         this.whatsAppMessageRepository = whatsAppMessageRepository;
+        this.authenticationRepository = authenticationRepository;
+        this.passwordEncoder = passwordEncoder;
         this.mapper = mapper;
     }
 
@@ -71,6 +75,12 @@ public class VolunteerService {
                         .templateName("verification_code")
                         .phoneNumber(volunteerRequest.getPhoneNumber())
                         .templateVariables(List.of(verificationCode.getVerificationCode()))
+                .build());
+
+        authenticationRepository.save(AuthEntity.builder()
+                        .username(entity.getPhoneNumber())
+                        .hashedPassword(passwordEncoder.encode(volunteerRequest.getPassword()))
+                        .roles(Set.of())
                 .build());
 
         return volunteerJpaRepository.save(entity);

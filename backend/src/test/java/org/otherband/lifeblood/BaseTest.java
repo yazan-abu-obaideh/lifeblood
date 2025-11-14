@@ -2,6 +2,7 @@ package org.otherband.lifeblood;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.hibernate.AssertionFailure;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
@@ -83,6 +84,10 @@ public abstract class BaseTest {
         hospitalJpaRepository.saveAll(Arrays.asList(hospitalEntities));
     }
 
+    public String randomPassword() {
+        return RandomStringUtils.secure().next(16);
+    }
+
     public VolunteerEntity createAnyVolunteer() throws Exception {
         String chosenHospitalUuid = Arrays.stream(fetchAvailableHospitals()).findAny().map(HospitalEntity::getUuid)
                 .orElseThrow(() -> new AssertionFailure("Expected to find at least one hospital"));
@@ -91,6 +96,7 @@ public abstract class BaseTest {
         registrationRequest.setSelectedHospitals(List.of(chosenHospitalUuid));
         registrationRequest.setPushNotificationToken(UUID.randomUUID().toString());
         registrationRequest.setPushNotificationType(PushNotificationType.FIREBASE);
+        registrationRequest.setPassword(randomPassword());
         return createVolunteer(registrationRequest);
     }
 

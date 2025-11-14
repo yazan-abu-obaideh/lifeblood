@@ -69,7 +69,7 @@ public class AlertController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("hasRole('DOCTOR')")
+    @PreAuthorize("hasRole('doctor')")
     public AlertResponse createAlert(@RequestBody AlertCreationRequest request) {
         SimpleValidator.INSTANCE.validate(request);
 

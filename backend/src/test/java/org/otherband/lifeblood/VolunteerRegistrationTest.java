@@ -1,5 +1,6 @@
 package org.otherband.lifeblood;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Test;
 import org.otherband.lifeblood.generated.model.NotificationChannel;
 import org.otherband.lifeblood.generated.model.PhoneVerificationRequest;
@@ -45,6 +46,7 @@ public class VolunteerRegistrationTest extends BaseTest {
         VolunteerRegistrationRequest request = new VolunteerRegistrationRequest();
         request.setPhoneNumber(phoneNumber);
         request.setSelectedHospitals(List.of(hospitalUuid));
+        request.setPassword(randomPassword());
 
         VolunteerEntity result = createVolunteer(request);
 
@@ -71,6 +73,7 @@ public class VolunteerRegistrationTest extends BaseTest {
         VolunteerRegistrationRequest request = new VolunteerRegistrationRequest();
         request.setSelectedHospitals(List.of(hospitalUuid));
         request.setPhoneNumber(phoneNumber);
+        request.setPassword(randomPassword());
 
         VolunteerEntity volunteer = createVolunteer(request);
 

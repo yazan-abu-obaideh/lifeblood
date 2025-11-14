@@ -40,6 +40,14 @@ public enum SimpleValidator {
         if (isBlank(volunteerRequest.getPhoneNumber())) {
             violationMessages.add("please enter your phone number");
         }
+        if (isBlank(volunteerRequest.getPassword())) {
+            violationMessages.add("please enter a password");
+        } else {
+            int passwordLength = volunteerRequest.getPassword().length();
+            if (passwordLength < 10) {
+                violationMessages.add("Password length must exceed 10 characters");
+            }
+        }
         List<String> selectedHospitals = volunteerRequest.getSelectedHospitals();
         if (Objects.isNull(selectedHospitals) || selectedHospitals.isEmpty()) {
             violationMessages.add("please choose at least one hospital of interest");
