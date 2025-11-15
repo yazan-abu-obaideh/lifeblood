@@ -6,6 +6,7 @@ import {
   enableNotifications,
   messagingSenderId,
 } from "./root/utils/notifications";
+import SignIn from "./root/SignIn";
 
 if (messagingSenderId === "") {
   console.warn("No messaging sender ID found");

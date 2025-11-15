@@ -325,7 +325,6 @@ const VolunteerSettings: React.FC = () => {
       if (!user.userUuid) {
         throw Error("User uuid not found");
       }
-      const token = "your-jwt-token";
       const response = await fetch(
         `${config.apiBaseUrl}${config.endpoints.volunteer.replace(
           "{uuid}",
@@ -333,7 +332,7 @@ const VolunteerSettings: React.FC = () => {
         )}`,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${user.userToken}`,
           },
         }
       );
