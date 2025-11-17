@@ -53,7 +53,10 @@
       "LoginResponse": {
         "type": "object",
         "properties": {
-          "authToken": {
+          "phoneNumber": {
+            "type": "string"
+          },
+          "userUuid": {
             "type": "string"
           },
           "refreshToken": {

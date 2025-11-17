@@ -10,8 +10,8 @@ import static com.google.i18n.phonenumbers.PhoneNumberUtil.getInstance;
 public enum PhoneNumberUtil {
     INSTANCE;
 
-    public static final PhoneNumberFormat FORMAT = PhoneNumberFormat.E164;
-    public static final String CURR_REGION = "JO";
+    private static final PhoneNumberFormat FORMAT = PhoneNumberFormat.E164;
+    private static final String CURR_REGION = "JO";
 
     public String formatPhoneNumber(String phoneNumber) {
         try {

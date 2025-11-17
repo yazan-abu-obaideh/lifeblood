@@ -57,6 +57,9 @@
             <column name="username" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
+            <column name="user_uuid" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
             <column name="hashed_password" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>

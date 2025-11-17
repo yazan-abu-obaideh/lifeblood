@@ -34,8 +34,8 @@ public class AlertTest extends BaseTest {
         LoginRequest loginRequest = new LoginRequest();
         loginRequest.setUsername(DOCTOR_USERNAME);
         loginRequest.setPassword(DOCTOR_PASSWORD);
-        String refreshToken = login(loginRequest);
-        return getAuthToken(DOCTOR_USERNAME, refreshToken);
+        var loginResponse = login(loginRequest);
+        return getAuthToken(DOCTOR_USERNAME, loginResponse.getRefreshToken());
     }
 
     @Test

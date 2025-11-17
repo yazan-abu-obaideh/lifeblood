@@ -106,8 +106,8 @@ public class VolunteerRegistrationTest extends BaseTest {
         loginRequest.setUsername(phoneNumber);
         loginRequest.setPassword(password);
 
-        String refreshToken = login(loginRequest);
-        String authToken = getAuthToken(phoneNumber, refreshToken);
+        var loginResponse = login(loginRequest);
+        String authToken = getAuthToken(phoneNumber, loginResponse.getRefreshToken());
 
 
         HttpHeaders httpHeaders = new HttpHeaders();

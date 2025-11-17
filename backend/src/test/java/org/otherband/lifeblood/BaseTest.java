@@ -12,10 +12,7 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.otherband.lifeblood.auth.AuthEntity;
 import org.otherband.lifeblood.auth.AuthenticationJpaRepository;
 import org.otherband.lifeblood.auth.RoleConstants;
-import org.otherband.lifeblood.generated.model.LoginRequest;
-import org.otherband.lifeblood.generated.model.PushNotificationType;
-import org.otherband.lifeblood.generated.model.RefreshTokenRequest;
-import org.otherband.lifeblood.generated.model.VolunteerRegistrationRequest;
+import org.otherband.lifeblood.generated.model.*;
 import org.otherband.lifeblood.hospital.HospitalEntity;
 import org.otherband.lifeblood.hospital.HospitalJpaRepository;
 import org.otherband.lifeblood.notifications.NotificationSender;
@@ -119,6 +116,7 @@ public abstract class BaseTest {
             authenticationJpaRepository.save(
                     AuthEntity.builder()
                             .username(DOCTOR_USERNAME)
+                            .userUuid(UUID.randomUUID().toString())
                             .hashedPassword(passwordEncoder.encode(DOCTOR_PASSWORD))
                             .roles(Set.of(RoleConstants.DOCTOR_ROLE))
                             .build()
@@ -128,14 +126,16 @@ public abstract class BaseTest {
     }
 
     @SneakyThrows
-    public String login(LoginRequest loginRequest) {
-        return mockMvc.perform(
+    public LoginResponse login(LoginRequest loginRequest) {
+        String responseString = mockMvc.perform(
                         MockMvcRequestBuilders.post(AUTH_API.concat("/login"))
                                 .contentType("application/json")
                                 .content(objectMapper.writeValueAsString(loginRequest))
                 )
                 .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+                .andReturn().getResponse()
+                .getContentAsString();
+        return objectMapper.readValue(responseString, LoginResponse.class);
     }
 
     @SneakyThrows

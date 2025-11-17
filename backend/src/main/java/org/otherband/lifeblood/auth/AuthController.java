@@ -1,8 +1,10 @@
 package org.otherband.lifeblood.auth;
 
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.AssertionFailure;
 import org.otherband.lifeblood.UserAuthException;
 import org.otherband.lifeblood.generated.model.LoginRequest;
+import org.otherband.lifeblood.generated.model.LoginResponse;
 import org.otherband.lifeblood.generated.model.RefreshTokenRequest;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 @RequestMapping(AuthController.AUTH_API)
 public class AuthController {
@@ -40,12 +43,17 @@ public class AuthController {
     @PostMapping
     @RequestMapping("/login")
     @PreAuthorize(RoleConstants.ALLOW_ALL)
-    public String login(@RequestBody LoginRequest loginRequest) {
+    public LoginResponse login(@RequestBody LoginRequest loginRequest) {
         AuthEntity auth =
                 authenticationJpaRepository.findAuthEntityByUsername(loginRequest.getUsername())
                 .filter(authEntity -> passwordsMatch(authEntity.getHashedPassword(), loginRequest.getPassword()))
                 .orElseThrow(() -> new UserAuthException("Username and password combination not found"));
-        return jwtService.generateRefreshToken(buildUser(auth));
+
+        LoginResponse loginResponse = new LoginResponse();
+        loginResponse.setRefreshToken(jwtService.generateRefreshToken(buildUser(auth)));
+        loginResponse.setPhoneNumber(auth.getUsername());
+        loginResponse.setUserUuid(auth.getUserUuid());
+        return loginResponse;
     }
 
     @PostMapping

@@ -82,6 +82,7 @@ public class VolunteerService {
 
         authenticationRepository.save(AuthEntity.builder()
                         .username(entity.getPhoneNumber())
+                        .userUuid(entity.getUuid())
                         .hashedPassword(passwordEncoder.encode(volunteerRequest.getPassword()))
                         .roles(Set.of(RoleConstants.VOLUNTEER_ROLE))
                 .build());
