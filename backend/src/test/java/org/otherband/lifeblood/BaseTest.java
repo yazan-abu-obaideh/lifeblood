@@ -14,6 +14,7 @@ import org.otherband.lifeblood.auth.AuthenticationJpaRepository;
 import org.otherband.lifeblood.auth.RoleConstants;
 import org.otherband.lifeblood.generated.model.LoginRequest;
 import org.otherband.lifeblood.generated.model.PushNotificationType;
+import org.otherband.lifeblood.generated.model.RefreshTokenRequest;
 import org.otherband.lifeblood.generated.model.VolunteerRegistrationRequest;
 import org.otherband.lifeblood.hospital.HospitalEntity;
 import org.otherband.lifeblood.hospital.HospitalJpaRepository;
@@ -137,6 +138,20 @@ public abstract class BaseTest {
                 .andReturn().getResponse().getContentAsString();
     }
 
+    @SneakyThrows
+    public String getAuthToken(String username, String refreshToken) {
+        RefreshTokenRequest request = new RefreshTokenRequest();
+        request.setUsername(username);
+        request.setRefreshToken(refreshToken);
+        return mockMvc.perform(
+                        MockMvcRequestBuilders.post(AUTH_API.concat("/refresh"))
+                                .contentType("application/json")
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+    }
+
     public static String randomPassword() {
         return RandomStringUtils.secure().next(16);
     }
@@ -145,12 +160,16 @@ public abstract class BaseTest {
         String chosenHospitalUuid = Arrays.stream(fetchAvailableHospitals()).findAny().map(HospitalEntity::getUuid)
                 .orElseThrow(() -> new AssertionFailure("Expected to find at least one hospital"));
         VolunteerRegistrationRequest registrationRequest = new VolunteerRegistrationRequest();
-        registrationRequest.setPhoneNumber(FAKER.phoneNumber().phoneNumber());
+        registrationRequest.setPhoneNumber(randomPhoneNumber());
         registrationRequest.setSelectedHospitals(List.of(chosenHospitalUuid));
         registrationRequest.setPushNotificationToken(UUID.randomUUID().toString());
         registrationRequest.setPushNotificationType(PushNotificationType.FIREBASE);
         registrationRequest.setPassword(randomPassword());
         return createVolunteer(registrationRequest);
+    }
+
+    protected static String randomPhoneNumber() {
+        return "+9627".concat(RandomStringUtils.secure().nextNumeric(8));
     }
 
     protected HospitalEntity[] fetchAvailableHospitals() throws Exception {

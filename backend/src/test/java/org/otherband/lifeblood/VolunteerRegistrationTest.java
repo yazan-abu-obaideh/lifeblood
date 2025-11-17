@@ -40,7 +40,7 @@ public class VolunteerRegistrationTest extends BaseTest {
 
     @Test
     void createVolunteer() throws Exception {
-        String phoneNumber = FAKER.phoneNumber().phoneNumber();
+        String phoneNumber = randomPhoneNumber();
 
         HospitalEntity[] availableHospitals = fetchAvailableHospitals();
         String hospitalUuid = availableHospitals[1].getUuid();
@@ -69,7 +69,7 @@ public class VolunteerRegistrationTest extends BaseTest {
 
     @Test
     void verifyPhoneNumber() throws Exception {
-        final String phoneNumber = FAKER.phoneNumber().phoneNumber();
+        final String phoneNumber = randomPhoneNumber();
         final String password = randomPassword();
 
         HospitalEntity[] availableHospitals = fetchAvailableHospitals();
@@ -106,10 +106,12 @@ public class VolunteerRegistrationTest extends BaseTest {
         loginRequest.setUsername(phoneNumber);
         loginRequest.setPassword(password);
 
-        String accessToken = login(loginRequest);
+        String refreshToken = login(loginRequest);
+        String authToken = getAuthToken(phoneNumber, refreshToken);
+
 
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setBearerAuth(accessToken);
+        httpHeaders.setBearerAuth(authToken);
         String updatedResponseString = mockMvc.perform(
                         MockMvcRequestBuilders.get(VOLUNTEER_API.concat("/").concat(volunteer.getUuid()))
                                 .headers(httpHeaders)

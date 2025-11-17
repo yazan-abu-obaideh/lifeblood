@@ -1,6 +1,8 @@
 package org.otherband.lifeblood.auth;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
@@ -14,10 +16,8 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -28,13 +28,47 @@ public class JwtService {
     private final String secretKey;
     private final Duration tokenExpiration;
     private final TimeService timeService;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     public JwtService(@Value("${jwt.secret.key}") String secretKey,
                       @Value("${jwt.token.expiration.minutes}") int tokenExpiration,
-                      TimeService timeService) {
+                      TimeService timeService,
+                      RefreshTokenRepository refreshTokenRepository) {
         this.secretKey = secretKey;
         this.tokenExpiration = Duration.ofMinutes(tokenExpiration);
         this.timeService = timeService;
+        this.refreshTokenRepository = refreshTokenRepository;
+    }
+
+    public String generateRefreshToken(UserDetails userDetails) {
+        LocalDateTime now = timeService.now();
+        LocalDateTime expirationDate = now.plus(Duration.of(21, ChronoUnit.DAYS));
+
+        String refreshToken = Jwts.builder()
+                .subject(userDetails.getUsername())
+                .issuedAt(toDate(now))
+                .expiration(toDate(expirationDate))
+                .signWith(getSigningKey())
+                .claim("refreshToken", true)
+                .compact();
+
+        RefreshTokenEntity entity = new RefreshTokenEntity();
+        entity.setUsername(userDetails.getUsername());
+        entity.setToken(refreshToken);
+
+        return refreshTokenRepository.save(entity).getToken();
+    }
+
+    public boolean isValidRefreshToken(String username, String refreshToken) {
+        Jws<Claims> claimsJws = Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(refreshToken);
+        Boolean isRefreshToken = Optional.of(claimsJws).map(Jwt::getPayload)
+                .filter(claims -> username.equals(claims.getSubject()))
+                .map(claims -> claims.get("refreshToken"))
+                .filter(object -> object instanceof Boolean)
+                .map(object -> (Boolean) object)
+                .orElse(false);
+        return isRefreshToken && hasNotExpired(refreshToken);
+
     }
 
     public String generateToken(UserDetails userDetails) {
@@ -50,8 +84,8 @@ public class JwtService {
     public String generateToken(Map<String, Object> extraClaims, String username) {
         LocalDateTime now = timeService.now();
         LocalDateTime expiration = now.plus(tokenExpiration);
-        Date nowDate = Date.from(now.atZone(timeService.getZoneId()).toInstant());
-        Date expirationDate = Date.from(expiration.atZone(timeService.getZoneId()).toInstant());
+        Date nowDate = toDate(now);
+        Date expirationDate = toDate(expiration);
 
         return Jwts.builder().claims(extraClaims).subject(username).issuedAt(nowDate).expiration(expirationDate).signWith(getSigningKey()).compact();
     }
@@ -78,6 +112,10 @@ public class JwtService {
 
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
+    }
+
+    private Date toDate(LocalDateTime now) {
+        return Date.from(now.atZone(timeService.getZoneId()).toInstant());
     }
 
     private  <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {

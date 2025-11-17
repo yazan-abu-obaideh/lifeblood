@@ -1,7 +1,9 @@
 package org.otherband.lifeblood.auth;
 
+import org.hibernate.AssertionFailure;
 import org.otherband.lifeblood.UserAuthException;
 import org.otherband.lifeblood.generated.model.LoginRequest;
+import org.otherband.lifeblood.generated.model.RefreshTokenRequest;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -21,11 +23,16 @@ public class AuthController {
     public static final String AUTH_API = "/api/v1/auth";
 
     private final AuthenticationJpaRepository authenticationJpaRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
-    public AuthController(AuthenticationJpaRepository authenticationJpaRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
+    public AuthController(AuthenticationJpaRepository authenticationJpaRepository,
+                          RefreshTokenRepository refreshTokenRepository,
+                          PasswordEncoder passwordEncoder,
+                          JwtService jwtService) {
         this.authenticationJpaRepository = authenticationJpaRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
     }
@@ -38,14 +45,25 @@ public class AuthController {
                 authenticationJpaRepository.findAuthEntityByUsername(loginRequest.getUsername())
                 .filter(authEntity -> passwordsMatch(authEntity.getHashedPassword(), loginRequest.getPassword()))
                 .orElseThrow(() -> new UserAuthException("Username and password combination not found"));
-        return jwtService.generateToken(buildUser(auth));
+        return jwtService.generateRefreshToken(buildUser(auth));
     }
 
     @PostMapping
     @RequestMapping("/refresh")
     @PreAuthorize(RoleConstants.ALLOW_ALL)
-    public String refresh() {
-        return "";
+    public String refresh(@RequestBody RefreshTokenRequest request) {
+        if (!jwtService.isValidRefreshToken(request.getUsername(), request.getRefreshToken())) {
+            throw new UserAuthException("Invalid or expired refresh token");
+        }
+        refreshTokenRepository.findRefreshTokenEntityByUsername(request.getUsername())
+                .stream()
+                .filter(refreshTokenEntity -> refreshTokenEntity.getToken().equals(request.getRefreshToken()))
+                .findFirst()
+                .orElseThrow(() ->
+                        new UserAuthException("Refresh token was considered valid, but it does not exist in the repository. Revoked or forged."));
+        return authenticationJpaRepository.findAuthEntityByUsername(request.getUsername())
+                .map(authEntity -> jwtService.generateToken(buildUser(authEntity)))
+                .orElseThrow(() -> new AssertionFailure("Disastrous: refresh token was considered valid, but user was not found"));
     }
 
     private static UserDetails buildUser(AuthEntity auth) {

@@ -13,8 +13,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import static java.util.Optional.ofNullable;
 
 @Component
 @Slf4j
@@ -43,10 +45,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (username != null) {
                 if (jwtService.isValidToken(jwt)) {
-                    List<String> roles = jwtService.extractRoles(jwt);
+                    List<String> roles = ofNullable(jwtService.extractRoles(jwt)).orElse(Collections.emptyList());
                     List<SimpleGrantedAuthority> authorities = roles.stream()
                             .map(SimpleGrantedAuthority::new)
-                            .collect(Collectors.toList());
+                            .toList();
 
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             username,

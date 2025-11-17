@@ -1,6 +1,7 @@
 package org.otherband.lifeblood.volunteer;
 
 import org.otherband.lifeblood.ApplicationMapper;
+import org.otherband.lifeblood.PhoneNumberUtil;
 import org.otherband.lifeblood.TimeService;
 import org.otherband.lifeblood.UserException;
 import org.otherband.lifeblood.auth.AuthEntity;
@@ -62,6 +63,7 @@ public class VolunteerService {
     public VolunteerEntity registerVolunteer(VolunteerRegistrationRequest volunteerRequest) {
         VolunteerEntity entity = mapper.toEntity(volunteerRequest);
         entity.setUuid(UUID.randomUUID().toString());
+        entity.setPhoneNumber(PhoneNumberUtil.INSTANCE.formatPhoneNumber(volunteerRequest.getPhoneNumber()));
         entity.setAlertableHospitals(mapToHospitals(volunteerRequest.getSelectedHospitals()));
         entity.setNotificationChannels(Arrays.stream(NotificationChannel.values()).map(Enum::name).toList());
         entity.setMinimumSeverity(0);

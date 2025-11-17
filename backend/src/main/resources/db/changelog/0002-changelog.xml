@@ -64,6 +64,20 @@
                 <constraints nullable="true"/>
             </column>
         </createTable>
+        <createTable tableName="refresh_token">
+            <column name="id" type="bigserial">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="token" type="varchar(4000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="creation_date" type="datetime2">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
     </changeSet>
 
 </databaseChangeLog>
