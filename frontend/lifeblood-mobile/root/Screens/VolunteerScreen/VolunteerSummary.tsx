@@ -186,7 +186,7 @@ const ErrorView: React.FC = () => {
 };
 
 const VolunteerSummary: React.FC = () => {
-  const { userUuid, userToken } = useUser();
+  const { userUuid, getUserToken } = useUser();
   const navigation = useNavigation<NavigationProp>();
 
   const [userData, setUserData] = useState<VolunteerResponse | null>(null);
@@ -201,6 +201,7 @@ const VolunteerSummary: React.FC = () => {
       if (!userUuid) {
         throw Error(`User uuid is not present`);
       }
+      const token = await getUserToken();
       const response = await fetch(
         `${config.apiBaseUrl}${config.endpoints.volunteer.replace(
           "{uuid}",
@@ -208,7 +209,7 @@ const VolunteerSummary: React.FC = () => {
         )}`,
         {
           headers: {
-            Authorization: `Bearer ${userToken}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );

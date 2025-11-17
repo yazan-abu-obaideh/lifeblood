@@ -4,27 +4,56 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import VolunteerSummary from "./Screens/VolunteerScreen/VolunteerSummary";
 import VolunteerSettings from "./Screens/VolunteerScreen/VolunteerSettings";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { UserContext, useUser } from "./Screens/UserContext";
 import { RootStackParamList } from "./Screens/navigationUtils";
 import SignIn from "./SignIn";
+import { config } from "./config/config";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getFromAsyncStorage } from "./utils/asyncStorageUtils";
 
 const stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function SignedInScreen() {
-  const [userUuid, setUserUuid] = useState<string | undefined>(
-    "4770f643-033f-420f-8a0f-49ce1e08f23c"
-  );
+  const [userUuid, setUserUuid] = useState<string | undefined>(undefined);
 
-  const [userToken, setUserToken] = useState<string | undefined>(undefined);
+  useEffect(() => {
+    getFromAsyncStorage("USER_UUID")
+      .then((userUuid) => {
+        setUserUuid(userUuid ?? undefined);
+      })
+      .catch((error) => {
+        console.error(
+          `Something went wrong while getting userUuid from async storage ${error}`
+        );
+      });
+  }, []);
+
+  const getUserToken = useCallback(async () => {
+    const response = await fetch(`${config.apiBaseUrl}/api/v1/auth/refresh`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        username: await getFromAsyncStorage("PHONE_NUMBER"),
+        refreshToken: await getFromAsyncStorage("REFRESH_TOKEN"),
+      }),
+    });
+
+    if (!response.ok) {
+      console.error(`Auth token fetching failed ${response}`)
+    }
+
+    return response.text();
+  }, []);
 
   return (
     <UserContext.Provider
       value={{
         userUuid: userUuid,
         setUserUuid: setUserUuid,
-        userToken,
-        setUserToken,
+        getUserToken,
         clearUserUuid: () => setUserUuid(undefined),
       }}
     >

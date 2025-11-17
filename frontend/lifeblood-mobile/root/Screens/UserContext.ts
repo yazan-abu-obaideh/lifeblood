@@ -2,8 +2,7 @@ import { createContext, useContext } from "react";
 
 interface UserContextType {
   userUuid: string | undefined;
-  userToken: string | undefined;
-  setUserToken: (token: string) => void;
+  getUserToken: () => Promise<string>;
   setUserUuid: (uuid: string) => void;
   clearUserUuid: () => void;
 }
