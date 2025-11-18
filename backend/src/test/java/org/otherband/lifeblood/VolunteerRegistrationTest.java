@@ -68,6 +68,58 @@ public class VolunteerRegistrationTest extends BaseTest {
     }
 
     @Test
+    void noCrossDataAccess() throws Exception {
+        final String firstPhoneNumber = randomPhoneNumber();
+        final String firstPassword = randomPassword();
+        HospitalEntity[] availableHospitals = fetchAvailableHospitals();
+        String hospitalUuid = availableHospitals[1].getUuid();
+
+        VolunteerRegistrationRequest request = new VolunteerRegistrationRequest();
+        request.setSelectedHospitals(List.of(hospitalUuid));
+        request.setPhoneNumber(firstPhoneNumber);
+        request.setPassword(firstPassword);
+        VolunteerEntity volunteer = createVolunteer(request);
+        verifyPhoneNumber(firstPhoneNumber);
+
+        String secondPhoneNumber = randomPhoneNumber();
+        VolunteerRegistrationRequest secondRequest = new VolunteerRegistrationRequest();
+        secondRequest.setSelectedHospitals(List.of(hospitalUuid));
+        secondRequest.setPhoneNumber(secondPhoneNumber);
+        secondRequest.setPassword(randomPassword());
+        VolunteerEntity secondVolunteer = createVolunteer(secondRequest);
+        verifyPhoneNumber(secondPhoneNumber);
+
+
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setUsername(firstPhoneNumber);
+        loginRequest.setPassword(firstPassword);
+
+        var loginResponse = login(loginRequest);
+        String authToken = getAuthToken(firstPhoneNumber, loginResponse.getRefreshToken());
+
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setBearerAuth(authToken);
+        mockMvc.perform(
+                        MockMvcRequestBuilders.get(VOLUNTEER_API.concat("/").concat(volunteer.getUuid()))
+                                .headers(httpHeaders)
+                )
+                .andExpect(status().isOk()) // their own data
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders.get(VOLUNTEER_API.concat("/").concat(secondVolunteer.getUuid()))
+                                .headers(httpHeaders)
+                )
+                .andExpect(status().is(401)) // someone else's data
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+    }
+
+    @Test
     void verifyPhoneNumber() throws Exception {
         final String phoneNumber = randomPhoneNumber();
         final String password = randomPassword();
@@ -84,23 +136,7 @@ public class VolunteerRegistrationTest extends BaseTest {
 
         assertThat(volunteer.isVerifiedPhoneNumber()).isFalse();
 
-        PhoneNumberVerificationCodeEntity verificationCode = verificationCodeJpaRepository.findAll()
-                .stream()
-                .filter(code -> phoneNumber.equals(code.getPhoneNumber()))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("Verification code not saved"));
-
-        String code = verificationCode.getVerificationCode();
-
-        PhoneVerificationRequest phoneVerificationRequest = new PhoneVerificationRequest();
-        phoneVerificationRequest.setPhoneNumber(phoneNumber);
-        phoneVerificationRequest.setVerificationCode(code);
-        mockMvc.perform(
-                        MockMvcRequestBuilders.post(VOLUNTEER_API.concat("/verify-phone-number"))
-                                .contentType("application/json")
-                                .content(objectMapper.writeValueAsString(phoneVerificationRequest))
-                )
-                .andExpect(status().isOk());
+        verifyPhoneNumber(phoneNumber);
 
         LoginRequest loginRequest = new LoginRequest();
         loginRequest.setUsername(phoneNumber);
@@ -125,6 +161,26 @@ public class VolunteerRegistrationTest extends BaseTest {
                 VolunteerEntity.class);
 
         assertThat(updatedVolunteer.isVerifiedPhoneNumber()).isTrue();
+    }
+
+    private void verifyPhoneNumber(String phoneNumber) throws Exception {
+        PhoneNumberVerificationCodeEntity verificationCode = verificationCodeJpaRepository.findAll()
+                .stream()
+                .filter(code -> phoneNumber.equals(code.getPhoneNumber()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Verification code not saved"));
+
+        String code = verificationCode.getVerificationCode();
+
+        PhoneVerificationRequest phoneVerificationRequest = new PhoneVerificationRequest();
+        phoneVerificationRequest.setPhoneNumber(phoneNumber);
+        phoneVerificationRequest.setVerificationCode(code);
+        mockMvc.perform(
+                        MockMvcRequestBuilders.post(VOLUNTEER_API.concat("/verify-phone-number"))
+                                .contentType("application/json")
+                                .content(objectMapper.writeValueAsString(phoneVerificationRequest))
+                )
+                .andExpect(status().isOk());
     }
 
 

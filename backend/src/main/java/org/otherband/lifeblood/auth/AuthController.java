@@ -50,7 +50,7 @@ public class AuthController {
                 .orElseThrow(() -> new UserAuthException("Username and password combination not found"));
 
         LoginResponse loginResponse = new LoginResponse();
-        loginResponse.setRefreshToken(jwtService.generateRefreshToken(buildUser(auth)));
+        loginResponse.setRefreshToken(jwtService.generateRefreshToken(buildUser(auth), auth.getUserUuid()));
         loginResponse.setPhoneNumber(auth.getUsername());
         loginResponse.setUserUuid(auth.getUserUuid());
         return loginResponse;
@@ -71,7 +71,7 @@ public class AuthController {
                 .orElseThrow(() ->
                         new UserAuthException("Refresh token was considered valid, but it does not exist in the repository. Revoked or forged."));
         return authenticationJpaRepository.findAuthEntityByUsername(request.getUsername())
-                .map(authEntity -> jwtService.generateToken(buildUser(authEntity)))
+                .map(authEntity -> jwtService.generateToken(buildUser(authEntity), authEntity.getUserUuid()))
                 .orElseThrow(() -> new AssertionFailure("Disastrous: refresh token was considered valid, but user was not found"));
     }
 

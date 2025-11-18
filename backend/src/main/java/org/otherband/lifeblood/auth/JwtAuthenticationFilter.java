@@ -15,6 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.Optional.ofNullable;
 
@@ -50,8 +51,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             .map(SimpleGrantedAuthority::new)
                             .toList();
 
+                    Map<String, Object> principalDetails = Map.of(
+                            "username", username,
+                            "user_uuid", jwtService.extractUuid(jwt)
+                    );
+
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            username,
+                            principalDetails,
                             null,
                             authorities
                     );

@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,7 +30,8 @@ class JwtServiceTest {
     void generateRefreshToken() {
         TimeService timeService = timeServiceMock();
         JwtService jwtService = buildJwtService(timeService);
-        String refreshToken = jwtService.generateRefreshToken(User.builder().username("user").password("password").build());
+        String refreshToken = jwtService.generateRefreshToken(User.builder().username("user").password("password").build(),
+                UUID.randomUUID().toString());
 
         assertTrue(jwtService.isValidRefreshToken("user", refreshToken));
         assertTrue(jwtService.isValidToken(refreshToken)); // refresh token must be a valid token to pass through the filter
@@ -47,7 +49,7 @@ class JwtServiceTest {
         JwtService other = buildJwtService(randomKey(), new TimeService());
 
         UserDetails userDetails = buildUserDetails(Set.of());
-        String refreshToken = other.generateRefreshToken(userDetails);
+        String refreshToken = other.generateRefreshToken(userDetails, UUID.randomUUID().toString());
 
         assertThrows(SignatureException.class, () -> jwtService.isValidRefreshToken(userDetails.getUsername(), refreshToken));
         assertTrue(other.isValidRefreshToken(userDetails.getUsername(), refreshToken));
@@ -57,7 +59,7 @@ class JwtServiceTest {
     void regularTokenIsNotValidRefreshToken() {
         JwtService jwtService = buildJwtService(new TimeService());
         UserDetails userDetails = buildUserDetails(Set.of());
-        String token = jwtService.generateToken(userDetails);
+        String token = jwtService.generateToken(userDetails, UUID.randomUUID().toString());
         assertFalse(jwtService.isValidRefreshToken(userDetails.getUsername(), token));
     }
 
@@ -70,7 +72,7 @@ class JwtServiceTest {
 
         UserDetails userDetails = buildUserDetails(Set.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
 
-        String token = otherService.generateToken(userDetails);
+        String token = otherService.generateToken(userDetails, UUID.randomUUID().toString());
 
         assertFalse(jwtService.isValidToken(token));
 
@@ -96,13 +98,15 @@ class JwtServiceTest {
                 .authorities(authorities)
                 .build();
 
-        String token = jwtService.generateToken(userDetails);
+        String userUuid = UUID.randomUUID().toString();
+        String token = jwtService.generateToken(userDetails, userUuid);
 
         String extractedUsername = jwtService.extractUsername(token);
         List<String> extractedRoles = jwtService.extractRoles(token);
         boolean isValid = jwtService.isValidToken(token);
 
         assertEquals(username, extractedUsername);
+        assertEquals(userUuid, jwtService.extractUuid(token));
         assertEquals(List.of("ROLE_ADMIN", "ROLE_USER"), extractedRoles);
         assertTrue(isValid);
 

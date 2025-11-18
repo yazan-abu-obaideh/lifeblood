@@ -8,6 +8,7 @@ import org.otherband.lifeblood.generated.model.VolunteerResponse;
 import org.otherband.lifeblood.validations.SimpleValidator;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,8 +26,8 @@ public class VolunteerController {
     }
 
     @GetMapping("/{uuid}")
-    @PreAuthorize(RoleConstants.HAS_VOLUNTEER_ROLE)
-    public VolunteerResponse getData(@PathVariable("uuid") String uuid) {
+    @PreAuthorize("#uuid == authentication.principal['user_uuid']")
+    public VolunteerResponse getData(@P("uuid") @PathVariable("uuid") String uuid) {
         return mapper.toResponse(volunteerService.findActiveUserByUuid(uuid));
     }
 

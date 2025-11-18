@@ -21,6 +21,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.ofNullable;
+
 @Service
 @Slf4j
 public class JwtService {
@@ -40,13 +42,14 @@ public class JwtService {
         this.refreshTokenRepository = refreshTokenRepository;
     }
 
-    public String generateRefreshToken(UserDetails userDetails) {
+    public String generateRefreshToken(UserDetails userDetails, String userUuid) {
         LocalDateTime now = timeService.now();
         LocalDateTime expirationDate = now.plus(Duration.of(21, ChronoUnit.DAYS));
 
         String refreshToken = Jwts.builder()
                 .subject(userDetails.getUsername())
                 .issuedAt(timeService.toDate(now))
+                .claims(Map.of("user_uuid", userUuid))
                 .expiration(timeService.toDate(expirationDate))
                 .signWith(getSigningKey())
                 .claim("refreshToken", true)
@@ -72,12 +75,13 @@ public class JwtService {
 
     }
 
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(UserDetails userDetails, String userUuid) {
         Map<String, Object> claims = new HashMap<>();
 
         List<String> roles = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
 
         claims.put("roles", roles);
+        claims.put("user_uuid", userUuid);
 
         return generateToken(claims, userDetails.getUsername());
     }
@@ -103,6 +107,14 @@ public class JwtService {
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+
+    public String extractUuid(String token) {
+        return extractClaim(token, claims ->
+                ofNullable(claims.get("user_uuid"))
+                        .filter(o -> o instanceof String)
+                        .map(Object::toString)
+                        .orElse(null));
     }
 
     @SuppressWarnings("unchecked")
