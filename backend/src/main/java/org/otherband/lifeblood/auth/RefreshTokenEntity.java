@@ -14,7 +14,7 @@ public class RefreshTokenEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String token;
+    private String tokenHash;
     private String username;
     @CreatedDate
     private LocalDateTime creationDate;

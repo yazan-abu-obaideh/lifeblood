@@ -26,30 +26,37 @@ class JwtServiceTest {
 
     @Test
     void generateRefreshToken() {
-        RefreshTokenRepository repository = repoMock();
-        JwtService jwtService = new JwtService(SECRET_KEY, 15, new TimeService(), repository);
+        TimeService timeService = timeServiceMock();
+        JwtService jwtService = buildJwtService(timeService);
         String refreshToken = jwtService.generateRefreshToken(User.builder().username("user").password("password").build());
+
         assertTrue(jwtService.isValidRefreshToken("user", refreshToken));
+        assertTrue(jwtService.isValidToken(refreshToken)); // refresh token must be a valid token to pass through the filter
+
         assertFalse(jwtService.isValidRefreshToken("different-user", refreshToken));
+
+        // expired
+        when(timeService.now()).thenReturn(LocalDateTime.now().plusDays(45));
+        assertFalse(jwtService.isValidRefreshToken("user", refreshToken));
     }
 
     @Test
     void regularTokenIsNotValidRefreshToken() {
-        JwtService jwtService = new JwtService(SECRET_KEY, 15, new TimeService(), repoMock());
-        String token = jwtService.generateToken(buildUserDetails(Set.of()));
-        assertFalse(jwtService.isValidRefreshToken("username", token));
+        JwtService jwtService = buildJwtService(new TimeService());
+        UserDetails userDetails = buildUserDetails(Set.of());
+        String token = jwtService.generateToken(userDetails);
+        assertFalse(jwtService.isValidRefreshToken(userDetails.getUsername(), token));
     }
 
 
     @Test
     void generateWithDifferentKey() {
-        JwtService jwtService = new JwtService(SECRET_KEY, 15, new TimeService(), repoMock());
+        JwtService jwtService = buildJwtService(new TimeService());
 
         JwtService otherService = new JwtService(
                 "some-other-key-some-other-key-some-other-key-some-other-key-some-other-key-some-other-key",
                 15, new TimeService(),
-                repoMock()
-                );
+                repoMock());
 
         UserDetails userDetails = buildUserDetails(Set.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
 
@@ -66,7 +73,7 @@ class JwtServiceTest {
         final LocalDateTime startTime = LocalDateTime.now();
         TimeService timeService = timeServiceMock();
 
-        JwtService jwtService = new JwtService(SECRET_KEY, 15, timeService, repoMock());
+        JwtService jwtService = buildJwtService(timeService);
 
         String username = "testuser";
         List<SimpleGrantedAuthority> authorities = List.of(
@@ -91,6 +98,10 @@ class JwtServiceTest {
 
         when(timeService.now()).thenReturn(startTime.plusMinutes(16)); // expired
         assertFalse(jwtService.isValidToken(token));
+    }
+
+    private static JwtService buildJwtService(TimeService timeService) {
+        return new JwtService(SECRET_KEY, 15, timeService, repoMock());
     }
 
     private static TimeService timeServiceMock() {

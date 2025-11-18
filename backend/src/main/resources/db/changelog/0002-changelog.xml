@@ -74,7 +74,7 @@
             <column name="username" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="token" type="varchar(4000)">
+            <column name="token_hash" type="varchar(4000)">
                 <constraints nullable="false"/>
             </column>
             <column name="creation_date" type="datetime2">

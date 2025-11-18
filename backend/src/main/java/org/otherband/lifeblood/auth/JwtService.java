@@ -54,9 +54,10 @@ public class JwtService {
 
         RefreshTokenEntity entity = new RefreshTokenEntity();
         entity.setUsername(userDetails.getUsername());
-        entity.setToken(refreshToken);
+        entity.setTokenHash(String.valueOf(refreshToken.hashCode()));
+        refreshTokenRepository.save(entity);
 
-        return refreshTokenRepository.save(entity).getToken();
+        return refreshToken;
     }
 
     public boolean isValidRefreshToken(String username, String refreshToken) {

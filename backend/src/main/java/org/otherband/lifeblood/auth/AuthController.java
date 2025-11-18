@@ -65,7 +65,8 @@ public class AuthController {
         }
         refreshTokenRepository.findRefreshTokenEntityByUsername(request.getUsername())
                 .stream()
-                .filter(refreshTokenEntity -> refreshTokenEntity.getToken().equals(request.getRefreshToken()))
+                .filter(refreshTokenEntity ->
+                        refreshTokenEntity.getTokenHash().equals(String.valueOf(request.getRefreshToken().hashCode())))
                 .findFirst()
                 .orElseThrow(() ->
                         new UserAuthException("Refresh token was considered valid, but it does not exist in the repository. Revoked or forged."));
