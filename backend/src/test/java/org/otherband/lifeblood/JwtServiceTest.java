@@ -1,6 +1,7 @@
 package org.otherband.lifeblood;
 
 import io.jsonwebtoken.security.SignatureException;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Test;
 import org.otherband.lifeblood.auth.JwtService;
 import org.otherband.lifeblood.auth.RefreshTokenRepository;
@@ -41,6 +42,18 @@ class JwtServiceTest {
     }
 
     @Test
+    void generateRefreshTokenWithWrongKey() {
+        JwtService jwtService = buildJwtService(new TimeService());
+        JwtService other = buildJwtService(randomKey(), new TimeService());
+
+        UserDetails userDetails = buildUserDetails(Set.of());
+        String refreshToken = other.generateRefreshToken(userDetails);
+
+        assertThrows(SignatureException.class, () -> jwtService.isValidRefreshToken(userDetails.getUsername(), refreshToken));
+        assertTrue(other.isValidRefreshToken(userDetails.getUsername(), refreshToken));
+    }
+
+    @Test
     void regularTokenIsNotValidRefreshToken() {
         JwtService jwtService = buildJwtService(new TimeService());
         UserDetails userDetails = buildUserDetails(Set.of());
@@ -53,10 +66,7 @@ class JwtServiceTest {
     void generateWithDifferentKey() {
         JwtService jwtService = buildJwtService(new TimeService());
 
-        JwtService otherService = new JwtService(
-                "some-other-key-some-other-key-some-other-key-some-other-key-some-other-key-some-other-key",
-                15, new TimeService(),
-                repoMock());
+        JwtService otherService = buildJwtService(randomKey(), new TimeService());
 
         UserDetails userDetails = buildUserDetails(Set.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
 
@@ -101,13 +111,22 @@ class JwtServiceTest {
     }
 
     private static JwtService buildJwtService(TimeService timeService) {
-        return new JwtService(SECRET_KEY, 15, timeService, repoMock());
+        return buildJwtService(SECRET_KEY, timeService);
+    }
+
+    private static String randomKey() {
+        return RandomStringUtils.secure().nextAlphabetic(350);
+    }
+
+    private static JwtService buildJwtService(String secretKey, TimeService timeService) {
+        return new JwtService(secretKey, 15, timeService, repoMock());
     }
 
     private static TimeService timeServiceMock() {
         TimeService timeService = mock(TimeService.class);
         when(timeService.now()).thenCallRealMethod();
         when(timeService.getZoneId()).thenCallRealMethod();
+        when(timeService.toDate(any())).thenCallRealMethod();
         return timeService;
     }
 

@@ -46,8 +46,8 @@ public class JwtService {
 
         String refreshToken = Jwts.builder()
                 .subject(userDetails.getUsername())
-                .issuedAt(toDate(now))
-                .expiration(toDate(expirationDate))
+                .issuedAt(timeService.toDate(now))
+                .expiration(timeService.toDate(expirationDate))
                 .signWith(getSigningKey())
                 .claim("refreshToken", true)
                 .compact();
@@ -85,8 +85,8 @@ public class JwtService {
     public String generateToken(Map<String, Object> extraClaims, String username) {
         LocalDateTime now = timeService.now();
         LocalDateTime expiration = now.plus(tokenExpiration);
-        Date nowDate = toDate(now);
-        Date expirationDate = toDate(expiration);
+        Date nowDate = timeService.toDate(now);
+        Date expirationDate = timeService.toDate(expiration);
 
         return Jwts.builder().claims(extraClaims).subject(username).issuedAt(nowDate).expiration(expirationDate).signWith(getSigningKey()).compact();
     }
@@ -113,10 +113,6 @@ public class JwtService {
 
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
-    }
-
-    private Date toDate(LocalDateTime now) {
-        return Date.from(now.atZone(timeService.getZoneId()).toInstant());
     }
 
     private  <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
