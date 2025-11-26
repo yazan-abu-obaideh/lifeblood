@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
-import { ApiError, verifyCode } from "./services/api";
-import { styles } from "./styles";
-import { validateVerificationCode } from "./utils/validation";
+import { ApiError, verifyCode } from "../../services/api";
+import { styles } from "../../styles";
+import { validateVerificationCode } from "../../utils/validation";
 import { useNavigation } from "@react-navigation/native";
-import { NavigationProp } from "./Screens/navigationUtils";
-import { getFromAsyncStorage } from "./utils/asyncStorageUtils";
+import { NavigationProp } from "../navigationUtils";
+import { getFromAsyncStorage } from "../../utils/asyncStorageUtils";
 
-export const VerificationScreen: React.FC = () => {
+export const PhoneVerificationScreen: React.FC = () => {
   const [code, setCode] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [verified, setVerified] = useState(false);

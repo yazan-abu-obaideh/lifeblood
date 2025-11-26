@@ -7,17 +7,17 @@ import VolunteerSettings from "./Screens/VolunteerScreen/VolunteerSettings";
 import { useCallback, useEffect, useState } from "react";
 import { UserContext, useUser } from "./Screens/UserContext";
 import { RootStackParamList } from "./Screens/navigationUtils";
-import SignIn from "./SignIn";
+import SignIn from "./Screens/SignIn";
 import { config } from "./config/config";
 import { getFromAsyncStorage } from "./utils/asyncStorageUtils";
-import SignUp from "./SignUp";
-import { VerificationScreen } from "./VerificationScreen";
+import SignUp from "./Screens/RegistrationScreens/SignUp";
+import { PhoneVerificationScreen } from "./Screens/RegistrationScreens/VerificationScreen";
 
 const stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootScreen() {
   const [userUuid, setUserUuid] = useState<string | undefined>(undefined);
-  const [loadingInitial, setLoadingInitial] = useState(true)
+  const [loadingInitial, setLoadingInitial] = useState(true);
 
   let initialRoute: "signIn" | "summary" = "signIn";
 
@@ -34,8 +34,8 @@ export default function RootScreen() {
     getFromAsyncStorage("REFRESH_TOKEN")
       .then((refreshToken) => {
         if (refreshToken) {
-          console.log(refreshToken)
-          if (new Date(JSON.parse(refreshToken)['expiration']) < new Date()) {
+          console.log(refreshToken);
+          if (new Date(JSON.parse(refreshToken)["expiration"]) < new Date()) {
             initialRoute = "summary";
           } else {
             initialRoute = "signIn";
@@ -69,8 +69,9 @@ export default function RootScreen() {
     return response.text();
   }, []);
 
-  
-  return (loadingInitial ? <></> :
+  return loadingInitial ? (
+    <></>
+  ) : (
     <UserContext.Provider
       value={{
         userUuid: userUuid,
@@ -90,7 +91,7 @@ export default function RootScreen() {
           />
           <stack.Screen
             name="verifyNumber"
-            component={VerificationScreen}
+            component={PhoneVerificationScreen}
             options={{
               headerShown: false,
             }}

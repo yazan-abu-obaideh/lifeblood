@@ -7,13 +7,13 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
-import { getHospitals, ApiError } from "./services/api";
-import { styles } from "./styles";
-import { PhoneInputScreenProps } from "./types";
-import { validatePhoneNumber } from "./utils/validation";
-import { HospitalResponse } from "./generated-open-api/models/HospitalResponse";
+import { getHospitals, ApiError } from "../../services/api";
+import { styles } from "../../styles";
+import { PhoneInputScreenProps } from "../../types";
+import { validatePhoneNumber } from "../../utils/validation";
+import { HospitalResponse } from "../../generated-open-api/models/HospitalResponse";
 
-export const PhoneInputScreen: React.FC<PhoneInputScreenProps> = ({
+export const RegistrationScreen: React.FC<PhoneInputScreenProps> = ({
   registerVolunteer: registerVolunteer,
   loading,
 }) => {

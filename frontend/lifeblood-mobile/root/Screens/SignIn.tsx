@@ -8,13 +8,12 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { config } from "./config/config";
-import { useUser } from "./Screens/UserContext";
+import { config } from "../config/config";
+import { useUser } from "../Screens/UserContext";
 import { useNavigation } from "@react-navigation/native";
-import { NavigationProp } from "./Screens/navigationUtils";
-import { LoginResponse } from "./generated-open-api";
-import { saveToAsyncStorage } from "./utils/asyncStorageUtils";
+import { NavigationProp } from "../Screens/navigationUtils";
+import { LoginResponse } from "../generated-open-api";
+import { saveToAsyncStorage } from "../utils/asyncStorageUtils";
 
 const LoginScreen: React.FC = () => {
   const [username, setUsername] = useState("");

@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import { KeyboardAvoidingView, Platform, Alert } from "react-native";
-import { registerVolunteer, verifyCode, ApiError } from "./services/api";
-import { styles } from "./styles";
-import { SignUpProps } from "./types";
-import { VerificationScreen } from "./VerificationScreen";
-import { PhoneInputScreen } from "./PhoneInputScreen";
+import { registerVolunteer, verifyCode, ApiError } from "../../services/api";
+import { styles } from "../../styles";
+import { SignUpProps } from "../../types";
+import { RegistrationScreen } from "./PhoneInputScreen";
 import { useNavigation } from "@react-navigation/native";
-import { NavigationProp } from "./Screens/navigationUtils";
+import { NavigationProp } from "../navigationUtils";
 
 const SignUp: React.FC<SignUpProps> = ({ onComplete }) => {
   const [phoneNumber, setPhoneNumber] = useState<string>("");
@@ -37,33 +36,12 @@ const SignUp: React.FC<SignUpProps> = ({ onComplete }) => {
     }
   };
 
-  const verifyCodeHandler = async (code: string): Promise<void> => {
-    setLoading(true);
-    try {
-      await verifyCode(phoneNumber, code);
-
-      onComplete?.({
-        phoneNumber,
-        selectedHospitals: selectedHospitalIds,
-      });
-    } catch (error) {
-      if (error instanceof ApiError) {
-        Alert.alert("Error", error.message);
-      } else {
-        Alert.alert("Error", "Failed to verify code");
-      }
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <PhoneInputScreen
+      <RegistrationScreen
         registerVolunteer={registerVolunteerHandler}
         loading={loading}
       />
