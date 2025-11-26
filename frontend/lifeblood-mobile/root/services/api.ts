@@ -4,6 +4,10 @@ import {
   PageAlertResponse,
 } from "../generated-open-api/models/all";
 
+interface ApiResponse {
+  name: string;
+}
+
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -77,6 +81,7 @@ interface SendVerificationCodeResponse {
 
 export const registerVolunteer = async (
   phoneNumber: string,
+  password: string,
   hospitalUuids: string[]
 ): Promise<SendVerificationCodeResponse> => {
   const url = `${config.apiBaseUrl}${config.endpoints.registerVolunteer}`;
@@ -89,7 +94,7 @@ export const registerVolunteer = async (
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ phoneNumber, selectedHospitals: hospitalUuids }),
+      body: JSON.stringify({ phoneNumber, password, selectedHospitals: hospitalUuids }),
     });
 
     console.log("[API] Send code response status:", response.status);

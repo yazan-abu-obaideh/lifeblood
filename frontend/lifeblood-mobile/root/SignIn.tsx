@@ -50,7 +50,8 @@ const LoginScreen: React.FC = () => {
       await saveToAsyncStorage("REFRESH_TOKEN", loginResponse.refreshToken!);
       await saveToAsyncStorage("USER_UUID", loginResponse.userUuid!);
       await saveToAsyncStorage("PHONE_NUMBER", loginResponse.phoneNumber!);
-      navigation.navigate("summary");
+      userContext.setUserUuid(loginResponse.userUuid!);
+      navigation.replace("summary");
     } catch (error) {
       console.error("Login error:", error);
       Alert.alert("Login Failed", "Invalid username or password");

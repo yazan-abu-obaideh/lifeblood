@@ -14,10 +14,11 @@ import { validatePhoneNumber } from "./utils/validation";
 import { HospitalResponse } from "./generated-open-api/models/HospitalResponse";
 
 export const PhoneInputScreen: React.FC<PhoneInputScreenProps> = ({
-  sendVerificationCode,
+  registerVolunteer: registerVolunteer,
   loading,
 }) => {
   const [phoneNumber, setPhoneNumber] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [hospitals, setHospitals] = useState<HospitalResponse[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -75,7 +76,7 @@ export const PhoneInputScreen: React.FC<PhoneInputScreenProps> = ({
     setError("");
 
     try {
-      await sendVerificationCode(phoneNumber, Array.from(selectedIds));
+      await registerVolunteer(phoneNumber, password, Array.from(selectedIds));
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);
@@ -102,6 +103,18 @@ export const PhoneInputScreen: React.FC<PhoneInputScreenProps> = ({
           setError("");
         }}
         keyboardType="phone-pad"
+        editable={!loading}
+      />
+      <Text style={styles.subtitle}>Enter your password</Text>
+
+      <TextInput
+        style={[styles.input, error && styles.inputError]}
+        placeholder="Password"
+        value={password}
+        onChangeText={(text) => {
+          setPassword(text);
+          setError("");
+        }}
         editable={!loading}
       />
 

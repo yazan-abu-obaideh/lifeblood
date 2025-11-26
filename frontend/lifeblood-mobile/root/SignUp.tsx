@@ -5,23 +5,26 @@ import { styles } from "./styles";
 import { SignUpProps } from "./types";
 import { VerificationScreen } from "./VerificationScreen";
 import { PhoneInputScreen } from "./PhoneInputScreen";
+import { useNavigation } from "@react-navigation/native";
+import { NavigationProp } from "./Screens/navigationUtils";
 
 const SignUp: React.FC<SignUpProps> = ({ onComplete }) => {
-  const [step, setStep] = useState<"phone" | "verify">("phone");
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [selectedHospitalIds, setSelectedHospitalIds] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const navigation = useNavigation<NavigationProp>();
 
-  const sendVerificationCodeHandler = async (
+  const registerVolunteerHandler = async (
     phone: string,
+    password: string,
     hospitalIds: string[]
   ): Promise<void> => {
     setLoading(true);
     try {
-      await registerVolunteer(phone, hospitalIds);
+      await registerVolunteer(phone, password, hospitalIds);
       setPhoneNumber(phone);
       setSelectedHospitalIds(hospitalIds);
-      setStep("verify");
+      navigation.navigate("verifyNumber");
     } catch (error) {
       if (error instanceof ApiError) {
         Alert.alert("Error", error.message);
@@ -55,30 +58,15 @@ const SignUp: React.FC<SignUpProps> = ({ onComplete }) => {
     }
   };
 
-  const goBack = (): void => {
-    setStep("phone");
-    setPhoneNumber("");
-    setSelectedHospitalIds([]);
-  };
-
   return (
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      {step === "phone" ? (
-        <PhoneInputScreen
-          sendVerificationCode={sendVerificationCodeHandler}
-          loading={loading}
-        />
-      ) : (
-        <VerificationScreen
-          phoneNumber={phoneNumber}
-          verifyCode={verifyCodeHandler}
-          goBack={goBack}
-          loading={loading}
-        />
-      )}
+      <PhoneInputScreen
+        registerVolunteer={registerVolunteerHandler}
+        loading={loading}
+      />
     </KeyboardAvoidingView>
   );
 };
