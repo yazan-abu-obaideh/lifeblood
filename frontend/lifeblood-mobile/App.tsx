@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import * as Notifications from "expo-notifications";
-import SignUp from "./root/SignUp";
 import RootScreen from "./root/Root";
 import {
   enableNotifications,

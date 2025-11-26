@@ -1,0 +1,130 @@
+import AlertsView from "./Screens/AlertScreen/AlertsView";
+
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import VolunteerSummary from "./Screens/VolunteerScreen/VolunteerSummary";
+import VolunteerSettings from "./Screens/VolunteerScreen/VolunteerSettings";
+import { useCallback, useEffect, useState } from "react";
+import { UserContext, useUser } from "./Screens/UserContext";
+import { RootStackParamList } from "./Screens/navigationUtils";
+import SignIn from "./SignIn";
+import { config } from "./config/config";
+import { getFromAsyncStorage } from "./utils/asyncStorageUtils";
+import SignUp from "./SignUp";
+import { VerificationScreen } from "./VerificationScreen";
+
+const stack = createNativeStackNavigator<RootStackParamList>();
+
+export default function RootScreen() {
+  const [userUuid, setUserUuid] = useState<string | undefined>(undefined);
+  const [loadingInitial, setLoadingInitial] = useState(true)
+
+  let initialRoute: "signIn" | "summary" = "signIn";
+
+  useEffect(() => {
+    getFromAsyncStorage("USER_UUID")
+      .then((userUuid) => {
+        setUserUuid(userUuid ?? undefined);
+      })
+      .catch((error) => {
+        console.error(
+          `Something went wrong while getting userUuid from async storage ${error}`
+        );
+      });
+    getFromAsyncStorage("REFRESH_TOKEN")
+      .then((refreshToken) => {
+        if (refreshToken) {
+          console.log(refreshToken)
+          if (new Date(JSON.parse(refreshToken)['expiration']) < new Date()) {
+            initialRoute = "summary";
+          } else {
+            initialRoute = "signIn";
+          }
+        }
+        setLoadingInitial(false);
+      })
+      .catch((error) => {
+        console.error(
+          `Something went wrong while checking refresh token ${error}`
+        );
+      });
+  }, []);
+
+  const getUserToken = useCallback(async () => {
+    const response = await fetch(`${config.apiBaseUrl}/api/v1/auth/refresh`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: await getFromAsyncStorage("PHONE_NUMBER"),
+        refreshToken: await getFromAsyncStorage("REFRESH_TOKEN"),
+      }),
+    });
+
+    if (!response.ok) {
+      console.error(`Auth token fetching failed ${response}`);
+    }
+
+    return response.text();
+  }, []);
+
+  
+  return (loadingInitial ? <></> :
+    <UserContext.Provider
+      value={{
+        userUuid: userUuid,
+        setUserUuid: setUserUuid,
+        getUserToken,
+        clearUserUuid: () => setUserUuid(undefined),
+      }}
+    >
+      <NavigationContainer>
+        <stack.Navigator initialRouteName={initialRoute}>
+          <stack.Screen
+            name="signUp"
+            component={SignUp}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <stack.Screen
+            name="verifyNumber"
+            component={VerificationScreen}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <stack.Screen
+            name="signIn"
+            component={SignIn}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <stack.Screen
+            name="summary"
+            component={VolunteerSummary}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <stack.Screen
+            name="alerts"
+            component={AlertsView}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <stack.Screen
+            name="settings"
+            component={VolunteerSettings}
+            options={{
+              headerShown: false,
+            }}
+          />
+        </stack.Navigator>
+      </NavigationContainer>
+    </UserContext.Provider>
+  );
+}
