@@ -61,22 +61,24 @@ public class VolunteerService {
 
     @Transactional
     public VolunteerEntity registerVolunteer(VolunteerRegistrationRequest volunteerRequest) {
+        String formattedPhoneNumber = formatPhoneNumber(volunteerRequest.getPhoneNumber());
+        
         VolunteerEntity entity = mapper.toEntity(volunteerRequest);
         entity.setUuid(UUID.randomUUID().toString());
-        entity.setPhoneNumber(PhoneNumberUtil.INSTANCE.formatPhoneNumber(volunteerRequest.getPhoneNumber()));
+        entity.setPhoneNumber(formattedPhoneNumber);
         entity.setAlertableHospitals(mapToHospitals(volunteerRequest.getSelectedHospitals()));
         entity.setNotificationChannels(Arrays.stream(NotificationChannel.values()).map(Enum::name).toList());
         entity.setMinimumSeverity(0);
 
         PhoneNumberVerificationCodeEntity verificationCode = new PhoneNumberVerificationCodeEntity();
-        verificationCode.setPhoneNumber(volunteerRequest.getPhoneNumber());
+        verificationCode.setPhoneNumber(formattedPhoneNumber);
         verificationCode.setVerificationCode(UUID.randomUUID().toString());
 
         verificationCodeJpaRepository.save(verificationCode);
 
         whatsAppMessageRepository.save(WhatsAppMessageEntity.builder()
                         .templateName("verification_code")
-                        .phoneNumber(volunteerRequest.getPhoneNumber())
+                        .phoneNumber(formattedPhoneNumber)
                         .templateVariables(List.of(verificationCode.getVerificationCode()))
                 .build());
 
@@ -92,14 +94,15 @@ public class VolunteerService {
 
     @Transactional
     public void verifyPhoneNumber(PhoneVerificationRequest request) {
+        String formattedPhoneNumber = formatPhoneNumber(request.getPhoneNumber());
         Optional<PhoneNumberVerificationCodeEntity> result = verificationCodeJpaRepository.findByPhoneNumberAndVerificationCode(
-                request.getPhoneNumber(), request.getVerificationCode()
+                formattedPhoneNumber, request.getVerificationCode()
         );
 
         if (result.isEmpty()) {
             throw new UserException(
                     "Verification code '%s' for phone number '%s' invalid or expired"
-                            .formatted(request.getVerificationCode(), request.getPhoneNumber())
+                            .formatted(request.getVerificationCode(), formattedPhoneNumber)
             );
         }
 
@@ -108,8 +111,9 @@ public class VolunteerService {
             throw new UserException("Verification code has expired. Please request a new one.");
         }
 
-        VolunteerEntity volunteer = volunteerJpaRepository.findByPhoneNumber(request.getPhoneNumber())
-                .orElseThrow(() -> new AssertionError("This should never happen."));
+        VolunteerEntity volunteer = volunteerJpaRepository.findByPhoneNumber(formattedPhoneNumber)
+                .orElseThrow(() -> new AssertionError(
+                        "This should never happen: the verification code was found, but not the volunteer"));
 
         volunteer.setVerifiedPhoneNumber(true);
         volunteerJpaRepository.save(volunteer);
@@ -126,5 +130,9 @@ public class VolunteerService {
                 })
                 .map(Optional::get)
                 .toList();
+    }
+
+    private static String formatPhoneNumber(String phoneNumber) {
+        return PhoneNumberUtil.INSTANCE.formatPhoneNumber(phoneNumber);
     }
 }
