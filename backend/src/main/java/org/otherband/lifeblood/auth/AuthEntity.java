@@ -18,7 +18,7 @@ public class AuthEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String userUuid;
-    private String username;
+    private String phoneNumber;
     private String hashedPassword;
     @Column(columnDefinition = "varchar(50) array")
     private Set<String> roles;

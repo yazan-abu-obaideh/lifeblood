@@ -7,5 +7,5 @@ import java.util.List;
 
 @Repository
 public interface RefreshTokenRepository extends JpaRepository<RefreshTokenEntity, Long> {
-    List<RefreshTokenEntity> findRefreshTokenEntityByUsername(String username);
+    List<RefreshTokenEntity> findRefreshTokenEntityByPhoneNumber(String phoneNumber);
 }

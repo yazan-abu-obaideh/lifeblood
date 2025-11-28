@@ -9,11 +9,11 @@ import {
 } from "react-native";
 import { getHospitals, ApiError } from "../../services/api";
 import { styles } from "../../styles";
-import { PhoneInputScreenProps } from "../../types";
+import { RegistrationScreenProps } from "../../types";
 import { validatePhoneNumber } from "../../utils/validation";
 import { HospitalResponse } from "../../generated-open-api/models/HospitalResponse";
 
-export const RegistrationScreen: React.FC<PhoneInputScreenProps> = ({
+export const RegistrationScreen: React.FC<RegistrationScreenProps> = ({
   registerVolunteer: registerVolunteer,
   loading,
 }) => {

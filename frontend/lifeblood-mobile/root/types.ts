@@ -1,4 +1,4 @@
-export interface PhoneInputScreenProps {
+export interface RegistrationScreenProps {
   registerVolunteer: (
     phoneNumber: string,
     password: string,

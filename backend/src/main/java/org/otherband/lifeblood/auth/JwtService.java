@@ -7,9 +7,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.otherband.lifeblood.TimeService;
+import org.otherband.lifeblood.volunteer.UserDetails;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -19,7 +18,6 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 
@@ -47,7 +45,7 @@ public class JwtService {
         LocalDateTime expirationDate = now.plus(Duration.of(21, ChronoUnit.DAYS));
 
         String refreshToken = Jwts.builder()
-                .subject(userDetails.getUsername())
+                .subject(userDetails.getPhoneNumber())
                 .issuedAt(timeService.toDate(now))
                 .claims(Map.of("user_uuid", userUuid))
                 .expiration(timeService.toDate(expirationDate))
@@ -56,17 +54,17 @@ public class JwtService {
                 .compact();
 
         RefreshTokenEntity entity = new RefreshTokenEntity();
-        entity.setUsername(userDetails.getUsername());
+        entity.setPhoneNumber(userDetails.getPhoneNumber());
         entity.setTokenHash(String.valueOf(refreshToken.hashCode()));
         refreshTokenRepository.save(entity);
 
         return refreshToken;
     }
 
-    public boolean isValidRefreshToken(String username, String refreshToken) {
+    public boolean isValidRefreshToken(String subject, String refreshToken) {
         Jws<Claims> claimsJws = Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(refreshToken);
         Boolean isRefreshToken = Optional.of(claimsJws).map(Jwt::getPayload)
-                .filter(claims -> username.equals(claims.getSubject()))
+                .filter(claims -> subject.equals(claims.getSubject()))
                 .map(claims -> claims.get("refreshToken"))
                 .filter(object -> object instanceof Boolean)
                 .map(object -> (Boolean) object)
@@ -78,21 +76,20 @@ public class JwtService {
     public String generateToken(UserDetails userDetails, String userUuid) {
         Map<String, Object> claims = new HashMap<>();
 
-        List<String> roles = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
 
-        claims.put("roles", roles);
+        claims.put("roles", userDetails.getRoles());
         claims.put("user_uuid", userUuid);
 
-        return generateToken(claims, userDetails.getUsername());
+        return generateToken(claims, userDetails.getPhoneNumber());
     }
 
-    public String generateToken(Map<String, Object> extraClaims, String username) {
+    public String generateToken(Map<String, Object> extraClaims, String subject) {
         LocalDateTime now = timeService.now();
         LocalDateTime expiration = now.plus(tokenExpiration);
         Date nowDate = timeService.toDate(now);
         Date expirationDate = timeService.toDate(expiration);
 
-        return Jwts.builder().claims(extraClaims).subject(username).issuedAt(nowDate).expiration(expirationDate).signWith(getSigningKey()).compact();
+        return Jwts.builder().claims(extraClaims).subject(subject).issuedAt(nowDate).expiration(expirationDate).signWith(getSigningKey()).compact();
     }
 
     public boolean isValidToken(String token) {
@@ -105,7 +102,7 @@ public class JwtService {
         }
     }
 
-    public String extractUsername(String token) {
+    public String extractSubject(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 

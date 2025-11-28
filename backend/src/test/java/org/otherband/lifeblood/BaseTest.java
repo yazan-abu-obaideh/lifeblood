@@ -22,17 +22,13 @@ import org.otherband.lifeblood.volunteer.VerificationCodeJpaRepository;
 import org.otherband.lifeblood.volunteer.VolunteerEntity;
 import org.otherband.lifeblood.volunteer.VolunteerJpaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.io.Resource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -56,7 +52,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public abstract class BaseTest {
 
     public static final Faker FAKER = new Faker();
-    public static final String DOCTOR_USERNAME = "doctor_user";
+    public static final String DOCTOR_PHONE_NUMBER = "+962797777777";
     public static final String DOCTOR_PASSWORD = randomPassword();
 
     public static final AtomicBoolean SETUP_DONE = new AtomicBoolean();
@@ -91,31 +87,21 @@ public abstract class BaseTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Value("classpath:hospitals.json")
-    private Resource hospitals;
-
     @BeforeAll
-    public void initialData() throws IOException {
-        doSetup(this.hospitals, hospitalJpaRepository, authenticationJpaRepository, passwordEncoder, objectMapper);
+    public void initialData() {
+        doSetup(authenticationJpaRepository, passwordEncoder);
     }
 
-    private static synchronized void doSetup(Resource hospitals,
-                         HospitalJpaRepository hospitalJpaRepository,
-                         AuthenticationJpaRepository authenticationJpaRepository,
-                         PasswordEncoder passwordEncoder,
-                         ObjectMapper objectMapper) throws IOException {
+    private static synchronized void doSetup(AuthenticationJpaRepository authenticationJpaRepository,
+                                             PasswordEncoder passwordEncoder) {
           /* because the test instance life cycle is per class,
            the setup method runs multiple times.
            This synchronization and boolean check prevent that.
          */
         if (!SETUP_DONE.get()) {
-            String hospitalsContent = hospitals.getContentAsString(StandardCharsets.UTF_8);
-            HospitalEntity[] hospitalEntities = objectMapper.readValue(hospitalsContent,
-                    HospitalEntity[].class);
-            hospitalJpaRepository.saveAll(Arrays.asList(hospitalEntities));
             authenticationJpaRepository.save(
                     AuthEntity.builder()
-                            .username(DOCTOR_USERNAME)
+                            .phoneNumber(DOCTOR_PHONE_NUMBER)
                             .userUuid(UUID.randomUUID().toString())
                             .hashedPassword(passwordEncoder.encode(DOCTOR_PASSWORD))
                             .roles(Set.of(RoleConstants.DOCTOR_ROLE))
@@ -139,9 +125,9 @@ public abstract class BaseTest {
     }
 
     @SneakyThrows
-    public String getAuthToken(String username, String refreshToken) {
+    public String getAuthToken(String phoneNumber, String refreshToken) {
         RefreshTokenRequest request = new RefreshTokenRequest();
-        request.setUsername(username);
+        request.setPhoneNumber(phoneNumber);
         request.setRefreshToken(refreshToken);
         return mockMvc.perform(
                         MockMvcRequestBuilders.post(AUTH_API.concat("/refresh"))
@@ -173,7 +159,8 @@ public abstract class BaseTest {
     }
 
     protected HospitalEntity[] fetchAvailableHospitals() throws Exception {
-        String contentAsString = mockMvc.perform(MockMvcRequestBuilders.get(HOSPITAL_API).contentType("application/json")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        String contentAsString = mockMvc.perform(MockMvcRequestBuilders.get(HOSPITAL_API).contentType("application/json"))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         return objectMapper.readValue(contentAsString, HospitalEntity[].class);
     }
 

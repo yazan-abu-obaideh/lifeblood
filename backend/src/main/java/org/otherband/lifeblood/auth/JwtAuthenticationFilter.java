@@ -42,9 +42,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             final String jwt = authHeader.substring(7);
-            final String username = jwtService.extractUsername(jwt);
+            final String subject = jwtService.extractSubject(jwt);
 
-            if (username != null) {
+            if (subject != null) {
                 if (jwtService.isValidToken(jwt)) {
                     List<String> roles = ofNullable(jwtService.extractRoles(jwt)).orElse(Collections.emptyList());
                     List<SimpleGrantedAuthority> authorities = roles.stream()
@@ -52,7 +52,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             .toList();
 
                     Map<String, Object> principalDetails = Map.of(
-                            "username", username,
+                            "subject", subject,
                             "user_uuid", jwtService.extractUuid(jwt)
                     );
 

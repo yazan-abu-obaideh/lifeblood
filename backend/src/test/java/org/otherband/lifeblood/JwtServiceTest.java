@@ -5,14 +5,11 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Test;
 import org.otherband.lifeblood.auth.JwtService;
 import org.otherband.lifeblood.auth.RefreshTokenRepository;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.otherband.lifeblood.volunteer.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,7 +27,7 @@ class JwtServiceTest {
     void generateRefreshToken() {
         TimeService timeService = timeServiceMock();
         JwtService jwtService = buildJwtService(timeService);
-        String refreshToken = jwtService.generateRefreshToken(User.builder().username("user").password("password").build(),
+        String refreshToken = jwtService.generateRefreshToken(UserDetails.builder().phoneNumber("user").build(),
                 UUID.randomUUID().toString());
 
         assertTrue(jwtService.isValidRefreshToken("user", refreshToken));
@@ -48,19 +45,19 @@ class JwtServiceTest {
         JwtService jwtService = buildJwtService(new TimeService());
         JwtService other = buildJwtService(randomKey(), new TimeService());
 
-        UserDetails userDetails = buildUserDetails(Set.of());
+        UserDetails userDetails = buildUserDetails(List.of());
         String refreshToken = other.generateRefreshToken(userDetails, UUID.randomUUID().toString());
 
-        assertThrows(SignatureException.class, () -> jwtService.isValidRefreshToken(userDetails.getUsername(), refreshToken));
-        assertTrue(other.isValidRefreshToken(userDetails.getUsername(), refreshToken));
+        assertThrows(SignatureException.class, () -> jwtService.isValidRefreshToken(userDetails.getPhoneNumber(), refreshToken));
+        assertTrue(other.isValidRefreshToken(userDetails.getPhoneNumber(), refreshToken));
     }
 
     @Test
     void regularTokenIsNotValidRefreshToken() {
         JwtService jwtService = buildJwtService(new TimeService());
-        UserDetails userDetails = buildUserDetails(Set.of());
+        UserDetails userDetails = buildUserDetails(List.of());
         String token = jwtService.generateToken(userDetails, UUID.randomUUID().toString());
-        assertFalse(jwtService.isValidRefreshToken(userDetails.getUsername(), token));
+        assertFalse(jwtService.isValidRefreshToken(userDetails.getPhoneNumber(), token));
     }
 
 
@@ -70,13 +67,13 @@ class JwtServiceTest {
 
         JwtService otherService = buildJwtService(randomKey(), new TimeService());
 
-        UserDetails userDetails = buildUserDetails(Set.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
+        UserDetails userDetails = buildUserDetails(List.of("ROLE_ADMIN"));
 
         String token = otherService.generateToken(userDetails, UUID.randomUUID().toString());
 
         assertFalse(jwtService.isValidToken(token));
 
-        assertThrows(SignatureException.class, () -> jwtService.extractUsername(token));
+        assertThrows(SignatureException.class, () -> jwtService.extractSubject(token));
         assertThrows(SignatureException.class, () -> jwtService.extractRoles(token));
     }
 
@@ -87,25 +84,24 @@ class JwtServiceTest {
 
         JwtService jwtService = buildJwtService(timeService);
 
-        String username = "testuser";
-        List<SimpleGrantedAuthority> authorities = List.of(
-                new SimpleGrantedAuthority("ROLE_ADMIN"),
-                new SimpleGrantedAuthority("ROLE_USER")
+        String phoneNumber = "079 777 7777";
+        List<String> authorities = List.of(
+                "ROLE_ADMIN",
+                "ROLE_USER"
         );
-        UserDetails userDetails = User.builder()
-                .username(username)
-                .password("password")
-                .authorities(authorities)
+        UserDetails userDetails = UserDetails.builder()
+                .phoneNumber(phoneNumber)
+                .roles(authorities)
                 .build();
 
         String userUuid = UUID.randomUUID().toString();
         String token = jwtService.generateToken(userDetails, userUuid);
 
-        String extractedUsername = jwtService.extractUsername(token);
+        String extractedSubject = jwtService.extractSubject(token);
         List<String> extractedRoles = jwtService.extractRoles(token);
         boolean isValid = jwtService.isValidToken(token);
 
-        assertEquals(username, extractedUsername);
+        assertEquals(phoneNumber, extractedSubject);
         assertEquals(userUuid, jwtService.extractUuid(token));
         assertEquals(List.of("ROLE_ADMIN", "ROLE_USER"), extractedRoles);
         assertTrue(isValid);
@@ -134,11 +130,10 @@ class JwtServiceTest {
         return timeService;
     }
 
-    private static UserDetails buildUserDetails(Set<SimpleGrantedAuthority> authorities) {
-        return User.builder()
-                .username("username")
-                .password("password")
-                .authorities(authorities)
+    private static UserDetails buildUserDetails(List<String> authorities) {
+        return UserDetails.builder()
+                .phoneNumber("username")
+                .roles(authorities)
                 .build();
     }
 

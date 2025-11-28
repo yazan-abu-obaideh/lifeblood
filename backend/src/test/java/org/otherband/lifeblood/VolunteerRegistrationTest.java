@@ -91,7 +91,7 @@ public class VolunteerRegistrationTest extends BaseTest {
 
 
         LoginRequest loginRequest = new LoginRequest();
-        loginRequest.setUsername(firstPhoneNumber);
+        loginRequest.setPhoneNumber(firstPhoneNumber);
         loginRequest.setPassword(firstPassword);
 
         var loginResponse = login(loginRequest);
@@ -139,7 +139,7 @@ public class VolunteerRegistrationTest extends BaseTest {
         verifyPhoneNumber(phoneNumber);
 
         LoginRequest loginRequest = new LoginRequest();
-        loginRequest.setUsername(phoneNumber);
+        loginRequest.setPhoneNumber(phoneNumber);
         loginRequest.setPassword(password);
 
         var loginResponse = login(loginRequest);

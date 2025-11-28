@@ -1,7 +1,6 @@
 package org.otherband.lifeblood;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -32,10 +31,10 @@ public class AlertTest extends BaseTest {
 
     public String loginDoctor() {
         LoginRequest loginRequest = new LoginRequest();
-        loginRequest.setUsername(DOCTOR_USERNAME);
+        loginRequest.setPhoneNumber(DOCTOR_PHONE_NUMBER);
         loginRequest.setPassword(DOCTOR_PASSWORD);
         var loginResponse = login(loginRequest);
-        return getAuthToken(DOCTOR_USERNAME, loginResponse.getRefreshToken());
+        return getAuthToken(DOCTOR_PHONE_NUMBER, loginResponse.getRefreshToken());
     }
 
     @Test

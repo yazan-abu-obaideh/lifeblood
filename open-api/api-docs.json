@@ -42,7 +42,7 @@
       "LoginRequest": {
         "type": "object",
         "properties": {
-          "username": {
+          "phoneNumber": {
             "type": "string"
           },
           "password": {
@@ -70,7 +70,7 @@
       "RefreshTokenRequest": {
         "type": "object",
         "properties": {
-          "username": {
+          "phoneNumber": {
             "type": "string"
           },
           "refreshToken": {

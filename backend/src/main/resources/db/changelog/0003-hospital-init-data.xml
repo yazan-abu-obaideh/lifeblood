@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="0003" author="Yazan" dbms="postgresql,h2">
+        <insert tableName="hospital">
+            <column name="uuid" valueComputed="gen_random_uuid()"/>
+            <column name="hospital_name" value="Jordan University Hospital"/>
+            <column name="x_coordinate" value="31.2"/>
+            <column name="y_coordinate" value="31.3"/>
+        </insert>
+        <insert tableName="hospital">
+            <column name="uuid" valueComputed="gen_random_uuid()"/>
+            <column name="hospital_name" value="Istishari Hospital"/>
+            <column name="x_coordinate" value="31.4"/>
+            <column name="y_coordinate" value="31.5"/>
+        </insert>
+        <insert tableName="hospital">
+            <column name="uuid" valueComputed="gen_random_uuid()"/>
+            <column name="hospital_name" value="Takhasosi Hospital"/>
+            <column name="x_coordinate" value="31.55"/>
+            <column name="y_coordinate" value="31.6"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
