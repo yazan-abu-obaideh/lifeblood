@@ -2,14 +2,12 @@ import React, { useState } from "react";
 import { KeyboardAvoidingView, Platform, Alert } from "react-native";
 import { registerVolunteer, verifyCode, ApiError } from "../../services/api";
 import { styles } from "../../styles";
-import { SignUpProps } from "../../types";
-import { RegistrationScreen } from "./PhoneInputScreen";
+import { RegistrationScreen } from "./RegistrationScreen";
 import { useNavigation } from "@react-navigation/native";
 import { NavigationProp } from "../navigationUtils";
+import { saveToAsyncStorage } from "../../utils/asyncStorageUtils";
 
-const SignUp: React.FC<SignUpProps> = ({ onComplete }) => {
-  const [phoneNumber, setPhoneNumber] = useState<string>("");
-  const [selectedHospitalIds, setSelectedHospitalIds] = useState<string[]>([]);
+const SignUp: React.FC = ({}) => {
   const [loading, setLoading] = useState<boolean>(false);
   const navigation = useNavigation<NavigationProp>();
 
@@ -21,8 +19,7 @@ const SignUp: React.FC<SignUpProps> = ({ onComplete }) => {
     setLoading(true);
     try {
       await registerVolunteer(phone, password, hospitalIds);
-      setPhoneNumber(phone);
-      setSelectedHospitalIds(hospitalIds);
+      await saveToAsyncStorage("PHONE_NUMBER", phone);
       navigation.navigate("verifyNumber");
     } catch (error) {
       if (error instanceof ApiError) {

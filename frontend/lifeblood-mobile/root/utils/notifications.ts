@@ -4,6 +4,10 @@ import firebaseConfig from "../../google-services.json";
 
 export const messagingSenderId: string = process.env.MESSAGING_SENDER_ID || "";
 
+if (messagingSenderId === "") {
+  console.warn("No messaging sender ID found");
+}
+
 export async function localGetMessaging() {
   try {
     const app = await firebase.initializeApp({

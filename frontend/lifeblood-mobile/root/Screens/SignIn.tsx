@@ -52,12 +52,17 @@ const LoginScreen: React.FC = () => {
       userContext.setUserUuid(loginResponse.userUuid!);
       navigation.replace("summary");
     } catch (error) {
-      console.error("Login error:", error);
+      console.error(`Login error: ${error}`);
       Alert.alert("Login Failed", "Invalid username or password");
     } finally {
       setLoading(false);
     }
   };
+
+  function navigateToSignUp(): Promise<void> {
+    navigation.navigate("signUp");
+    return Promise.resolve();
+  }
 
   return (
     <View style={styles.container}>
@@ -83,17 +88,16 @@ const LoginScreen: React.FC = () => {
           editable={!loading}
         />
 
-        <TouchableOpacity
-          style={[styles.button, loading && styles.buttonDisabled]}
+        <ActionButton
+          loading={loading}
+          buttonText="Login"
           onPress={handleLogin}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>Login</Text>
-          )}
-        </TouchableOpacity>
+        />
+        <ActionButton
+          loading={loading}
+          buttonText="Sign Up"
+          onPress={navigateToSignUp}
+        />
       </View>
     </View>
   );
@@ -151,3 +155,27 @@ const styles = StyleSheet.create({
 });
 
 export default LoginScreen;
+
+function ActionButton({
+  loading,
+  onPress: onClick,
+  buttonText,
+}: {
+  loading: boolean;
+  onPress: () => Promise<void>;
+  buttonText: string;
+}) {
+  return (
+    <TouchableOpacity
+      style={[styles.button, loading && styles.buttonDisabled]}
+      onPress={onClick}
+      disabled={loading}
+    >
+      {loading ? (
+        <ActivityIndicator color="#fff" />
+      ) : (
+        <Text style={styles.buttonText}>{buttonText}</Text>
+      )}
+    </TouchableOpacity>
+  );
+}

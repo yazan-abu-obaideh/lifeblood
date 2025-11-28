@@ -4,6 +4,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import VolunteerSummary from "./Screens/VolunteerScreen/VolunteerSummary";
 import VolunteerSettings from "./Screens/VolunteerScreen/VolunteerSettings";
+import { Text } from "react-native";
 import { useCallback, useEffect, useState } from "react";
 import { UserContext, useUser } from "./Screens/UserContext";
 import { RootStackParamList } from "./Screens/navigationUtils";
@@ -17,7 +18,6 @@ const stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootScreen() {
   const [userUuid, setUserUuid] = useState<string | undefined>(undefined);
-  const [loadingInitial, setLoadingInitial] = useState(true);
 
   let initialRoute: "signIn" | "summary" = "signIn";
 
@@ -29,23 +29,6 @@ export default function RootScreen() {
       .catch((error) => {
         console.error(
           `Something went wrong while getting userUuid from async storage ${error}`
-        );
-      });
-    getFromAsyncStorage("REFRESH_TOKEN")
-      .then((refreshToken) => {
-        if (refreshToken) {
-          console.log(refreshToken);
-          if (new Date(JSON.parse(refreshToken)["expiration"]) < new Date()) {
-            initialRoute = "summary";
-          } else {
-            initialRoute = "signIn";
-          }
-        }
-        setLoadingInitial(false);
-      })
-      .catch((error) => {
-        console.error(
-          `Something went wrong while checking refresh token ${error}`
         );
       });
   }, []);
@@ -69,9 +52,7 @@ export default function RootScreen() {
     return response.text();
   }, []);
 
-  return loadingInitial ? (
-    <></>
-  ) : (
+  return (
     <UserContext.Provider
       value={{
         userUuid: userUuid,

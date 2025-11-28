@@ -1,15 +1,7 @@
-import React, { useEffect, useState } from "react";
 import * as Notifications from "expo-notifications";
+import React, { useEffect, useState } from "react";
 import RootScreen from "./root/Root";
-import {
-  enableNotifications,
-  messagingSenderId,
-} from "./root/utils/notifications";
-import { getFromAsyncStorage } from "./root/utils/asyncStorageUtils";
-
-if (messagingSenderId === "") {
-  console.warn("No messaging sender ID found");
-}
+import { enableNotifications } from "./root/utils/notifications";
 
 const notificationsEnabled: string = process.env.NOTIFICATIONS_ENABLED || "";
 
@@ -24,27 +16,12 @@ Notifications.setNotificationHandler({
 });
 
 export default function App() {
-  const [token, setToken] = useState("");
-  const [signedIn, setSignedIn] = useState(true);
-
-  useEffect(() => {
-    getFromAsyncStorage("PHONE_NUMBER")
-      .then((result) => {
-        if (result !== null) {
-          setSignedIn(true);
-        } else {
-          setSignedIn(false);
-        }
-      })
-      .catch((err) => {
-        setSignedIn(false);
-      });
-  }, []);
+  const [pushNotificationToken, setPushNotificationToken] = useState("");
 
   useEffect(() => {
     if ("TRUE" === notificationsEnabled.toUpperCase()) {
       console.log("Notifications enabled...");
-      return enableNotifications(setToken);
+      return enableNotifications(setPushNotificationToken);
     } else {
       console.log("Notifications disabled...");
     }

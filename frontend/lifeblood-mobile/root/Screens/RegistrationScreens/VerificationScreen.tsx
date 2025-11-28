@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { ApiError, verifyCode } from "../../services/api";
 import { styles } from "../../styles";
 import { validateVerificationCode } from "../../utils/validation";
@@ -9,20 +9,21 @@ import { getFromAsyncStorage } from "../../utils/asyncStorageUtils";
 
 export const PhoneVerificationScreen: React.FC = () => {
   const [code, setCode] = useState<string>("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [error, setError] = useState<string>("");
   const [verified, setVerified] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState("");
+
   const [loading, setLoading] = useState(false);
 
   const navigation = useNavigation<NavigationProp>();
 
-  const handleVerify = async (): Promise<void> => {
-    useEffect(() => {
-      getFromAsyncStorage("PHONE_NUMBER").then((result) => {
-        setPhoneNumber(result ?? "");
-      });
-    }, []);
+  useEffect(() => {
+    getFromAsyncStorage("PHONE_NUMBER").then((result) => {
+      setPhoneNumber(result ?? "");
+    });
+  }, []);
 
+  const handleVerify = async (): Promise<void> => {
     // Validate verification code
     const validation = validateVerificationCode(code);
     if (!validation.valid) {
@@ -33,14 +34,19 @@ export const PhoneVerificationScreen: React.FC = () => {
     setError("");
 
     try {
-      await verifyCode(code, phoneNumber);
+      setLoading(true);
+      await verifyCode(phoneNumber, code);
       setVerified(true);
+      Alert.alert("Verification successful! Redirecting to sign in screen.");
+      navigation.navigate("signIn");
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);
       } else {
         setError("An unexpected error occurred");
       }
+    } finally {
+      setLoading(false);
     }
   };
 
