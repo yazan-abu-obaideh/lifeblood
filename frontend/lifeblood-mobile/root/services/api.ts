@@ -54,7 +54,7 @@ export const fetchUserDetails = async (
 };
 
 export const login = async (
-  username: string,
+  phoneNumber: string,
   password: string
 ): Promise<LoginResponse> => {
   const response = await fetch(`${config.apiBaseUrl}/api/v1/auth/login`, {
@@ -63,7 +63,7 @@ export const login = async (
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      username: username.trim(),
+      phoneNumber: phoneNumber.trim(),
       password: password.trim(),
     }),
   });
@@ -82,7 +82,7 @@ export const fetchRefreshToken = async (): Promise<string> => {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      username: await getFromAsyncStorage("PHONE_NUMBER"),
+      phoneNumber: await getFromAsyncStorage("PHONE_NUMBER"),
       refreshToken: await getFromAsyncStorage("REFRESH_TOKEN"),
     }),
   });

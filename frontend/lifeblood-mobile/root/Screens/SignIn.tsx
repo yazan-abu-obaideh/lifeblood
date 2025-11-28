@@ -41,21 +41,21 @@ function ActionButton({
 }
 
 const LoginScreen: React.FC = () => {
-  const [username, setUsername] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const userContext = useUser();
   const navigation = useNavigation<NavigationProp>();
 
   const handleLogin = async () => {
-    if (!username.trim() || !password.trim()) {
-      Alert.alert("Error", "Please enter username and password");
+    if (!phoneNumber.trim() || !password.trim()) {
+      Alert.alert("Error", "Please enter phone number and password");
       return;
     }
 
     setLoading(true);
     try {
-      const loginResponse: LoginResponse = await login(username, password);
+      const loginResponse: LoginResponse = await login(phoneNumber, password);
       await saveToAsyncStorage("REFRESH_TOKEN", loginResponse.refreshToken!);
       await saveToAsyncStorage("USER_UUID", loginResponse.userUuid!);
       await saveToAsyncStorage("PHONE_NUMBER", loginResponse.phoneNumber!);
@@ -63,7 +63,7 @@ const LoginScreen: React.FC = () => {
       navigation.replace("summary");
     } catch (error) {
       console.error(`Login error: ${error}`);
-      Alert.alert("Login Failed", "Invalid username or password");
+      Alert.alert("Login Failed", "Invalid phone number or password");
     } finally {
       setLoading(false);
     }
@@ -82,9 +82,9 @@ const LoginScreen: React.FC = () => {
 
         <TextInput
           style={styles.input}
-          placeholder="Username"
-          value={username}
-          onChangeText={setUsername}
+          placeholder="Phone number"
+          value={phoneNumber}
+          onChangeText={setPhoneNumber}
           autoCapitalize="none"
           editable={!loading}
         />
