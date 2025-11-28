@@ -2,17 +2,17 @@ import AlertsView from "./Screens/AlertScreen/AlertsView";
 
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import VolunteerSummary from "./Screens/VolunteerScreen/VolunteerSummary";
-import VolunteerSettings from "./Screens/VolunteerScreen/VolunteerSettings";
-import { Text } from "react-native";
+import VolunteerSummary from "./Screens/VolunteerScreens/VolunteerSummary";
+import VolunteerSettings from "./Screens/VolunteerScreens/VolunteerSettings";
 import { useCallback, useEffect, useState } from "react";
-import { UserContext, useUser } from "./Screens/UserContext";
+import { UserContext } from "./Screens/UserContext";
 import { RootStackParamList } from "./Screens/navigationUtils";
 import SignIn from "./Screens/SignIn";
 import { config } from "./config/config";
 import { getFromAsyncStorage } from "./utils/asyncStorageUtils";
 import SignUp from "./Screens/RegistrationScreens/SignUp";
 import { PhoneVerificationScreen } from "./Screens/RegistrationScreens/VerificationScreen";
+import { fetchRefreshToken } from "./services/api";
 
 const stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -34,22 +34,7 @@ export default function RootScreen() {
   }, []);
 
   const getUserToken = useCallback(async () => {
-    const response = await fetch(`${config.apiBaseUrl}/api/v1/auth/refresh`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        username: await getFromAsyncStorage("PHONE_NUMBER"),
-        refreshToken: await getFromAsyncStorage("REFRESH_TOKEN"),
-      }),
-    });
-
-    if (!response.ok) {
-      console.error(`Auth token fetching failed ${response}`);
-    }
-
-    return response.text();
+    return fetchRefreshToken();
   }, []);
 
   return (

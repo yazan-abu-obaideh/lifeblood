@@ -8,7 +8,6 @@ import {
   Alert,
 } from "react-native";
 import { styles } from "./VolunteerSettingsStyles";
-import { config } from "../../config/config";
 import {
   AlertLevel,
   HospitalResponse,
@@ -17,15 +16,13 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { useUser } from "../UserContext";
 import { NavigationProp } from "../navigationUtils";
-import { getHospitals } from "../../services/api";
+import { fetchUserDetails, getHospitals } from "../../services/api";
 import {
   SEVERITY_LABELS,
   SEVERITY_DESCRIPTIONS,
   NUMBER_TO_SEVERITY,
   SEVERITY_TO_NUMBER,
 } from "../../utils/alertLevelUtils";
-
-type UserSettings = VolunteerResponse;
 
 interface SettingsHeaderProps {
   onBackPress: () => void;
@@ -303,9 +300,8 @@ const VolunteerSettings: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
 
-  const [originalSettings, setOriginalSettings] = useState<UserSettings | null>(
-    null
-  );
+  const [originalSettings, setOriginalSettings] =
+    useState<VolunteerResponse | null>(null);
   const [minimumSeverity, setMinimumSeverity] = useState<AlertLevel>(
     AlertLevel.Routine
   );
@@ -325,19 +321,7 @@ const VolunteerSettings: React.FC = () => {
       if (!user.userUuid) {
         throw Error("User uuid not found");
       }
-      const token = await user.getUserToken();
-      const response = await fetch(
-        `${config.apiBaseUrl}${config.endpoints.volunteer.replace(
-          "{uuid}",
-          user.userUuid
-        )}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      const data: UserSettings = await response.json();
+      const data: VolunteerResponse = await fetchUserDetails(user);
 
       setOriginalSettings(data);
       setMinimumSeverity(NUMBER_TO_SEVERITY[data.minimumSeverity ?? 0]);
@@ -411,7 +395,7 @@ const VolunteerSettings: React.FC = () => {
         throw new Error("Failed to save settings");
       }
 
-      const updatedData: UserSettings = await response.json();
+      const updatedData: VolunteerResponse = await response.json();
       setOriginalSettings(updatedData);
 
       Alert.alert("Success", "Settings saved successfully");

@@ -1,8 +1,12 @@
 import { config } from "../config/config";
 import {
   HospitalResponse,
+  LoginResponse,
   PageAlertResponse,
+  VolunteerResponse,
 } from "../generated-open-api/models/all";
+import { UserContextType } from "../Screens/UserContext";
+import { getFromAsyncStorage } from "../utils/asyncStorageUtils";
 
 interface ApiResponse {
   name: string;
@@ -24,6 +28,70 @@ export const getAlerts = async (
 ): Promise<PageAlertResponse> => {
   const response = await fetch(`${config.apiBaseUrl}/api/v1/alert?${params}`);
   return response.json();
+};
+
+export const fetchUserDetails = async (
+  user: UserContextType
+): Promise<VolunteerResponse> => {
+  const token = await user.getUserToken();
+  const response = await fetch(
+    `${config.apiBaseUrl}${config.endpoints.volunteer.replace(
+      "{uuid}",
+      user.userUuid!
+    )}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch user details");
+  }
+
+  return await response.json();
+};
+
+export const login = async (
+  username: string,
+  password: string
+): Promise<LoginResponse> => {
+  const response = await fetch(`${config.apiBaseUrl}/api/v1/auth/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      username: username.trim(),
+      password: password.trim(),
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Login failed");
+  }
+
+  return await response.json();
+};
+
+export const fetchRefreshToken = async (): Promise<string> => {
+  const response = await fetch(`${config.apiBaseUrl}/api/v1/auth/refresh`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      username: await getFromAsyncStorage("PHONE_NUMBER"),
+      refreshToken: await getFromAsyncStorage("REFRESH_TOKEN"),
+    }),
+  });
+
+  if (!response.ok) {
+    console.error(`Auth token fetching failed ${response}`);
+  }
+
+  return response.text();
 };
 
 export const getHospitals = async (): Promise<HospitalResponse[]> => {
@@ -94,7 +162,11 @@ export const registerVolunteer = async (
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ phoneNumber, password, selectedHospitals: hospitalUuids }),
+      body: JSON.stringify({
+        phoneNumber,
+        password,
+        selectedHospitals: hospitalUuids,
+      }),
     });
 
     console.log("[API] Send code response status:", response.status);

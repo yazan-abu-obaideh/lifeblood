@@ -14,6 +14,31 @@ import { useNavigation } from "@react-navigation/native";
 import { NavigationProp } from "../Screens/navigationUtils";
 import { LoginResponse } from "../generated-open-api";
 import { saveToAsyncStorage } from "../utils/asyncStorageUtils";
+import { login } from "../services/api";
+
+function ActionButton({
+  loading,
+  onPress: onClick,
+  buttonText,
+}: {
+  loading: boolean;
+  onPress: () => Promise<void>;
+  buttonText: string;
+}) {
+  return (
+    <TouchableOpacity
+      style={[styles.button, loading && styles.buttonDisabled]}
+      onPress={onClick}
+      disabled={loading}
+    >
+      {loading ? (
+        <ActivityIndicator color="#fff" />
+      ) : (
+        <Text style={styles.buttonText}>{buttonText}</Text>
+      )}
+    </TouchableOpacity>
+  );
+}
 
 const LoginScreen: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -30,22 +55,7 @@ const LoginScreen: React.FC = () => {
 
     setLoading(true);
     try {
-      const response = await fetch(`${config.apiBaseUrl}/api/v1/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: username.trim(),
-          password: password.trim(),
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Login failed");
-      }
-
-      const loginResponse: LoginResponse = await response.json();
+      const loginResponse: LoginResponse = await login(username, password);
       await saveToAsyncStorage("REFRESH_TOKEN", loginResponse.refreshToken!);
       await saveToAsyncStorage("USER_UUID", loginResponse.userUuid!);
       await saveToAsyncStorage("PHONE_NUMBER", loginResponse.phoneNumber!);
@@ -155,27 +165,3 @@ const styles = StyleSheet.create({
 });
 
 export default LoginScreen;
-
-function ActionButton({
-  loading,
-  onPress: onClick,
-  buttonText,
-}: {
-  loading: boolean;
-  onPress: () => Promise<void>;
-  buttonText: string;
-}) {
-  return (
-    <TouchableOpacity
-      style={[styles.button, loading && styles.buttonDisabled]}
-      onPress={onClick}
-      disabled={loading}
-    >
-      {loading ? (
-        <ActivityIndicator color="#fff" />
-      ) : (
-        <Text style={styles.buttonText}>{buttonText}</Text>
-      )}
-    </TouchableOpacity>
-  );
-}
