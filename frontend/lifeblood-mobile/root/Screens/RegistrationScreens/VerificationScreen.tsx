@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { ApiError, verifyCode } from "../../services/api";
+import { verifyCode } from "../../services/api";
+import { ApiError } from "../../services/apiClientConfig";
 import { styles } from "../../styles";
 import { getFromAsyncStorage } from "../../utils/asyncStorageUtils";
 import { validateVerificationCode } from "../../utils/validation";

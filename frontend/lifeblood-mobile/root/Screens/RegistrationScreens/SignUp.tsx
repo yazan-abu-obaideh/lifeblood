@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform } from "react-native";
-import { ApiError, registerVolunteer } from "../../services/api";
+import { registerVolunteer } from "../../services/api";
+import { ApiError } from "../../services/apiClientConfig";
 import { styles } from "../../styles";
 import { saveToAsyncStorage } from "../../utils/asyncStorageUtils";
 import { getNavigation } from "../navigationUtils";

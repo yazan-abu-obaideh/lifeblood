@@ -7,7 +7,8 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
-import { getHospitals, ApiError } from "../../services/api";
+import { getHospitals } from "../../services/api";
+import { ApiError } from "../../services/apiClientConfig";
 import { styles } from "../../styles";
 import { RegistrationScreenProps } from "../../types";
 import { validatePhoneNumber } from "../../utils/validation";
