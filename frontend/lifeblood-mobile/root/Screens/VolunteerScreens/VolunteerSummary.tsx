@@ -163,7 +163,7 @@ interface EditProfileButtonProps {
 const ViewAlertsButton: React.FC<EditProfileButtonProps> = ({ onPress }) => {
   return (
     <TouchableOpacity style={styles.editButton} onPress={onPress}>
-      <Text style={styles.editButtonText}>View All Alerts</Text>
+      <Text style={styles.editButtonText}>View Alerts</Text>
     </TouchableOpacity>
   );
 };

@@ -1,3 +1,4 @@
+import axios from "axios";
 import { config } from "../config/config";
 import {
   HospitalResponse,
@@ -7,10 +8,6 @@ import {
 } from "../generated-open-api/models/all";
 import { UserContextType } from "../Screens/UserContext";
 import { getFromAsyncStorage } from "../utils/asyncStorageUtils";
-
-interface ApiResponse {
-  name: string;
-}
 
 export class ApiError extends Error {
   constructor(
@@ -26,15 +23,17 @@ export class ApiError extends Error {
 export const getAlerts = async (
   params: URLSearchParams
 ): Promise<PageAlertResponse> => {
-  const response = await fetch(`${config.apiBaseUrl}/api/v1/alert?${params}`);
-  return response.json();
+  const response = await axios.get(
+    `${config.apiBaseUrl}/api/v1/alert?${params}`
+  );
+  return response.data;
 };
 
 export const fetchUserDetails = async (
   user: UserContextType
 ): Promise<VolunteerResponse> => {
   const token = await user.getUserToken();
-  const response = await fetch(
+  const response = await axios.get(
     `${config.apiBaseUrl}${config.endpoints.volunteer.replace(
       "{uuid}",
       user.userUuid!
@@ -46,52 +45,48 @@ export const fetchUserDetails = async (
     }
   );
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch user details");
-  }
-
-  return await response.json();
+  return response.data;
 };
 
 export const login = async (
   phoneNumber: string,
   password: string
 ): Promise<LoginResponse> => {
-  const response = await fetch(`${config.apiBaseUrl}/api/v1/auth/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
+  const response = await axios.post(
+    `${config.apiBaseUrl}/api/v1/auth/login`,
+    {
       phoneNumber: phoneNumber.trim(),
       password: password.trim(),
-    }),
-  });
+    },
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
 
-  if (!response.ok) {
-    throw new Error("Login failed");
-  }
-
-  return await response.json();
+  return response.data;
 };
 
 export const fetchRefreshToken = async (): Promise<string> => {
-  const response = await fetch(`${config.apiBaseUrl}/api/v1/auth/refresh`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
+  const response = await axios.post(
+    `${config.apiBaseUrl}/api/v1/auth/refresh`,
+    {
       phoneNumber: await getFromAsyncStorage("PHONE_NUMBER"),
       refreshToken: await getFromAsyncStorage("REFRESH_TOKEN"),
-    }),
-  });
+    },
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
 
-  if (!response.ok) {
+  if (response.status !== 200) {
     console.error(`Auth token fetching failed ${response}`);
   }
 
-  return response.text();
+  return response.data;
 };
 
 export const getHospitals = async (): Promise<HospitalResponse[]> => {
@@ -100,8 +95,7 @@ export const getHospitals = async (): Promise<HospitalResponse[]> => {
   console.log("[API] Fetching hospitals");
 
   try {
-    const response = await fetch(url, {
-      method: "GET",
+    const response = await axios.get(url, {
       headers: {
         "Content-Type": "application/json",
       },
@@ -109,27 +103,27 @@ export const getHospitals = async (): Promise<HospitalResponse[]> => {
 
     console.log("[API] Get hospitals response status:", response.status);
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      const errorMessage =
-        errorData.message || `HTTP error! status: ${response.status}`;
-
-      console.error("[API] Get hospitals failed:", {
-        status: response.status,
-        error: errorMessage,
-        data: errorData,
-      });
-
-      throw new ApiError(errorMessage, response.status, errorData);
-    }
-
-    const data = await response.json();
+    const data = response.data;
     console.log("[API] Get hospitals success:", data);
 
     return data;
   } catch (error) {
     if (error instanceof ApiError) {
       throw error;
+    }
+
+    if (axios.isAxiosError(error) && error.response) {
+      const errorData = error.response.data || {};
+      const errorMessage =
+        errorData.message || `HTTP error! status: ${error.response.status}`;
+
+      console.error("[API] Get hospitals failed:", {
+        status: error.response.status,
+        error: errorMessage,
+        data: errorData,
+      });
+
+      throw new ApiError(errorMessage, error.response.status, errorData);
     }
 
     console.error("[API] Network error fetching hospitals:", error);
@@ -157,41 +151,43 @@ export const registerVolunteer = async (
   console.log("[API] Sending verification code to:", phoneNumber);
 
   try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    const response = await axios.post(
+      url,
+      {
         phoneNumber,
         password,
         selectedHospitals: hospitalUuids,
-      }),
-    });
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     console.log("[API] Send code response status:", response.status);
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      const errorMessage =
-        errorData.message || `HTTP error! status: ${response.status}`;
-
-      console.error("[API] Send code failed:", {
-        status: response.status,
-        error: errorMessage,
-        data: errorData,
-      });
-
-      throw new ApiError(errorMessage, response.status, errorData);
-    }
-
-    const data = await response.json();
+    const data = response.data;
     console.log("[API] Send code success:", data);
 
     return data;
   } catch (error) {
     if (error instanceof ApiError) {
       throw error;
+    }
+
+    if (axios.isAxiosError(error) && error.response) {
+      const errorData = error.response.data || {};
+      const errorMessage =
+        errorData.message || `HTTP error! status: ${error.response.status}`;
+
+      console.error("[API] Send code failed:", {
+        status: error.response.status,
+        error: errorMessage,
+        data: errorData,
+      });
+
+      throw new ApiError(errorMessage, error.response.status, errorData);
     }
 
     console.error("[API] Network error sending code:", error);
@@ -213,29 +209,17 @@ export const verifyCode = async (
   console.log("[API] Verifying code for:", phoneNumber);
 
   try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ phoneNumber, verificationCode }),
-    });
+    const response = await axios.post(
+      url,
+      { phoneNumber, verificationCode },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     console.log("[API] Verify code response status:", response.status);
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      const errorMessage =
-        errorData.message || `HTTP error! status: ${response.status}`;
-
-      console.error("[API] Verify code failed:", {
-        status: response.status,
-        error: errorMessage,
-        data: errorData,
-      });
-
-      throw new ApiError(errorMessage, response.status, errorData);
-    }
 
     console.log("[API] Verify code success:");
 
@@ -243,6 +227,20 @@ export const verifyCode = async (
   } catch (error) {
     if (error instanceof ApiError) {
       throw error;
+    }
+
+    if (axios.isAxiosError(error) && error.response) {
+      const errorData = error.response.data || {};
+      const errorMessage =
+        errorData.message || `HTTP error! status: ${error.response.status}`;
+
+      console.error("[API] Verify code failed:", {
+        status: error.response.status,
+        error: errorMessage,
+        data: errorData,
+      });
+
+      throw new ApiError(errorMessage, error.response.status, errorData);
     }
 
     console.error("[API] Network error verifying code:", error);
