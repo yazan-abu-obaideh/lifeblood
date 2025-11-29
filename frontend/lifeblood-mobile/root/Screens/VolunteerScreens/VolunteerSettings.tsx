@@ -265,6 +265,7 @@ const HospitalsSection: React.FC<HospitalsSectionProps> = ({
           {allHospitals.map((hospital) => {
             return (
               <Hospital
+                key={hospital.uuid}
                 hospital={hospital}
                 selectedHospitals={selectedHospitals}
                 onHospitalsChange={onHospitalsChange}

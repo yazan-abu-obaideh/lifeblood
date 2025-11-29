@@ -63,7 +63,7 @@ const LoginScreen: React.FC = () => {
       navigation.reset({
         routes: [
           {
-            name: "signIn",
+            name: "summary",
           },
         ],
       });
