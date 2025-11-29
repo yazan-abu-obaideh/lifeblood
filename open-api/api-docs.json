@@ -109,6 +109,26 @@
           }
         }
       },
+      "UpdateVolunteerSettingsRequest": {
+        "type": "object",
+        "properties": {
+          "selectedHospitals": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "enabledNotificationChannels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NotificationChannel"
+            }
+          },
+          "minimumAlertLevel": {
+            "$ref": "#/components/schemas/AlertLevel"
+          }
+        }
+      },
       "HospitalResponse": {
         "type": "object",
         "required": [

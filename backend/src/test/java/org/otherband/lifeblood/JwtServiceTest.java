@@ -132,7 +132,7 @@ class JwtServiceTest {
 
     private static UserDetails buildUserDetails(List<String> authorities) {
         return UserDetails.builder()
-                .phoneNumber("username")
+                .phoneNumber("0798889999")
                 .roles(authorities)
                 .build();
     }

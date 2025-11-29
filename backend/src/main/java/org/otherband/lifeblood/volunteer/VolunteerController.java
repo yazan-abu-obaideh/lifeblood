@@ -3,6 +3,7 @@ package org.otherband.lifeblood.volunteer;
 import org.otherband.lifeblood.ApplicationMapper;
 import org.otherband.lifeblood.auth.RoleConstants;
 import org.otherband.lifeblood.generated.model.PhoneVerificationRequest;
+import org.otherband.lifeblood.generated.model.UpdateVolunteerSettingsRequest;
 import org.otherband.lifeblood.generated.model.VolunteerRegistrationRequest;
 import org.otherband.lifeblood.generated.model.VolunteerResponse;
 import org.otherband.lifeblood.validations.SimpleValidator;
@@ -29,6 +30,13 @@ public class VolunteerController {
     @PreAuthorize("#uuid == authentication.principal['user_uuid']")
     public VolunteerResponse getData(@P("uuid") @PathVariable("uuid") String uuid) {
         return mapper.toResponse(volunteerService.findActiveUserByUuid(uuid));
+    }
+
+    @PatchMapping("/{uuid}/update-settings")
+    @PreAuthorize("#uuid == authentication.principal['user_uuid']")
+    public VolunteerResponse updateSettings(@P("uuid") @PathVariable("uuid") String uuid,
+                                            @RequestBody UpdateVolunteerSettingsRequest updateVolunteerSettingsRequest) {
+        return mapper.toResponse(volunteerService.updateUserSettings(uuid, updateVolunteerSettingsRequest));
     }
 
     @PostMapping

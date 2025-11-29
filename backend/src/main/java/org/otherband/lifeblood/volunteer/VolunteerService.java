@@ -1,14 +1,17 @@
 package org.otherband.lifeblood.volunteer;
 
+import org.hibernate.AssertionFailure;
 import org.otherband.lifeblood.ApplicationMapper;
 import org.otherband.lifeblood.PhoneNumberUtil;
 import org.otherband.lifeblood.TimeService;
 import org.otherband.lifeblood.UserException;
+import org.otherband.lifeblood.alert.AlertLevelUtils;
 import org.otherband.lifeblood.auth.AuthEntity;
 import org.otherband.lifeblood.auth.AuthenticationJpaRepository;
 import org.otherband.lifeblood.auth.RoleConstants;
 import org.otherband.lifeblood.generated.model.NotificationChannel;
 import org.otherband.lifeblood.generated.model.PhoneVerificationRequest;
+import org.otherband.lifeblood.generated.model.UpdateVolunteerSettingsRequest;
 import org.otherband.lifeblood.generated.model.VolunteerRegistrationRequest;
 import org.otherband.lifeblood.hospital.HospitalEntity;
 import org.otherband.lifeblood.hospital.HospitalJpaRepository;
@@ -57,6 +60,33 @@ public class VolunteerService {
             throw new UserException("Please verify your phone number before accessing home screen");
         }
         return user;
+    }
+
+    @Transactional
+    public VolunteerEntity updateUserSettings(String volunteerUuid,
+                                              UpdateVolunteerSettingsRequest request) {
+        VolunteerEntity volunteer = volunteerJpaRepository.findByUuid(volunteerUuid)
+                .orElseThrow(() -> new AssertionFailure("Request was authorized for uuid '%s', but no user was found".formatted(volunteerUuid)));
+
+        if (notNullOrEmpty(request.getEnabledNotificationChannels())) {
+            volunteer.setNotificationChannels(request.getEnabledNotificationChannels().stream().map(NotificationChannel::name).toList());
+        }
+        if (notNullOrEmpty(request.getSelectedHospitals())) {
+            volunteer.setAlertableHospitals(request.getSelectedHospitals().stream()
+                    .map(hospitalUuid ->
+                            hospitalJpaRepository.findByUuid(hospitalUuid)
+                            .orElseThrow(() -> new IllegalArgumentException("Could not find hospital by uuid '%s'".formatted(hospitalUuid))))
+                    .toList());
+        }
+        if (!Objects.isNull(request.getMinimumAlertLevel())) {
+            volunteer.setMinimumSeverity(AlertLevelUtils.toLevel(request.getMinimumAlertLevel()));
+        }
+
+        return volunteerJpaRepository.save(volunteer);
+    }
+
+    private boolean notNullOrEmpty(List<?> list) {
+        return list != null && !list.isEmpty();
     }
 
     @Transactional
