@@ -9,6 +9,127 @@ import {
 import { UserContextType } from "../Screens/UserContext";
 import { getFromAsyncStorage } from "../utils/asyncStorageUtils";
 
+const apiClient = axios.create({
+  baseURL: config.apiBaseUrl,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+apiClient.interceptors.request.use((config) => {
+  console.debug(`[API] ${config.method?.toUpperCase()} ${config.url}`);
+  return config;
+});
+
+apiClient.interceptors.response.use(
+  (response) => {
+    console.debug(`[API] ${response.status} ${response.config.url}`);
+    return response;
+  },
+  (error) => {
+    if (!axios.isAxiosError(error)) {
+      console.error("[API] Unknown error:", error);
+      throw new ApiError(
+        "Something went wrong. Please check your internet connection.",
+        undefined,
+        error
+      );
+    }
+
+    if (!error.response) {
+      console.error("[API] Network error:", error);
+      throw new ApiError(
+        "Something went wrong. Please check your internet connection.",
+        undefined,
+        error
+      );
+    }
+
+    const { status, data } = error.response;
+    const errorData = data || {};
+
+    if (status >= 400 && status < 500) {
+      const message =
+        errorData.message || errorData.error || "An error occurred";
+
+      if (status === 401) {
+        console.warn("[API] Unauthorized:", {
+          status,
+          message,
+          data: errorData,
+        });
+        throw new ApiError(message, status, errorData);
+      }
+
+      if (status === 404) {
+        console.warn("[API] Not found:", { status, message, data: errorData });
+        throw new ApiError(
+          errorData.message || "Resource not found",
+          status,
+          errorData
+        );
+      }
+
+      if (status === 408) {
+        console.warn("[API] Request timeout:", {
+          status,
+          message,
+          data: errorData,
+        });
+        throw new ApiError(
+          "Request timed out. Please check your internet connection.",
+          status,
+          errorData
+        );
+      }
+
+      if (status === 429) {
+        console.warn("[API] Too many requests:", {
+          status,
+          message,
+          data: errorData,
+        });
+        throw new ApiError(
+          "Too many requests. Please slow down and try again.",
+          status,
+          errorData
+        );
+      }
+
+      console.warn("[API] Client error:", { status, message, data: errorData });
+      throw new ApiError(message, status, errorData);
+    }
+
+    if (status >= 500) {
+      if (status === 503) {
+        console.error("[API] Service unavailable:", {
+          status,
+          data: errorData,
+        });
+        throw new ApiError(
+          "Service temporarily unavailable. Please try again later.",
+          status,
+          errorData
+        );
+      }
+
+      console.error("[API] Server error:", { status, data: errorData });
+      throw new ApiError(
+        "An unknown error occurred. Please try again later or contact us.",
+        status,
+        errorData
+      );
+    }
+
+    console.error("[API] Unexpected error:", { status, data: errorData });
+    throw new ApiError(
+      "An unknown error occurred. Please try again later or contact us.",
+      status,
+      errorData
+    );
+  }
+);
+
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -23,9 +144,9 @@ export class ApiError extends Error {
 export const getAlerts = async (
   params: URLSearchParams
 ): Promise<PageAlertResponse> => {
-  const response = await axios.get(
-    `${config.apiBaseUrl}/api/v1/alert?${params}`
-  );
+  const response = await apiClient.get("/api/v1/alert", {
+    params: params,
+  });
   return response.data;
 };
 
@@ -33,17 +154,12 @@ export const fetchUserDetails = async (
   user: UserContextType
 ): Promise<VolunteerResponse> => {
   const token = await user.getUserToken();
-  const response = await axios.get(
-    `${config.apiBaseUrl}${config.endpoints.volunteer.replace(
-      "{uuid}",
-      user.userUuid!
-    )}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+  const endpoint = config.endpoints.volunteer.replace("{uuid}", user.userUuid!);
+  const response = await apiClient.get(endpoint, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
   return response.data;
 };
@@ -52,88 +168,26 @@ export const login = async (
   phoneNumber: string,
   password: string
 ): Promise<LoginResponse> => {
-  const response = await axios.post(
-    `${config.apiBaseUrl}/api/v1/auth/login`,
-    {
-      phoneNumber: phoneNumber.trim(),
-      password: password.trim(),
-    },
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
+  const response = await apiClient.post("/api/v1/auth/login", {
+    phoneNumber: phoneNumber.trim(),
+    password: password.trim(),
+  });
 
   return response.data;
 };
 
 export const fetchRefreshToken = async (): Promise<string> => {
-  const response = await axios.post(
-    `${config.apiBaseUrl}/api/v1/auth/refresh`,
-    {
-      phoneNumber: await getFromAsyncStorage("PHONE_NUMBER"),
-      refreshToken: await getFromAsyncStorage("REFRESH_TOKEN"),
-    },
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
-
-  if (response.status !== 200) {
-    console.error(`Auth token fetching failed ${response}`);
-  }
+  const response = await apiClient.post("/api/v1/auth/refresh", {
+    phoneNumber: await getFromAsyncStorage("PHONE_NUMBER"),
+    refreshToken: await getFromAsyncStorage("REFRESH_TOKEN"),
+  });
 
   return response.data;
 };
 
 export const getHospitals = async (): Promise<HospitalResponse[]> => {
-  const url = `${config.apiBaseUrl}${config.endpoints.hospitals}`;
-
-  console.log("[API] Fetching hospitals");
-
-  try {
-    const response = await axios.get(url, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    console.log("[API] Get hospitals response status:", response.status);
-
-    const data = response.data;
-    console.log("[API] Get hospitals success:", data);
-
-    return data;
-  } catch (error) {
-    if (error instanceof ApiError) {
-      throw error;
-    }
-
-    if (axios.isAxiosError(error) && error.response) {
-      const errorData = error.response.data || {};
-      const errorMessage =
-        errorData.message || `HTTP error! status: ${error.response.status}`;
-
-      console.error("[API] Get hospitals failed:", {
-        status: error.response.status,
-        error: errorMessage,
-        data: errorData,
-      });
-
-      throw new ApiError(errorMessage, error.response.status, errorData);
-    }
-
-    console.error("[API] Network error fetching hospitals:", error);
-
-    throw new ApiError(
-      "Network error. Please check your connection and try again.",
-      undefined,
-      error
-    );
-  }
+  const response = await apiClient.get(config.endpoints.hospitals);
+  return response.data;
 };
 
 interface SendVerificationCodeResponse {
@@ -146,109 +200,21 @@ export const registerVolunteer = async (
   password: string,
   hospitalUuids: string[]
 ): Promise<SendVerificationCodeResponse> => {
-  const url = `${config.apiBaseUrl}${config.endpoints.registerVolunteer}`;
+  const response = await apiClient.post(config.endpoints.registerVolunteer, {
+    phoneNumber,
+    password,
+    selectedHospitals: hospitalUuids,
+  });
 
-  console.log("[API] Sending verification code to:", phoneNumber);
-
-  try {
-    const response = await axios.post(
-      url,
-      {
-        phoneNumber,
-        password,
-        selectedHospitals: hospitalUuids,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    console.log("[API] Send code response status:", response.status);
-
-    const data = response.data;
-    console.log("[API] Send code success:", data);
-
-    return data;
-  } catch (error) {
-    if (error instanceof ApiError) {
-      throw error;
-    }
-
-    if (axios.isAxiosError(error) && error.response) {
-      const errorData = error.response.data || {};
-      const errorMessage =
-        errorData.message || `HTTP error! status: ${error.response.status}`;
-
-      console.error("[API] Send code failed:", {
-        status: error.response.status,
-        error: errorMessage,
-        data: errorData,
-      });
-
-      throw new ApiError(errorMessage, error.response.status, errorData);
-    }
-
-    console.error("[API] Network error sending code:", error);
-
-    throw new ApiError(
-      "Network error. Please check your connection and try again.",
-      undefined,
-      error
-    );
-  }
+  return response.data;
 };
 
 export const verifyCode = async (
   phoneNumber: string,
   verificationCode: string
 ): Promise<void> => {
-  const url = `${config.apiBaseUrl}${config.endpoints.verifyCode}`;
-
-  console.log("[API] Verifying code for:", phoneNumber);
-
-  try {
-    const response = await axios.post(
-      url,
-      { phoneNumber, verificationCode },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    console.log("[API] Verify code response status:", response.status);
-
-    console.log("[API] Verify code success:");
-
-    return;
-  } catch (error) {
-    if (error instanceof ApiError) {
-      throw error;
-    }
-
-    if (axios.isAxiosError(error) && error.response) {
-      const errorData = error.response.data || {};
-      const errorMessage =
-        errorData.message || `HTTP error! status: ${error.response.status}`;
-
-      console.error("[API] Verify code failed:", {
-        status: error.response.status,
-        error: errorMessage,
-        data: errorData,
-      });
-
-      throw new ApiError(errorMessage, error.response.status, errorData);
-    }
-
-    console.error("[API] Network error verifying code:", error);
-
-    throw new ApiError(
-      "Network error. Please check your connection and try again.",
-      undefined,
-      error
-    );
-  }
+  await apiClient.post(config.endpoints.verifyCode, {
+    phoneNumber,
+    verificationCode,
+  });
 };
