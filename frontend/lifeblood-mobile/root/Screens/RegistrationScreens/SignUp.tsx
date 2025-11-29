@@ -1,15 +1,14 @@
 import React, { useState } from "react";
-import { KeyboardAvoidingView, Platform, Alert } from "react-native";
-import { registerVolunteer, verifyCode, ApiError } from "../../services/api";
+import { Alert, KeyboardAvoidingView, Platform } from "react-native";
+import { ApiError, registerVolunteer } from "../../services/api";
 import { styles } from "../../styles";
-import { RegistrationScreen } from "./RegistrationScreen";
-import { useNavigation } from "@react-navigation/native";
-import { NavigationProp } from "../navigationUtils";
 import { saveToAsyncStorage } from "../../utils/asyncStorageUtils";
+import { getNavigation } from "../navigationUtils";
+import { RegistrationScreen } from "./RegistrationScreen";
 
 const SignUp: React.FC = ({}) => {
   const [loading, setLoading] = useState<boolean>(false);
-  const navigation = useNavigation<NavigationProp>();
+  const navigation = getNavigation();
 
   const registerVolunteerHandler = async (
     phone: string,

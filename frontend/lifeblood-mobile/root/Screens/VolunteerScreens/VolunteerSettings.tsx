@@ -15,7 +15,7 @@ import {
 } from "../../generated-open-api/models/all";
 import { useNavigation } from "@react-navigation/native";
 import { useUser } from "../UserContext";
-import { NavigationProp } from "../navigationUtils";
+import { getNavigation, NavigationProp } from "../navigationUtils";
 import { fetchUserDetails, getHospitals } from "../../services/api";
 import {
   SEVERITY_LABELS,
@@ -295,7 +295,7 @@ const LoadingView: React.FC = () => {
 
 const VolunteerSettings: React.FC = () => {
   const user = useUser();
-  const navigation = useNavigation<NavigationProp>();
+  const navigation = getNavigation();
 
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);

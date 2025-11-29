@@ -23,3 +23,29 @@ export const SEVERITY_DESCRIPTIONS: Record<AlertLevel, string> = {
   [AlertLevel.Urgent]: "Time-sensitive requests",
   [AlertLevel.LifeOrDeath]: "Critical emergencies only",
 };
+
+export const getSeverityColor = (level: AlertLevel): string => {
+  switch (level) {
+    case "ROUTINE":
+      return "#4CAF50";
+    case "URGENT":
+      return "#FF9800";
+    case "LIFE_OR_DEATH":
+      return "#E53935";
+    default:
+      return "#666";
+  }
+};
+
+export const getSeverityLabel = (level: AlertLevel): string => {
+  switch (level) {
+    case "ROUTINE":
+      return "Routine";
+    case "URGENT":
+      return "Urgent";
+    case "LIFE_OR_DEATH":
+      return "Life or Death";
+    default:
+      return level;
+  }
+};

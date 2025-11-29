@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
+import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { ApiError, verifyCode } from "../../services/api";
 import { styles } from "../../styles";
-import { validateVerificationCode } from "../../utils/validation";
-import { useNavigation } from "@react-navigation/native";
-import { NavigationProp } from "../navigationUtils";
 import { getFromAsyncStorage } from "../../utils/asyncStorageUtils";
+import { validateVerificationCode } from "../../utils/validation";
+import { getNavigation } from "../navigationUtils";
 
 export const PhoneVerificationScreen: React.FC = () => {
   const [code, setCode] = useState<string>("");
@@ -15,7 +14,7 @@ export const PhoneVerificationScreen: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
 
-  const navigation = useNavigation<NavigationProp>();
+  const navigation = getNavigation();
 
   useEffect(() => {
     getFromAsyncStorage("PHONE_NUMBER").then((result) => {

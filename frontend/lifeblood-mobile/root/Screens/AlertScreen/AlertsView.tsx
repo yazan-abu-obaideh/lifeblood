@@ -14,38 +14,16 @@ import {
 } from "../../generated-open-api/models/all";
 import { getAlerts } from "../../services/api";
 import { styles } from "./AlertsViewStyles";
+import {
+  getSeverityColor,
+  getSeverityLabel,
+} from "../../utils/alertLevelUtils";
 
 interface AlertItemProps {
   alert: AlertResponse;
 }
 
 const AlertItem: React.FC<AlertItemProps> = ({ alert }) => {
-  const getSeverityColor = (level: string): string => {
-    switch (level) {
-      case "ROUTINE":
-        return "#4CAF50";
-      case "URGENT":
-        return "#FF9800";
-      case "LIFE_OR_DEATH":
-        return "#E53935";
-      default:
-        return "#666";
-    }
-  };
-
-  const getSeverityLabel = (level: string): string => {
-    switch (level) {
-      case "ROUTINE":
-        return "Routine";
-      case "URGENT":
-        return "Urgent";
-      case "LIFE_OR_DEATH":
-        return "Life or Death";
-      default:
-        return level;
-    }
-  };
-
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {

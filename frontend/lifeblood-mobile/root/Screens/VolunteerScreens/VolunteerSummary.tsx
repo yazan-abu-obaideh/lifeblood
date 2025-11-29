@@ -1,20 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  ScrollView,
   ActivityIndicator,
+  ScrollView,
+  Text,
   TouchableOpacity,
+  View,
 } from "react-native";
-import { config } from "../../config/config";
-import { styles } from "./VolunteerSummaryStyles";
 import {
   HospitalResponse,
   VolunteerResponse,
 } from "../../generated-open-api/models/all";
+import { fetchUserDetails } from "../../services/api";
+import { getNavigation } from "../navigationUtils";
 import { useUser } from "../UserContext";
-import { useNavigation } from "@react-navigation/native";
-import { NavigationProp } from "../navigationUtils";
+import { styles } from "./VolunteerSummaryStyles";
 
 interface ProfileHeaderProps {
   onSettingsPress: () => void;
@@ -164,7 +163,7 @@ interface EditProfileButtonProps {
 const ViewAlertsButton: React.FC<EditProfileButtonProps> = ({ onPress }) => {
   return (
     <TouchableOpacity style={styles.editButton} onPress={onPress}>
-      <Text style={styles.editButtonText}>View Alerts</Text>
+      <Text style={styles.editButtonText}>View All Alerts</Text>
     </TouchableOpacity>
   );
 };
@@ -186,8 +185,8 @@ const ErrorView: React.FC = () => {
 };
 
 const VolunteerSummary: React.FC = () => {
-  const { userUuid, getUserToken } = useUser();
-  const navigation = useNavigation<NavigationProp>();
+  const user = useUser();
+  const navigation = getNavigation();
 
   const [userData, setUserData] = useState<VolunteerResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -198,25 +197,10 @@ const VolunteerSummary: React.FC = () => {
 
   const fetchUserData = async (): Promise<void> => {
     try {
-      if (!userUuid) {
+      if (!user.userUuid) {
         throw Error(`User uuid is not present`);
       }
-      const token = await getUserToken();
-      const response = await fetch(
-        `${config.apiBaseUrl}${config.endpoints.volunteer.replace(
-          "{uuid}",
-          userUuid
-        )}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (!(response.status === 200)) {
-        throw Error(`Received status ${response.status}`);
-      }
-      const data: VolunteerResponse = await response.json();
+      const data: VolunteerResponse = await fetchUserDetails(user);
       setUserData(data);
       console.log(`Found user data ${JSON.stringify(data)}`);
     } catch (error) {

@@ -2,17 +2,16 @@ import AlertsView from "./Screens/AlertScreen/AlertsView";
 
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import VolunteerSummary from "./Screens/VolunteerScreens/VolunteerSummary";
-import VolunteerSettings from "./Screens/VolunteerScreens/VolunteerSettings";
 import { useCallback, useEffect, useState } from "react";
-import { UserContext } from "./Screens/UserContext";
-import { RootStackParamList } from "./Screens/navigationUtils";
-import SignIn from "./Screens/SignIn";
-import { config } from "./config/config";
-import { getFromAsyncStorage } from "./utils/asyncStorageUtils";
 import SignUp from "./Screens/RegistrationScreens/SignUp";
 import { PhoneVerificationScreen } from "./Screens/RegistrationScreens/VerificationScreen";
+import SignIn from "./Screens/SignIn";
+import { UserContext } from "./Screens/UserContext";
+import VolunteerSettings from "./Screens/VolunteerScreens/VolunteerSettings";
+import VolunteerSummary from "./Screens/VolunteerScreens/VolunteerSummary";
+import { RootStackParamList } from "./Screens/navigationUtils";
 import { fetchRefreshToken } from "./services/api";
+import { getFromAsyncStorage } from "./utils/asyncStorageUtils";
 
 const stack = createNativeStackNavigator<RootStackParamList>();
 

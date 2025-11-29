@@ -1,20 +1,19 @@
+import { useNavigation } from "@react-navigation/native";
 import React, { useState } from "react";
 import {
-  View,
+  ActivityIndicator,
+  Alert,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  Alert,
-  ActivityIndicator,
+  View,
 } from "react-native";
-import { config } from "../config/config";
-import { useUser } from "../Screens/UserContext";
-import { useNavigation } from "@react-navigation/native";
-import { NavigationProp } from "../Screens/navigationUtils";
 import { LoginResponse } from "../generated-open-api";
-import { saveToAsyncStorage } from "../utils/asyncStorageUtils";
+import { getNavigation, NavigationProp } from "../Screens/navigationUtils";
+import { useUser } from "../Screens/UserContext";
 import { login } from "../services/api";
+import { saveToAsyncStorage } from "../utils/asyncStorageUtils";
 
 function ActionButton({
   loading,
@@ -45,7 +44,7 @@ const LoginScreen: React.FC = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const userContext = useUser();
-  const navigation = useNavigation<NavigationProp>();
+  const navigation = getNavigation();
 
   const handleLogin = async () => {
     if (!phoneNumber.trim() || !password.trim()) {
@@ -56,9 +55,11 @@ const LoginScreen: React.FC = () => {
     setLoading(true);
     try {
       const loginResponse: LoginResponse = await login(phoneNumber, password);
-      await saveToAsyncStorage("REFRESH_TOKEN", loginResponse.refreshToken!);
-      await saveToAsyncStorage("USER_UUID", loginResponse.userUuid!);
-      await saveToAsyncStorage("PHONE_NUMBER", loginResponse.phoneNumber!);
+      await Promise.all([
+        saveToAsyncStorage("REFRESH_TOKEN", loginResponse.refreshToken!),
+        saveToAsyncStorage("REFRESH_TOKEN", loginResponse.refreshToken!),
+        saveToAsyncStorage("PHONE_NUMBER", loginResponse.phoneNumber!),
+      ]);
       userContext.setUserUuid(loginResponse.userUuid!);
       navigation.replace("summary");
     } catch (error) {

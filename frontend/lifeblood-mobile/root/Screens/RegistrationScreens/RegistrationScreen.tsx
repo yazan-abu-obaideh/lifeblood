@@ -111,6 +111,7 @@ export const RegistrationScreen: React.FC<RegistrationScreenProps> = ({
         style={[styles.input, error && styles.inputError]}
         placeholder="Password"
         value={password}
+        textContentType="password"
         onChangeText={(text) => {
           setPassword(text);
           setError("");
