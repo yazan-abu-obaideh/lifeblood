@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   ScrollView,
   Text,
   TextInput,
-  View,
-  ActivityIndicator,
   TouchableOpacity,
+  View,
 } from "react-native";
+import { HospitalResponse } from "../../generated-open-api/models/HospitalResponse";
 import { getHospitals } from "../../services/api";
 import { ApiError } from "../../services/apiClientConfig";
 import { styles } from "../../styles";
 import { RegistrationScreenProps } from "../../types";
 import { validatePhoneNumber } from "../../utils/validation";
-import { HospitalResponse } from "../../generated-open-api/models/HospitalResponse";
 
 export const RegistrationScreen: React.FC<RegistrationScreenProps> = ({
   registerVolunteer: registerVolunteer,

@@ -25,9 +25,9 @@ const SignUp: React.FC = ({}) => {
       if (error instanceof ApiError) {
         Alert.alert("Error", error.message);
       } else {
-        Alert.alert("Error", "Failed to send verification code");
+        Alert.alert("Error", "Failed to register volunteer");
+        throw error;
       }
-      throw error;
     } finally {
       setLoading(false);
     }

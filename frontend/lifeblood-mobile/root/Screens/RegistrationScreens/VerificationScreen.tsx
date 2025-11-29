@@ -11,7 +11,6 @@ export const PhoneVerificationScreen: React.FC = () => {
   const [code, setCode] = useState<string>("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [error, setError] = useState<string>("");
-  const [verified, setVerified] = useState(false);
 
   const [loading, setLoading] = useState(false);
 
@@ -36,9 +35,14 @@ export const PhoneVerificationScreen: React.FC = () => {
     try {
       setLoading(true);
       await verifyCode(phoneNumber, code);
-      setVerified(true);
       Alert.alert("Verification successful! Redirecting to sign in screen.");
-      navigation.navigate("signIn");
+      navigation.reset({
+        routes: [
+          {
+            name: "signIn",
+          },
+        ],
+      });
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message);
@@ -49,21 +53,6 @@ export const PhoneVerificationScreen: React.FC = () => {
       setLoading(false);
     }
   };
-
-  if (verified) {
-    return (
-      <>
-        <Text>Verification successful!</Text>
-        <TouchableOpacity
-          onPress={() => {
-            navigation.replace("signIn");
-          }}
-        >
-          <Text>Tap here to log in</Text>
-        </TouchableOpacity>
-      </>
-    );
-  }
 
   return (
     <View style={styles.screen}>

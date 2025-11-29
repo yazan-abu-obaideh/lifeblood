@@ -9,6 +9,11 @@ import { UserContextType } from "../Screens/UserContext";
 import { getFromAsyncStorage } from "../utils/asyncStorageUtils";
 import { apiClient } from "./apiClientConfig";
 
+function toBearerToken(tokenString: string) {
+  if (tokenString.startsWith("Bearer ")) return tokenString;
+  return `Bearer ${tokenString}`;
+}
+
 export const getAlerts = async (
   params: URLSearchParams
 ): Promise<PageAlertResponse> => {
@@ -26,7 +31,7 @@ export const fetchUserDetails = async (
   const endpoint = config.endpoints.volunteer.replace("{uuid}", user.userUuid!);
   const response = await apiClient.get(endpoint, {
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: toBearerToken(token),
     },
   });
 
@@ -45,10 +50,15 @@ export const login = async (
   return response.data;
 };
 
-export const fetchRefreshToken = async (): Promise<string> => {
+export const fetchAuthToken = async (): Promise<string> => {
+  const [phoneNumber, refreshToken] = await Promise.all([
+    getFromAsyncStorage("PHONE_NUMBER"),
+    getFromAsyncStorage("REFRESH_TOKEN"),
+  ]);
+
   const response = await apiClient.post("/api/v1/auth/refresh", {
-    phoneNumber: await getFromAsyncStorage("PHONE_NUMBER"),
-    refreshToken: await getFromAsyncStorage("REFRESH_TOKEN"),
+    phoneNumber: phoneNumber,
+    refreshToken: refreshToken,
   });
 
   return response.data;
@@ -59,23 +69,16 @@ export const getHospitals = async (): Promise<HospitalResponse[]> => {
   return response.data;
 };
 
-interface SendVerificationCodeResponse {
-  success: boolean;
-  message?: string;
-}
-
 export const registerVolunteer = async (
   phoneNumber: string,
   password: string,
   hospitalUuids: string[]
-): Promise<SendVerificationCodeResponse> => {
-  const response = await apiClient.post(config.endpoints.registerVolunteer, {
+): Promise<void> => {
+  await apiClient.post(config.endpoints.registerVolunteer, {
     phoneNumber,
     password,
     selectedHospitals: hospitalUuids,
   });
-
-  return response.data;
 };
 
 export const verifyCode = async (

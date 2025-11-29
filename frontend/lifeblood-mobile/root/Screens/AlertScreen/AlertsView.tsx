@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   FlatList,
   RefreshControl,
   Text,
@@ -18,6 +17,7 @@ import {
   getSeverityColor,
   getSeverityLabel,
 } from "../../utils/alertLevelUtils";
+import { LoadingView } from "./LoadingView";
 
 interface AlertItemProps {
   alert: AlertResponse;
@@ -164,14 +164,6 @@ const EmptyState: React.FC = () => {
     <View style={styles.emptyContainer}>
       <Text style={styles.emptyIcon}>📭</Text>
       <Text style={styles.emptyText}>No alerts found</Text>
-    </View>
-  );
-};
-
-const LoadingView: React.FC = () => {
-  return (
-    <View style={styles.loadingContainer}>
-      <ActivityIndicator size="large" color="#E53935" />
     </View>
   );
 };

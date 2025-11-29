@@ -1,4 +1,3 @@
-import { useNavigation } from "@react-navigation/native";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -10,7 +9,7 @@ import {
   View,
 } from "react-native";
 import { LoginResponse } from "../generated-open-api";
-import { getNavigation, NavigationProp } from "../Screens/navigationUtils";
+import { getNavigation } from "../Screens/navigationUtils";
 import { useUser } from "../Screens/UserContext";
 import { login } from "../services/api";
 import { saveToAsyncStorage } from "../utils/asyncStorageUtils";
@@ -61,7 +60,13 @@ const LoginScreen: React.FC = () => {
         saveToAsyncStorage("PHONE_NUMBER", loginResponse.phoneNumber!),
       ]);
       userContext.setUserUuid(loginResponse.userUuid!);
-      navigation.replace("summary");
+      navigation.reset({
+        routes: [
+          {
+            name: "signIn",
+          },
+        ],
+      });
     } catch (error) {
       console.error(`Login error: ${error}`);
       Alert.alert("Login Failed", "Invalid phone number or password");

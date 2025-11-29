@@ -1,16 +1,11 @@
 import React, { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import {
   HospitalResponse,
   VolunteerResponse,
 } from "../../generated-open-api/models/all";
 import { fetchUserDetails } from "../../services/api";
+import { LoadingView } from "../AlertScreen/LoadingView";
 import { getNavigation } from "../navigationUtils";
 import { useUser } from "../UserContext";
 import { styles } from "./VolunteerSummaryStyles";
@@ -18,8 +13,6 @@ import { styles } from "./VolunteerSummaryStyles";
 interface ProfileHeaderProps {
   onSettingsPress: () => void;
 }
-
-type CurrentScreen = "summary" | "settings" | "alerts";
 
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({ onSettingsPress }) => {
   return (
@@ -165,14 +158,6 @@ const ViewAlertsButton: React.FC<EditProfileButtonProps> = ({ onPress }) => {
     <TouchableOpacity style={styles.editButton} onPress={onPress}>
       <Text style={styles.editButtonText}>View Alerts</Text>
     </TouchableOpacity>
-  );
-};
-
-const LoadingView: React.FC = () => {
-  return (
-    <View style={styles.centerContainer}>
-      <ActivityIndicator size="large" color="#E53935" />
-    </View>
   );
 };
 

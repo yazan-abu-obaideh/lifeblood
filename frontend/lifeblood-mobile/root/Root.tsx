@@ -10,7 +10,7 @@ import { UserContext } from "./Screens/UserContext";
 import VolunteerSettings from "./Screens/VolunteerScreens/VolunteerSettings";
 import VolunteerSummary from "./Screens/VolunteerScreens/VolunteerSummary";
 import { RootStackParamList } from "./Screens/navigationUtils";
-import { fetchRefreshToken } from "./services/api";
+import { fetchAuthToken } from "./services/api";
 import { getFromAsyncStorage } from "./utils/asyncStorageUtils";
 
 const stack = createNativeStackNavigator<RootStackParamList>();
@@ -33,7 +33,7 @@ export default function RootScreen() {
   }, []);
 
   const getUserToken = useCallback(async () => {
-    return fetchRefreshToken();
+    return fetchAuthToken();
   }, []);
 
   return (

@@ -11,6 +11,7 @@ import { styles } from "./VolunteerSettingsStyles";
 import {
   AlertLevel,
   HospitalResponse,
+  NotificationChannel,
   VolunteerResponse,
 } from "../../generated-open-api/models/all";
 import { useNavigation } from "@react-navigation/native";
@@ -23,6 +24,7 @@ import {
   NUMBER_TO_SEVERITY,
   SEVERITY_TO_NUMBER,
 } from "../../utils/alertLevelUtils";
+import { LoadingView } from "../AlertScreen/LoadingView";
 
 interface SettingsHeaderProps {
   onBackPress: () => void;
@@ -121,7 +123,7 @@ interface NotificationChannelProps {
   onToggle: () => void;
 }
 
-const NotificationChannel: React.FC<NotificationChannelProps> = ({
+const NotificationChannelSlider: React.FC<NotificationChannelProps> = ({
   channel,
   isEnabled,
   onToggle,
@@ -157,7 +159,7 @@ interface NotificationChannelsSectionProps {
 const NotificationChannelsSection: React.FC<
   NotificationChannelsSectionProps
 > = ({ enabledChannels, onChannelToggle }) => {
-  const availableChannels = ["PUSH_NOTIFICATIONS", "WHATSAPP_MESSAGES"];
+  const availableChannels = Object.values(NotificationChannel);
 
   return (
     <View style={styles.section}>
@@ -171,7 +173,7 @@ const NotificationChannelsSection: React.FC<
 
       <View style={styles.channelsList}>
         {availableChannels.map((channel) => (
-          <NotificationChannel
+          <NotificationChannelSlider
             key={channel}
             channel={channel}
             isEnabled={enabledChannels.includes(channel)}
@@ -188,6 +190,41 @@ interface HospitalsSectionProps {
   onHospitalsChange: (hospitals: HospitalResponse[]) => void;
 }
 
+function Hospital({
+  selectedHospitals,
+  hospital,
+  onHospitalsChange,
+}: {
+  selectedHospitals: HospitalResponse[];
+  hospital: HospitalResponse;
+  onHospitalsChange: (hospitals: HospitalResponse[]) => void;
+}) {
+  const contained =
+    selectedHospitals.filter((aHospital) => hospital.uuid === aHospital.uuid)
+      .length > 0;
+  return (
+    <TouchableOpacity
+      key={hospital.uuid}
+      style={styles.selectedHospitalItem}
+      onPress={() => {
+        if (contained) {
+          onHospitalsChange(
+            selectedHospitals.filter(
+              (aHospital) => aHospital.uuid !== hospital.uuid
+            )
+          );
+        } else {
+          onHospitalsChange([...selectedHospitals, hospital]);
+        }
+      }}
+    >
+      <Text style={styles.selectedHospitalName}>
+        {hospital.hospitalName + (contained ? " (selected)" : "")}
+      </Text>
+    </TouchableOpacity>
+  );
+}
+
 const HospitalsSection: React.FC<HospitalsSectionProps> = ({
   selectedHospitals,
   onHospitalsChange,
@@ -197,6 +234,8 @@ const HospitalsSection: React.FC<HospitalsSectionProps> = ({
   useEffect(() => {
     getHospitals().then((hospitals) => setAllHospitals(hospitals));
   }, []);
+
+  const numberSelectedHospitals = selectedHospitals.length;
 
   return (
     <View style={styles.section}>
@@ -214,8 +253,8 @@ const HospitalsSection: React.FC<HospitalsSectionProps> = ({
         activeOpacity={0.7}
       >
         <Text style={styles.hospitalSelectorText}>
-          {selectedHospitals.length > 0
-            ? `${selectedHospitals.length} hospital(s) selected`
+          {numberSelectedHospitals > 0
+            ? `${numberSelectedHospitals} hospital(s) selected`
             : "Select hospitals"}
         </Text>
         <Text style={styles.chevron}>▼</Text>
@@ -224,30 +263,12 @@ const HospitalsSection: React.FC<HospitalsSectionProps> = ({
       {
         <View style={styles.selectedHospitalsList}>
           {allHospitals.map((hospital) => {
-            const contained =
-              selectedHospitals.filter(
-                (aHospital) => hospital.uuid === aHospital.uuid
-              ).length > 0;
             return (
-              <TouchableOpacity
-                key={hospital.uuid}
-                style={styles.selectedHospitalItem}
-                onPress={() => {
-                  if (contained) {
-                    onHospitalsChange(
-                      selectedHospitals.filter(
-                        (aHospital) => aHospital.uuid !== hospital.uuid
-                      )
-                    );
-                  } else {
-                    onHospitalsChange([...selectedHospitals, hospital]);
-                  }
-                }}
-              >
-                <Text style={styles.selectedHospitalName}>
-                  {hospital.hospitalName + (contained ? " (selected)" : "")}
-                </Text>
-              </TouchableOpacity>
+              <Hospital
+                hospital={hospital}
+                selectedHospitals={selectedHospitals}
+                onHospitalsChange={onHospitalsChange}
+              />
             );
           })}
         </View>
@@ -282,14 +303,6 @@ const SaveButton: React.FC<SaveButtonProps> = ({
         </Text>
       )}
     </TouchableOpacity>
-  );
-};
-
-const LoadingView: React.FC = () => {
-  return (
-    <View style={styles.centerContainer}>
-      <ActivityIndicator size="large" color="#E53935" />
-    </View>
   );
 };
 
