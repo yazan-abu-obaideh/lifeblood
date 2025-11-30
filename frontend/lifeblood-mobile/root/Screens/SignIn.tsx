@@ -9,8 +9,8 @@ import {
   View,
 } from "react-native";
 import { LoginResponse } from "../generated-open-api";
-import { getNavigation } from "../Screens/navigationUtils";
-import { useUser } from "../Screens/UserContext";
+import { getNavigation } from "./navigationUtils";
+import { useUser } from "./UserContext";
 import { login } from "../services/api";
 import { saveToAsyncStorage } from "../utils/asyncStorageUtils";
 

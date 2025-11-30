@@ -10,7 +10,7 @@ import {
 import {
   AlertResponse,
   PageAlertResponse,
-} from "../../generated-open-api/models/all";
+} from "../../generated-open-api";
 import { getAlerts } from "../../services/api";
 import { styles } from "./AlertsViewStyles";
 import {

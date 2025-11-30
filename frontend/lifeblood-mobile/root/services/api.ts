@@ -4,7 +4,7 @@ import {
   LoginResponse,
   PageAlertResponse,
   VolunteerResponse,
-} from "../generated-open-api/models/all";
+} from "../generated-open-api";
 import { UserContextType } from "../Screens/UserContext";
 import { getFromAsyncStorage } from "../utils/asyncStorageUtils";
 import { apiClient } from "./apiClientConfig";

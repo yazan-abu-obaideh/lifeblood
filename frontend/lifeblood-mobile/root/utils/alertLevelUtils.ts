@@ -1,4 +1,4 @@
-import { AlertLevel } from "../generated-open-api/models/AlertLevel";
+import { AlertLevel } from "../generated-open-api";
 
 export const SEVERITY_TO_NUMBER: Record<AlertLevel, number> = {
   [AlertLevel.Routine]: 0,

@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { HospitalResponse } from "../../generated-open-api/models/HospitalResponse";
+import { HospitalResponse } from "../../generated-open-api";
 import { getHospitals } from "../../services/api";
 import { ApiError } from "../../services/apiClientConfig";
 import { styles } from "../../styles";

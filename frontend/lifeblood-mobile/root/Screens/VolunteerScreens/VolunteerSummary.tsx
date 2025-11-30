@@ -3,7 +3,7 @@ import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import {
   HospitalResponse,
   VolunteerResponse,
-} from "../../generated-open-api/models/all";
+} from "../../generated-open-api";
 import { fetchUserDetails } from "../../services/api";
 import { LoadingView } from "../AlertScreen/LoadingView";
 import { getNavigation } from "../navigationUtils";

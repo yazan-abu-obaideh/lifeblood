@@ -13,7 +13,7 @@ import {
   HospitalResponse,
   NotificationChannel,
   VolunteerResponse,
-} from "../../generated-open-api/models/all";
+} from "../../generated-open-api";
 import { useNavigation } from "@react-navigation/native";
 import { useUser } from "../UserContext";
 import { getNavigation, NavigationProp } from "../navigationUtils";
